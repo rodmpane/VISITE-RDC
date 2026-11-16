@@ -123,6 +123,7 @@ def chercher_itineraire(
     return {
         "itinéraires": routes,
         "avertissement": "Les trajets issus des données initiales sont des estimations NON VÉRIFIÉES. Aucun horaire, tarif, état de route ou départ n'est garanti. Vérifiez toujours la sécurité, l'existence du trajet, les prix et la disponibilité directement auprès du transporteur avant tout déplacement.",
+        "tarifs_valides_par_gestionnaire": True,
         "temps_reel": False,
     }
 
