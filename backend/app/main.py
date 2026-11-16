@@ -73,7 +73,7 @@ WHERE l.statut='ok' AND (
         -- This is NOT a verification or a change to the admin publication flag.
         l.publie=0 AND l.source_hash IS NOT NULL AND l.verifie_le IS NULL
         AND COALESCE(TRIM(l.source_info),'')=''
-        -- Double % for psycopg's SQL placeholder parser; SQLite also accepts it.
+        -- Double percent signs for psycopg's SQL placeholder parser.
         AND LOWER(COALESCE(l.note,'')) NOT LIKE '%%vérifier%%'
         AND LOWER(COALESCE(l.note,'')) NOT LIKE '%%insécurité%%'
         AND LOWER(COALESCE(l.note,'')) NOT LIKE '%%conflit%%'
