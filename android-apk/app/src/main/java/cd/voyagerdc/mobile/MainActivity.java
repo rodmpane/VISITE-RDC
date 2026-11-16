@@ -9,15 +9,27 @@ import android.webkit.WebViewClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.widget.Toast;
+import android.webkit.JavascriptInterface;
+import android.speech.tts.TextToSpeech;
+import java.util.Locale;
 
 public class MainActivity extends Activity {
     private WebView web;
+    private TextToSpeech speech;
     private static final String HOME = "https://voyage-rdc-web-dzot.onrender.com/";
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        speech = new TextToSpeech(this, status -> { if (status == TextToSpeech.SUCCESS) speech.setLanguage(Locale.FRENCH); });
         web = new WebView(this);
         setContentView(web);
         web.getSettings().setJavaScriptEnabled(true);
+        web.addJavascriptInterface(new Object() {
+            @JavascriptInterface public void announce(String message) {
+                if ("Votre itinéraire est disponible".equals(message)) runOnUiThread(() -> {
+                    if (speech != null) speech.speak(message, TextToSpeech.QUEUE_FLUSH, null, "itineraire");
+                });
+            }
+        }, "VoyageRDCAndroid");
         web.getSettings().setDomStorageEnabled(true);
         web.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         web.setWebViewClient(new WebViewClient() {
@@ -41,5 +53,5 @@ public class MainActivity extends Activity {
     @Override public void onBackPressed() {
         if (web.canGoBack()) web.goBack(); else super.onBackPressed();
     }
-    @Override protected void onDestroy() { web.destroy(); super.onDestroy(); }
+    @Override protected void onDestroy() { web.destroy(); if (speech != null) { speech.stop(); speech.shutdown(); } super.onDestroy(); }
 }
