@@ -74,12 +74,15 @@ function SearchPage() {
       const data = await api(`/itineraire?${params}`);
       const found = data["itinéraires"] || [];
       setRoutes(found);
-      if (found.length && voiceEnabled && typeof window !== "undefined" && "speechSynthesis" in window) {
+      if (found.length && voiceEnabled && typeof window !== "undefined") {
         try {
-          window.speechSynthesis.cancel();
-          const message = new SpeechSynthesisUtterance("Votre itinéraire est disponible");
-          message.lang = "fr-FR"; message.rate = 0.95;
-          window.speechSynthesis.speak(message);
+          if (window.VoyageRDCAndroid?.announce) window.VoyageRDCAndroid.announce("Votre itinéraire est disponible");
+          else if ("speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+            const message = new SpeechSynthesisUtterance("Votre itinéraire est disponible");
+            message.lang = "fr-FR"; message.rate = 0.95;
+            window.speechSynthesis.speak(message);
+          }
         } catch (_) { /* Le message visuel reste disponible si la voix est bloquée. */ }
       }
       setNotice(data.avertissement || "");
