@@ -49,6 +49,7 @@ function SearchPage() {
   const [section, setSection] = useState("recherche");
   const [operateurs, setOperateurs] = useState([]);
   const [points, setPoints] = useState(null);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
 
   useEffect(() => {
     api("/lieux").then(setLieux).catch(e => setError(`Impossible de charger les villes : ${e.message}`));
@@ -62,7 +63,16 @@ function SearchPage() {
     try {
       const params = new URLSearchParams({ depart_id: from, arrivee_id: to, modes: modes.join(",") });
       const data = await api(`/itineraire?${params}`);
-      setRoutes(data["itinéraires"] || []);
+      const found = data["itinéraires"] || [];
+      setRoutes(found);
+      if (found.length && voiceEnabled && typeof window !== "undefined" && "speechSynthesis" in window) {
+        try {
+          window.speechSynthesis.cancel();
+          const message = new SpeechSynthesisUtterance("Votre itinéraire est disponible");
+          message.lang = "fr-FR"; message.rate = 0.95;
+          window.speechSynthesis.speak(message);
+        } catch (_) { /* Le message visuel reste disponible si la voix est bloquée. */ }
+      }
       setNotice(data.avertissement || "");
     } catch (e) { setError(e.message); }
     finally { setLoading(false); }
@@ -97,13 +107,15 @@ function SearchPage() {
           <button type="button" className="swap-btn" title="Inverser départ et destination" aria-label="Inverser départ et destination" onClick={() => { setFrom(to); setTo(from); }}><Icon type="swap" size={19} /></button>
           <label className="field"><span>VILLE D’ARRIVÉE</span><div className="select-wrap"><span className="field-icon"><Icon type="pin" size={18} /></span><select aria-label="Ville d’arrivée" value={to} onChange={e => setTo(e.target.value)}><option value="">Choisissez une ville</option>{places.map(l => <option key={l.id} value={l.id}>{l.nom}</option>)}</select></div></label></div>
         <div className="modes-head"><strong>Moyens de transport</strong><span>Sélectionnez vos préférences</span></div><div className="mode-row">{MODES.map(([key, icon, name]) => <button type="button" key={key} aria-pressed={modes.includes(key)} className={modes.includes(key) ? "mode selected" : "mode"} onClick={() => toggleMode(key)}><span className="mode-icon">{icon}</span>{name}</button>)}</div>
-        <div className="search-bottom"><p><Icon type="info" size={16} /> Les prix et durées sont indicatifs.</p><button className="search-submit" disabled={loading || !lieux.length}>{loading ? "Recherche en cours…" : "Trouver mon itinéraire"} <Icon type="arrow" size={19} /></button></div>
+        <div className="search-bottom"><div className="search-help"><p><Icon type="info" size={16} /> Les prix et durées sont indicatifs.</p><label className="voice-choice"><input type="checkbox" checked={voiceEnabled} onChange={e => setVoiceEnabled(e.target.checked)} /> Annonce vocale des résultats</label></div><button className="search-submit" disabled={loading || !lieux.length}>{loading ? <><span className="rdc-spinner rdc-spinner-small" aria-hidden="true" /> Recherche en cours…</> : <>Trouver mon itinéraire <Icon type="arrow" size={19} /></>}</button></div>
       </form> : <div className="operator-panel"><h3>Répertoire des transporteurs</h3><p>Ces opérateurs proviennent des données de départ. Vérifiez directement leurs services et coordonnées.</p>{operateurs.length ? <div className="operator-list">{operateurs.map(o => <div className="operator" key={o.id}><span className="operator-avatar">{(o.nom || "?").slice(0, 1)}</span><div><strong>{o.nom}</strong><small>{o.type || "Transport"}</small></div></div>)}</div> : <p className="empty-operators">Aucun transporteur référencé pour le moment.</p>}</div>}
     </div></section>
 
     {section === "recherche" && <section className="container results-section" aria-live="polite"><div className="section-top"><div><span className="kicker">VOS OPTIONS</span><h2>Itinéraires disponibles</h2></div><span className="result-count">{searched ? `${routes.length} itinéraire${routes.length > 1 ? "s" : ""}` : "Prêt à explorer"}</span></div>
       {error && <div className="message error" role="alert">{error}</div>}
       {!searched && !error && <div className="empty-state"><span className="empty-symbol">⌁</span><h3>Votre prochain voyage commence ici.</h3><p>Choisissez deux villes et les moyens de transport souhaités pour découvrir les trajets publiés.</p></div>}
+      {loading && <div className="search-progress" role="status" aria-live="polite"><span className="rdc-spinner" aria-hidden="true" /><strong>Recherche de votre itinéraire…</strong><span>Nous consultons les trajets publiés entre les villes choisies.</span></div>}
+      {searched && !loading && !error && !!routes.length && <div className="route-available" role="status">✓ Votre itinéraire est disponible</div>}
       {searched && !loading && !error && !routes.length && <div className="empty-state"><span className="empty-symbol">⌁</span><h3>Aucun itinéraire publié actuellement.</h3><p>Le réseau est en cours de vérification. Essayez d’autres villes ou modes de transport ; aucun trajet non confirmé ne sera proposé.</p></div>}
       {routes.map((route, i) => <article key={i} className="route-card"><div className="route-top"><span className="route-ranking">{CRITERE_LABEL[route.critere]}</span><span className="verified"><Icon type="shield" size={14} /> Publication contrôlée</span></div><div className="route-main"><div className="route-path"><h3>{places.find(l => l.id === from)?.nom} <span>→</span> {places.find(l => l.id === to)?.nom}</h3><div className="route-modes">{route.segments.map(s => <span key={s.id}>{MODE_LABEL[s.mode] || s.mode}</span>)}</div></div><div className="route-metrics"><div><small>DURÉE ESTIMÉE</small><strong>{fmtDuration(route.duree_h)}</strong></div><div><small>PRIX ESTIMÉ DÈS</small><strong>{fmtMoney(route.prix_min_usd)}</strong></div></div></div><details className="route-details"><summary>Voir les étapes et informations <span>⌄</span></summary><div className="route-legs">{route.segments.map((s, index) => <div className="leg" key={s.id}><span className="leg-index">{index + 1}</span><div><strong>{s.depart_nom} → {s.arrivee_nom}</strong><p>{MODE_LABEL[s.mode]} · {fmtDuration(s.duree_h)} · {fmtMoney(s.prix_min_usd)}{s.prix_max_usd != null ? ` à ${fmtMoney(s.prix_max_usd)}` : ""}</p><small>Dernière vérification : {s.verifie_le || "non renseignée"} · {s.source_info || "Source non renseignée"}</small><div><button className="text-link" onClick={() => showPoints(s.depart_id, s.depart_nom)} type="button">Points de départ</button> · <button className="text-link" onClick={() => showPoints(s.arrivee_id, s.arrivee_nom)} type="button">Points d’arrivée</button></div></div></div>)}</div>{points && <div className="points-panel"><h4>Points d’embarquement — {points.name}</h4>{points.loading ? <p>Chargement…</p> : points.error ? <p>{points.error}</p> : points.list.length ? points.list.map(p => <p key={p.id}>{p.nom} {p.verifie ? "· Emplacement indiqué comme vérifié" : "· Emplacement à confirmer"} {p.latitude && p.longitude && <a target="_blank" rel="noreferrer" href={`https://www.openstreetmap.org/?mlat=${p.latitude}&mlon=${p.longitude}#map=13/${p.latitude}/${p.longitude}`}>Voir sur la carte ↗</a>}</p>) : <p>Aucun point enregistré pour cette ville.</p>}</div>}</details></article>)}
       {!!routes.length && <div className="disclaimer"><Icon type="info" size={20} /><p>{notice} Les horaires et places ne sont pas disponibles en temps réel. Voyage RDC ne propose ni réservation ni paiement dans cette version.</p></div>}
