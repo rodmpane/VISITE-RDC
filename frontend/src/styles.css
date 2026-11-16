@@ -27,3 +27,14 @@
 @keyframes rdc-rotate{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.rdc-spinner{animation:none}}
 @media(max-width:620px){.search-progress{padding:25px 14px}.voice-choice{font-size:12px}}
+
+/* Voyage RDC V1.2 — signal de sélection et services à venir. */
+.selection-indicator{display:flex;align-items:center;gap:13px;margin:18px 0 0;padding:12px 15px;border-radius:12px;border:1px solid #b8d9f5;background:linear-gradient(110deg,#eff7ff,#fffbea);color:#15588d;font-size:12px;font-weight:700}
+.rdc-spinner-selection{width:36px;height:36px}
+.rdc-spinner-selection::after{inset:7px;background:#fff}
+.booking-teaser{padding:18px 34px 25px;border-top:1px solid #e8edf3;background:linear-gradient(115deg,#f0f7ff,#fffbea)}
+.booking-teaser strong{font-size:14px;color:#15588d}
+.booking-teaser p{margin:7px 0 14px;font-size:12px;color:#667d8c}
+.booking-actions{display:flex;gap:10px;flex-wrap:wrap}
+.booking-actions button{border:1px solid #ccd8e3;border-radius:9px;background:#e8eef3;color:#657789;padding:12px 16px;font-weight:800;font-size:12px;cursor:not-allowed;opacity:.75}
+@media(max-width:620px){.selection-indicator{align-items:center}.booking-teaser{padding:18px 19px}.booking-actions{flex-direction:column}.booking-actions button{width:100%}}
