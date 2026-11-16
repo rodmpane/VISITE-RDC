@@ -96,10 +96,11 @@ def chercher_itineraire(
         raise HTTPException(status_code=422, detail="Modes invalides")
     with connection() as conn:
         edges = fetchall(conn, EDGES_SQL)
+    # First prefer the registered, directed network.
     routes = itineraries(edges, depart_id, arrivee_id, allowed)
     if not routes:
-        # A reverse direction is only a planning hypothesis, never a confirmed service.
-        # Preserve every original link; never overwrite or publish a database row.
+        # Try the network with clearly labeled reverse-direction hypotheses.
+        # Do not infer new roads, ferries, flights or prices from geography.
         pairs = {(e["depart_id"], e["arrivee_id"], e["mode"]) for e in edges}
         reverse = []
         for e in edges:
@@ -111,7 +112,13 @@ def chercher_itineraire(
             copy["id"] = f"hypothese-retour-{e['id']}"
             copy["niveau_publication"] = "hypothese_retour"
             copy["source_info"] = "Sens retour non enregistré : trajet théorique à confirmer"
+            # Reverse direction may have a different fare and duration.
+            copy["prix_min_usd"] = None
+            copy["prix_max_usd"] = None
+            copy["duree_h"] = None
             reverse.append(copy)
+        # Search by geographical link count when reverse prices/durations
+        # are unknown; never silently reuse an outbound fare.
         routes = itineraries(edges + reverse, depart_id, arrivee_id, allowed)
     return {
         "itinéraires": routes,
