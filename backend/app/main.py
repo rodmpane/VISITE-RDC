@@ -97,6 +97,22 @@ def chercher_itineraire(
     with connection() as conn:
         edges = fetchall(conn, EDGES_SQL)
     routes = itineraries(edges, depart_id, arrivee_id, allowed)
+    if not routes:
+        # A reverse direction is only a planning hypothesis, never a confirmed service.
+        # Preserve every original link; never overwrite or publish a database row.
+        pairs = {(e["depart_id"], e["arrivee_id"], e["mode"]) for e in edges}
+        reverse = []
+        for e in edges:
+            if (e["arrivee_id"], e["depart_id"], e["mode"]) in pairs:
+                continue
+            copy = dict(e)
+            copy["depart_id"], copy["arrivee_id"] = e["arrivee_id"], e["depart_id"]
+            copy["depart_nom"], copy["arrivee_nom"] = e["arrivee_nom"], e["depart_nom"]
+            copy["id"] = f"hypothese-retour-{e['id']}"
+            copy["niveau_publication"] = "hypothese_retour"
+            copy["source_info"] = "Sens retour non enregistré : trajet théorique à confirmer"
+            reverse.append(copy)
+        routes = itineraries(edges + reverse, depart_id, arrivee_id, allowed)
     return {
         "itinéraires": routes,
         "avertissement": "Les trajets issus des données initiales sont des estimations NON VÉRIFIÉES. Aucun horaire, tarif, état de route ou départ n'est garanti. Vérifiez toujours la sécurité, l'existence du trajet, les prix et la disponibilité directement auprès du transporteur avant tout déplacement.",
