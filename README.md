@@ -2,7 +2,15 @@
 
 Une première version technique de **Voyage RDC** : consultation gratuite d'itinéraires multimodaux en RDC, à partir de données validées et centralisées. **Internet obligatoire.** Aucun service worker ni stockage local de trajets, aucun module de réservation ou paiement.
 
-> **Statut : prototype fonctionnel à tester avant tout lancement public.** Cette version comprend les **145 liaisons réelles de l'archive fournie**, dans `backend/seed/donnees/*.csv`. Ces données sont des estimations et des informations de départ, pas des horaires/tarifs garantis. Elles doivent être vérifiées sur le terrain, puis publiées sélectivement.
+> **Statut : prototype informatif, pas un service de transport confirmé.** Cette version comprend les **145 liaisons de l'archive fournie**, dans `backend/seed/donnees/*.csv`. Ces données sont des estimations et des informations de départ, pas des horaires/tarifs garantis. Elles doivent être vérifiées sur le terrain.
+
+### Aperçu public indicatif (pilote)
+
+La recherche publique peut proposer **66 liaisons indicatives provenant de l'archive initiale**, sans les certifier : elles sont identifiées par le badge « Estimation non vérifiée ». Les 71 liaisons marquées `a_verifier` et les 8 liaisons initialement `ok` dont la note demande explicitement une vérification restent exclues. Le nombre affichable peut ensuite diminuer ou évoluer si l'administrateur modifie les statuts. Les données non vérifiées n'ont pas de source/date de confirmation et ne sont **pas** comptées dans le nombre de liaisons officiellement publiées. Un trajet indicatif peut être interrompu ou ne pas exister au moment du départ : contactez impérativement le transporteur et vérifiez les conditions de sécurité.
+
+Une liaison ne figure plus dans l'aperçu indicatif si son statut passe à `a_verifier` ou `suspendu`. Si elle a été officiellement vérifiée puis dépubliée, elle reste masquée. L'administration continue d'exiger une source et une date réelles pour la publication vérifiée.
+
+Le site affiche un indicateur animé bleu et jaune dès que deux villes différentes sont sélectionnées, et annonce « Votre itinéraire est disponible » par synthèse vocale si des résultats sont obtenus et si le navigateur autorise l'audio (option désactivable). Les boutons de réservation et de paiement sont visibles, **désactivés**, et accompagnés de la mention « bientôt disponible ». L'application reste uniquement en ligne.
 
 ## Architecture
 
@@ -25,14 +33,14 @@ doit être enregistré dans le code source.
 2. Dans le tableau de bord Render, créer un **Blueprint** depuis ce dépôt.
 3. Vérifier les deux ressources et leurs coûts avant de confirmer l'application du Blueprint.
 4. Attendre que le déploiement soit terminé et que `/api/health` réponde `{"status":"ok"}`.
-5. Tester la recherche des villes. Les liaisons resteront invisibles jusqu'à leur validation et leur publication.
+5. Tester la recherche des villes. Les itinéraires indicatifs sont signalés comme non vérifiés ; les itinéraires certifiés nécessitent une validation et une publication par l'administration.
 6. Récupérer le jeton `ADMIN_API_TOKEN` dans la configuration privée Render afin d'accéder à `/admin` (ne pas l'envoyer dans une discussion ni le publier).
 
 Les plans `free` configurés dans le Blueprint conviennent uniquement à un **pilote temporaire** : leur disponibilité, leurs limites et la durée de vie de la base gratuite dépendent de Render. Avant toute ouverture publique durable, sélectionner des plans appropriés, activer les sauvegardes, tester leur restauration, assurer la supervision et valider les itinéraires sur le terrain.
 
 > Attention : si ce code remplace un ancien dépôt public qui contenait un fichier `.env`, la suppression du fichier dans la nouvelle branche ne révoque pas les identifiants exposés dans l'historique Git. Renouveler ces identifiants immédiatement et traiter l'historique selon les procédures de sécurité GitHub.
 
-Chaque liaison est importée avec `publie=0`. Il faut **statut OK**, **date de vérification** et **source_info** pour publier. Le moteur n'affiche que les liaisons publiées et OK. Le moteur calcule un chemin par critère (rapide, économique, court) sans inventer de trajets inverses. Les résultats restent **indicatifs**, pas une promesse de place disponible.
+Chaque liaison est importée avec `publie=0`. Il faut **statut OK**, **date de vérification** et **source_info** pour publier une liaison comme vérifiée. Le moteur affiche également l'aperçu public distinct des estimations non vérifiées décrites plus haut, sans modifier `publie`. Le moteur calcule un chemin par critère (rapide, économique, court) sans inventer de trajets inverses. Les résultats restent **indicatifs**, pas une promesse de place disponible.
 
 ## Démarrer avec Docker (recommandé)
 
@@ -77,7 +85,7 @@ python -m scripts.import_csv --directory /chemin/vers/voyage-rdc
 
 L'import de la même archive est idempotent. **Attention** : si vous modifiez un champ d'une liaison dans le CSV et réimportez, une nouvelle ligne peut être ajoutée car l'empreinte de source change. Après l'import initial, gérez les corrections par l'administration, ou définissez une stratégie de réconciliation avant des imports récurrents.
 
-**Données et publication :** les 145 liaisons sont visibles dans `/admin` après le démarrage. Les 74 lignes marquées `ok` par l'ancien projet **ne sont pas automatiquement certifiées ni publiées**. Tant qu'aucune liaison n'a été validée sur le terrain et publiée, la recherche publique affiche « Aucun itinéraire publié actuellement » : c'est une mesure de sécurité volontaire.
+**Données et publication :** les 145 liaisons sont visibles dans `/admin` après le démarrage. Les 74 lignes marquées `ok` par l'ancien projet **ne sont pas automatiquement certifiées ni publiées**. Parmi elles, 66 peuvent être montrées comme estimations non vérifiées (voir « Aperçu public indicatif »). Les autres restent masquées ; la publication certifiée exige une vérification réelle.
 
 ## API disponible
 

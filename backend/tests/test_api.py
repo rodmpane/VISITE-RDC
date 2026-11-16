@@ -54,13 +54,33 @@ class ApiTests(unittest.TestCase):
             }, headers=self.headers)
             self.assertEqual(response.status_code, 200, response.text)
 
-    def test_import_is_unpublished_and_idempotent(self):
+    def test_import_is_preview_only_and_idempotent(self):
         self.assertEqual(self.client.get("/api/health").status_code, 200)
         self.assertEqual(len(self.client.get("/api/lieux").json()), 3)
-        self.assertEqual(self.client.get("/api/itineraire?depart_id=a&arrivee_id=c").json()["itinéraires"], [])
+        estimate = self.client.get("/api/itineraire?depart_id=a&arrivee_id=c").json()
+        self.assertTrue(estimate["itinéraires"])
+        self.assertTrue(all(segment["niveau_publication"] == "indicatif"
+                            for route in estimate["itinéraires"] for segment in route["segments"]))
+        self.assertIn("NON VÉRIFIÉES", estimate["avertissement"])
         import_rows(self.data)
         with connection() as conn:
             self.assertEqual(fetchone(conn, "SELECT COUNT(*) AS n FROM liaisons")["n"], 4)
+            self.assertEqual(fetchone(conn, "SELECT SUM(publie) AS n FROM liaisons")["n"], 0)
+
+    def test_previews_exclude_uncertain_and_admin_unpublished_routes(self):
+        with connection() as conn:
+            execute(conn, "UPDATE liaisons SET note=? WHERE id=2", ("Itinéraire à vérifier",))
+            execute(conn, "UPDATE liaisons SET statut=? WHERE id=3", ("a_verifier",))
+        data = self.client.get("/api/itineraire?depart_id=a&arrivee_id=c").json()
+        ids = {seg["id"] for path in data["itinéraires"] for seg in path["segments"]}
+        self.assertNotIn(2, ids)
+        self.assertNotIn(3, ids)
+        self.publish(start=1, end=2)
+        with connection() as conn:
+            execute(conn, "UPDATE liaisons SET publie=0 WHERE id=1")
+        data = self.client.get("/api/itineraire?depart_id=a&arrivee_id=c").json()
+        ids = {seg["id"] for path in data["itinéraires"] for seg in path["segments"]}
+        self.assertNotIn(1, ids)
 
     def test_admin_requires_token_and_provenance(self):
         self.assertEqual(self.client.get("/api/admin/liaisons").status_code, 401)
@@ -69,11 +89,14 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 422)
         self.publish(start=1, end=2)
         self.assertEqual(self.client.get("/api/admin/statistiques", headers=self.headers).json()["publiees"], 1)
-        self.assertTrue(self.client.get("/api/itineraire?depart_id=a&arrivee_id=c").json()["itinéraires"])
+        result = self.client.get("/api/itineraire?depart_id=a&arrivee_id=c&modes=bus").json()["itinéraires"]
+        self.assertTrue(result)
+        self.assertTrue(any(s["niveau_publication"] == "verifie" for p in result for s in p["segments"]))
         response = self.client.patch("/api/admin/liaisons/1", json={"statut": "suspendu"}, headers=self.headers)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["publie"], 0)
-        self.assertEqual(self.client.get("/api/itineraire?depart_id=a&arrivee_id=c").json()["itinéraires"], [])
+        result = self.client.get("/api/itineraire?depart_id=a&arrivee_id=c").json()["itinéraires"]
+        self.assertNotIn(1, {s["id"] for p in result for s in p["segments"]})
 
     def test_multimodal_search_and_inputs(self):
         self.publish()

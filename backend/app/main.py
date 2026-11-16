@@ -62,9 +62,22 @@ def operateurs():
 EDGES_SQL = """
 SELECT l.id,l.mode,l.depart_id,l.arrivee_id,l.distance_km,l.duree_h,
  l.prix_min_usd,l.prix_max_usd,l.etat_route,l.operateur,l.frequence,l.note,
- l.verifie_le,l.source_info, d.nom AS depart_nom, a.nom AS arrivee_nom
+ l.verifie_le,l.source_info,
+ CASE WHEN l.publie=1 THEN 'verifie' ELSE 'indicatif' END AS niveau_publication,
+ d.nom AS depart_nom, a.nom AS arrivee_nom
 FROM liaisons l JOIN lieux d ON d.id=l.depart_id JOIN lieux a ON a.id=l.arrivee_id
-WHERE l.publie=1 AND l.statut='ok'
+WHERE l.statut='ok' AND (
+    l.publie=1
+    OR (
+        -- Showcase initial estimates separately from verified publications.
+        -- This is NOT a verification or a change to the admin publication flag.
+        l.publie=0 AND l.source_hash IS NOT NULL AND l.verifie_le IS NULL
+        AND COALESCE(TRIM(l.source_info),'')=''
+        AND LOWER(COALESCE(l.note,'')) NOT LIKE '%vérifier%'
+        AND LOWER(COALESCE(l.note,'')) NOT LIKE '%insécurité%'
+        AND LOWER(COALESCE(l.note,'')) NOT LIKE '%conflit%'
+    )
+)
 ORDER BY l.id
 """
 
@@ -85,7 +98,7 @@ def chercher_itineraire(
     routes = itineraries(edges, depart_id, arrivee_id, allowed)
     return {
         "itinéraires": routes,
-        "avertissement": "Informations indicatives. Vérifiez toujours horaires, prix, sécurité et disponibilité auprès du transporteur avant de partir.",
+        "avertissement": "Les trajets issus des données initiales sont des estimations NON VÉRIFIÉES. Aucun horaire, tarif, état de route ou départ n'est garanti. Vérifiez toujours la sécurité, l'existence du trajet, les prix et la disponibilité directement auprès du transporteur avant tout déplacement.",
         "temps_reel": False,
     }
 
