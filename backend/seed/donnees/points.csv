@@ -1,0 +1,101 @@
+id,lieu_id,type,nom,code,latitude,longitude,verifie
+gr-kinshasa,kinshasa,gare_routiere,Gare routière / arrêt de Kinshasa (à préciser),,-4.33,15.31,0
+gr-matadi,matadi,gare_routiere,Gare routière / arrêt de Matadi (à préciser),,-5.82,13.46,0
+gr-boma,boma,gare_routiere,Gare routière / arrêt de Boma (à préciser),,-5.85,13.06,0
+gr-moanda,moanda,gare_routiere,Gare routière / arrêt de Moanda (à préciser),,-5.93,12.35,0
+gr-kimpese,kimpese,gare_routiere,Gare routière / arrêt de Kimpese (à préciser),,-5.56,14.43,0
+gr-mbanza-ngungu,mbanza-ngungu,gare_routiere,Gare routière / arrêt de Mbanza-Ngungu (à préciser),,-5.25,14.86,0
+gr-kisantu,kisantu,gare_routiere,Gare routière / arrêt de Kisantu (à préciser),,-5.13,15.1,0
+gr-kenge,kenge,gare_routiere,Gare routière / arrêt de Kenge (à préciser),,-4.83,17.04,0
+gr-kikwit,kikwit,gare_routiere,Gare routière / arrêt de Kikwit (à préciser),,-5.04,18.82,0
+gr-bandundu,bandundu,gare_routiere,Gare routière / arrêt de Bandundu-ville (à préciser),,-3.32,17.38,0
+gr-inongo,inongo,gare_routiere,Gare routière / arrêt de Inongo (à préciser),,-1.95,18.27,0
+gr-tshikapa,tshikapa,gare_routiere,Gare routière / arrêt de Tshikapa (à préciser),,-6.42,20.8,0
+gr-ilebo,ilebo,gare_routiere,Gare routière / arrêt de Ilebo (à préciser),,-4.33,20.58,0
+gr-kananga,kananga,gare_routiere,Gare routière / arrêt de Kananga (à préciser),,-5.9,22.42,0
+gr-mbuji-mayi,mbuji-mayi,gare_routiere,Gare routière / arrêt de Mbuji-Mayi (à préciser),,-6.14,23.59,0
+gr-mwene-ditu,mwene-ditu,gare_routiere,Gare routière / arrêt de Mwene-Ditu (à préciser),,-7.0,23.45,0
+gr-kabinda,kabinda,gare_routiere,Gare routière / arrêt de Kabinda (à préciser),,-6.13,24.48,0
+gr-lodja,lodja,gare_routiere,Gare routière / arrêt de Lodja (à préciser),,-3.49,23.43,0
+gr-kindu,kindu,gare_routiere,Gare routière / arrêt de Kindu (à préciser),,-2.95,25.92,0
+gr-bukavu,bukavu,gare_routiere,Gare routière / arrêt de Bukavu (à préciser),,-2.51,28.86,0
+gr-kalehe,kalehe,gare_routiere,Gare routière / arrêt de Kalehe (à préciser),,-2.1,28.9,0
+gr-uvira,uvira,gare_routiere,Gare routière / arrêt de Uvira (à préciser),,-3.4,29.14,0
+gr-baraka,baraka,gare_routiere,Gare routière / arrêt de Baraka (à préciser),,-4.1,29.09,0
+gr-goma,goma,gare_routiere,Gare routière / arrêt de Goma (à préciser),,-1.68,29.22,0
+gr-rutshuru,rutshuru,gare_routiere,Gare routière / arrêt de Rutshuru (à préciser),,-1.19,29.45,0
+gr-bunagana,bunagana,gare_routiere,Gare routière / arrêt de Bunagana (à préciser),,-1.28,29.64,0
+gr-butembo,butembo,gare_routiere,Gare routière / arrêt de Butembo (à préciser),,0.14,29.29,0
+gr-beni,beni,gare_routiere,Gare routière / arrêt de Beni (à préciser),,0.49,29.47,0
+gr-kasindi,kasindi,gare_routiere,Gare routière / arrêt de Kasindi (à préciser),,0.05,29.72,0
+gr-bunia,bunia,gare_routiere,Gare routière / arrêt de Bunia (à préciser),,1.56,30.25,0
+gr-mambasa,mambasa,gare_routiere,Gare routière / arrêt de Mambasa (à préciser),,1.36,29.05,0
+gr-mahagi,mahagi,gare_routiere,Gare routière / arrêt de Mahagi (à préciser),,2.3,30.99,0
+gr-isiro,isiro,gare_routiere,Gare routière / arrêt de Isiro (à préciser),,2.77,27.62,0
+gr-buta,buta,gare_routiere,Gare routière / arrêt de Buta (à préciser),,2.8,24.73,0
+gr-kisangani,kisangani,gare_routiere,Gare routière / arrêt de Kisangani (à préciser),,0.52,25.19,0
+gr-bumba,bumba,gare_routiere,Gare routière / arrêt de Bumba (à préciser),,2.19,22.46,0
+gr-lisala,lisala,gare_routiere,Gare routière / arrêt de Lisala (à préciser),,2.15,21.51,0
+gr-gbadolite,gbadolite,gare_routiere,Gare routière / arrêt de Gbadolite (à préciser),,4.28,21.01,0
+gr-gemena,gemena,gare_routiere,Gare routière / arrêt de Gemena (à préciser),,3.25,19.77,0
+gr-libenge,libenge,gare_routiere,Gare routière / arrêt de Libenge (à préciser),,3.65,18.64,0
+gr-zongo,zongo,gare_routiere,Gare routière / arrêt de Zongo (à préciser),,4.35,18.6,0
+gr-mbandaka,mbandaka,gare_routiere,Gare routière / arrêt de Mbandaka (à préciser),,0.05,18.26,0
+gr-kalemie,kalemie,gare_routiere,Gare routière / arrêt de Kalemie (à préciser),,-5.93,29.19,0
+gr-kamina,kamina,gare_routiere,Gare routière / arrêt de Kamina (à préciser),,-8.74,25.0,0
+gr-kolwezi,kolwezi,gare_routiere,Gare routière / arrêt de Kolwezi (à préciser),,-10.72,25.47,0
+gr-likasi,likasi,gare_routiere,Gare routière / arrêt de Likasi (à préciser),,-10.98,26.74,0
+gr-lubumbashi,lubumbashi,gare_routiere,Gare routière / arrêt de Lubumbashi (à préciser),,-11.66,27.48,0
+gr-kasumbalesa,kasumbalesa,gare_routiere,Gare routière / arrêt de Kasumbalesa (à préciser),,-12.27,27.78,0
+ap-kinshasa,kinshasa,aeroport,Aéroport international de N'Djili,FIH,-4.33,15.31,1
+ap-lubumbashi,lubumbashi,aeroport,Aéroport international de Lubumbashi,FBM,-11.66,27.48,1
+ap-kisangani,kisangani,aeroport,Aéroport de Bangoka,FKI,0.52,25.19,1
+ap-goma,goma,aeroport,Aéroport de Goma,GOM,-1.68,29.22,1
+ap-bukavu,bukavu,aeroport,Aéroport de Kavumu,BKY,-2.51,28.86,1
+ap-mbuji-mayi,mbuji-mayi,aeroport,Aéroport de Mbuji-Mayi,MJM,-6.14,23.59,1
+ap-kananga,kananga,aeroport,Aéroport de Kananga,KGA,-5.9,22.42,1
+ap-mbandaka,mbandaka,aeroport,Aéroport de Mbandaka,MDK,0.05,18.26,1
+ap-kindu,kindu,aeroport,Aéroport de Kindu,KND,-2.95,25.92,1
+ap-kolwezi,kolwezi,aeroport,Aéroport de Kolwezi,KWZ,-10.72,25.47,1
+ap-gbadolite,gbadolite,aeroport,Aéroport de Gbadolite,BDT,4.28,21.01,1
+ap-gemena,gemena,aeroport,Aéroport de Gemena,GMA,3.25,19.77,1
+ap-bunia,bunia,aeroport,Aéroport de Bunia,BUX,1.56,30.25,1
+ap-beni,beni,aeroport,Aéroport de Beni (Mavivi),BNC,0.49,29.47,1
+ap-isiro,isiro,aeroport,Aéroport d'Isiro (Matari),IRP,2.77,27.62,1
+ap-lisala,lisala,aeroport,Aéroport de Lisala,LIQ,2.15,21.51,1
+ap-matadi,matadi,aeroport,Aéroport de Matadi (Tshimpi),MAT,-5.82,13.46,1
+ap-kikwit,kikwit,aeroport,Aéroport de Kikwit,KKW,-5.04,18.82,1
+ap-bandundu,bandundu,aeroport,Aéroport de Bandundu,FDU,-3.32,17.38,1
+ap-lodja,lodja,aeroport,Aéroport de Lodja,LJA,-3.49,23.43,1
+ap-tshikapa,tshikapa,aeroport,Aéroport de Tshikapa,TSH,-6.42,20.8,1
+ap-kalemie,kalemie,aeroport,Aéroport de Kalemie,,-5.93,29.19,0
+ap-kamina,kamina,aeroport,Aéroport de Kamina,,-8.74,25.0,0
+po-kinshasa,kinshasa,port,Port de Kinshasa (SCTP),,-4.33,15.31,0
+po-matadi,matadi,port,Port de Matadi,,-5.82,13.46,0
+po-boma,boma,port,Port de Boma,,-5.85,13.06,0
+po-mbandaka,mbandaka,port,Port de Mbandaka,,0.05,18.26,0
+po-lisala,lisala,port,Port de Lisala,,2.15,21.51,0
+po-bumba,bumba,port,Port de Bumba,,2.19,22.46,0
+po-kisangani,kisangani,port,Port de Kisangani,,0.52,25.19,0
+po-kindu,kindu,port,Port de Kindu,,-2.95,25.92,0
+po-ilebo,ilebo,port,Port d'Ilebo,,-4.33,20.58,0
+po-bandundu,bandundu,port,Port de Bandundu,,-3.32,17.38,0
+po-inongo,inongo,port,Port d'Inongo,,-1.95,18.27,0
+po-goma,goma,port,Port de Goma (lac Kivu),,-1.68,29.22,0
+po-bukavu,bukavu,port,Port de Bukavu (lac Kivu),,-2.51,28.86,0
+po-uvira,uvira,port,Port d'Uvira (lac Tanganyika),,-3.4,29.14,0
+po-kalemie,kalemie,port,Port de Kalemie (lac Tanganyika),,-5.93,29.19,0
+po-zongo,zongo,port,Port de Zongo,,4.35,18.6,0
+ga-kinshasa,kinshasa,gare_train,Gare centrale de Kinshasa,,-4.33,15.31,0
+ga-matadi,matadi,gare_train,Gare de Matadi,,-5.82,13.46,0
+ga-lubumbashi,lubumbashi,gare_train,Gare SNCC de Lubumbashi,,-11.66,27.48,0
+ga-kolwezi,kolwezi,gare_train,Gare SNCC de Kolwezi,,-10.72,25.47,0
+ga-kamina,kamina,gare_train,Gare SNCC de Kamina,,-8.74,25.0,0
+ga-mwene-ditu,mwene-ditu,gare_train,Gare SNCC de Mwene-Ditu,,-7.0,23.45,0
+ga-kananga,kananga,gare_train,Gare SNCC de Kananga,,-5.9,22.42,0
+ga-ilebo,ilebo,gare_train,Gare SNCC d'Ilebo,,-4.33,20.58,0
+ap-kinshasa-ndolo,kinshasa,aeroport,Aéroport de N'Dolo (vols intérieurs),,-4.33,15.33,0
+po-kinshasa-ngobila,kinshasa,port,Beach Ngobila (traversée Brazzaville),,-4.3,15.3,0
+ar-kinshasa-victoire,kinshasa,arret,Place de la Victoire (Matonge),,-4.34,15.31,0
+ar-kinshasa-marche,kinshasa,arret,Marché Central,,-4.32,15.3,0
+po-brazzaville,brazzaville,port,Beach Brazzaville,,-4.27,15.28,0

@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: voyage_rdc
+      POSTGRES_USER: voyage
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Définir POSTGRES_PASSWORD dans .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voyage -d voyage_rdc"]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+    restart: unless-stopped
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://voyage:${POSTGRES_PASSWORD}@db:5432/voyage_rdc
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?Définir ADMIN_API_TOKEN dans .env}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  web:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+volumes:
+  postgres_data:

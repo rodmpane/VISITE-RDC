@@ -1,0 +1,50 @@
+id,nom,province_id,type,latitude,longitude
+kinshasa,Kinshasa,kinshasa,ville,-4.33,15.31
+matadi,Matadi,kongo-central,ville,-5.82,13.46
+boma,Boma,kongo-central,ville,-5.85,13.06
+moanda,Moanda,kongo-central,ville,-5.93,12.35
+kimpese,Kimpese,kongo-central,ville,-5.56,14.43
+mbanza-ngungu,Mbanza-Ngungu,kongo-central,ville,-5.25,14.86
+kisantu,Kisantu,kongo-central,ville,-5.13,15.1
+kenge,Kenge,kwango,ville,-4.83,17.04
+kikwit,Kikwit,kwilu,ville,-5.04,18.82
+bandundu,Bandundu-ville,kwilu,ville,-3.32,17.38
+inongo,Inongo,mai-ndombe,ville,-1.95,18.27
+tshikapa,Tshikapa,kasai,ville,-6.42,20.8
+ilebo,Ilebo,kasai,ville,-4.33,20.58
+kananga,Kananga,kasai-central,ville,-5.9,22.42
+mbuji-mayi,Mbuji-Mayi,kasai-oriental,ville,-6.14,23.59
+mwene-ditu,Mwene-Ditu,lomami,ville,-7.0,23.45
+kabinda,Kabinda,lomami,ville,-6.13,24.48
+lodja,Lodja,sankuru,ville,-3.49,23.43
+kindu,Kindu,maniema,ville,-2.95,25.92
+bukavu,Bukavu,sud-kivu,ville,-2.51,28.86
+kalehe,Kalehe,sud-kivu,ville,-2.1,28.9
+uvira,Uvira,sud-kivu,ville,-3.4,29.14
+baraka,Baraka,sud-kivu,ville,-4.1,29.09
+goma,Goma,nord-kivu,ville,-1.68,29.22
+rutshuru,Rutshuru,nord-kivu,ville,-1.19,29.45
+bunagana,Bunagana (frontière Ouganda),nord-kivu,frontiere,-1.28,29.64
+butembo,Butembo,nord-kivu,ville,0.14,29.29
+beni,Beni,nord-kivu,ville,0.49,29.47
+kasindi,Kasindi (frontière Ouganda),nord-kivu,frontiere,0.05,29.72
+bunia,Bunia,ituri,ville,1.56,30.25
+mambasa,Mambasa,ituri,ville,1.36,29.05
+mahagi,Mahagi (frontière Ouganda),ituri,frontiere,2.3,30.99
+isiro,Isiro,haut-uele,ville,2.77,27.62
+buta,Buta,bas-uele,ville,2.8,24.73
+kisangani,Kisangani,tshopo,ville,0.52,25.19
+bumba,Bumba,mongala,ville,2.19,22.46
+lisala,Lisala,mongala,ville,2.15,21.51
+gbadolite,Gbadolite,nord-ubangi,ville,4.28,21.01
+gemena,Gemena,sud-ubangi,ville,3.25,19.77
+libenge,Libenge,sud-ubangi,ville,3.65,18.64
+zongo,Zongo (frontière RCA),sud-ubangi,frontiere,4.35,18.6
+mbandaka,Mbandaka,equateur,ville,0.05,18.26
+kalemie,Kalemie,tanganyika,ville,-5.93,29.19
+kamina,Kamina,haut-lomami,ville,-8.74,25.0
+kolwezi,Kolwezi,lualaba,ville,-10.72,25.47
+likasi,Likasi,haut-katanga,ville,-10.98,26.74
+lubumbashi,Lubumbashi,haut-katanga,ville,-11.66,27.48
+kasumbalesa,Kasumbalesa (frontière Zambie),haut-katanga,frontiere,-12.27,27.78
+brazzaville,Brazzaville (Congo-Brazzaville),kinshasa,international,-4.27,15.28

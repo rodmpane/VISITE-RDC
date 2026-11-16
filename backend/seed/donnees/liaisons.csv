@@ -1,0 +1,146 @@
+mode,depart_id,arrivee_id,distance_km,duree_h,prix_min_usd,prix_max_usd,etat_route,operateur,frequence,note,statut
+bus,kinshasa,kisantu,115,2.5,6,11,bon,Transporteurs privés / minibus,,,ok
+voiture,kinshasa,kisantu,115,2.5,30,54,bon,Taxi interurbain / location avec chauffeur,,,ok
+moto,kinshasa,kisantu,115,2.2,10,19,bon,Moto-taxi,,,ok
+bus,kisantu,mbanza-ngungu,37,1.0,2,3,bon,Transporteurs privés / minibus,,,ok
+voiture,kisantu,mbanza-ngungu,37,1.0,10,17,bon,Taxi interurbain / location avec chauffeur,,,ok
+moto,kisantu,mbanza-ngungu,37,0.9,3,6,bon,Moto-taxi,,,ok
+bus,mbanza-ngungu,kimpese,73,1.7,4,7,bon,Transporteurs privés / minibus,,,ok
+voiture,mbanza-ngungu,kimpese,73,1.7,19,34,bon,Taxi interurbain / location avec chauffeur,,,ok
+moto,mbanza-ngungu,kimpese,73,1.5,7,12,bon,Moto-taxi,,,ok
+bus,kimpese,matadi,139,3.0,7,13,bon,Transporteurs privés / minibus,,,ok
+voiture,kimpese,matadi,139,3.0,36,66,bon,Taxi interurbain / location avec chauffeur,,,ok
+moto,kimpese,matadi,139,2.6,13,23,bon,Moto-taxi,,,ok
+bus,matadi,boma,55,1.4,3,5,bon,Transporteurs privés / minibus,,,ok
+voiture,matadi,boma,55,1.4,14,26,bon,Taxi interurbain / location avec chauffeur,,,ok
+moto,matadi,boma,55,1.2,5,9,bon,Moto-taxi,,,ok
+bus,boma,moanda,99,2.2,5,9,bon,Transporteurs privés / minibus,,,ok
+voiture,boma,moanda,99,2.2,26,47,bon,Taxi interurbain / location avec chauffeur,,,ok
+moto,boma,moanda,99,1.9,9,16,bon,Moto-taxi,,,ok
+bus,kinshasa,kenge,250,7.4,13,24,moyen,Transporteurs privés / minibus,,"RN1, partiellement revêtue",ok
+voiture,kinshasa,kenge,250,7.4,66,118,moyen,Taxi interurbain / location avec chauffeur,,"RN1, partiellement revêtue",ok
+bus,kenge,kikwit,248,7.3,13,23,moyen,Transporteurs privés / minibus,,RN1,ok
+voiture,kenge,kikwit,248,7.3,65,117,moyen,Taxi interurbain / location avec chauffeur,,RN1,ok
+bus,kikwit,tshikapa,334,16.9,23,41,mauvais,Transporteurs privés / minibus,,Très dégradée en saison des pluies,ok
+voiture,kikwit,tshikapa,334,16.9,114,205,mauvais,Taxi interurbain / location avec chauffeur,,Très dégradée en saison des pluies,ok
+bus,tshikapa,kananga,235,12.0,16,29,mauvais,Transporteurs privés / minibus,,Très dégradée en saison des pluies,ok
+voiture,tshikapa,kananga,235,12.0,80,144,mauvais,Taxi interurbain / location avec chauffeur,,Très dégradée en saison des pluies,ok
+bus,kananga,mbuji-mayi,165,5.0,9,16,moyen,Transporteurs privés / minibus,,,ok
+voiture,kananga,mbuji-mayi,165,5.0,43,78,moyen,Taxi interurbain / location avec chauffeur,,,ok
+moto,kananga,mbuji-mayi,165,4.2,15,27,moyen,Moto-taxi,,,ok
+bus,mbuji-mayi,mwene-ditu,121,3.7,6,11,moyen,Transporteurs privés / minibus,,,ok
+voiture,mbuji-mayi,mwene-ditu,121,3.7,32,57,moyen,Taxi interurbain / location avec chauffeur,,,ok
+moto,mbuji-mayi,mwene-ditu,121,3.1,11,20,moyen,Moto-taxi,,,ok
+bus,mbuji-mayi,kabinda,123,3.8,6,12,moyen,Transporteurs privés / minibus,,,ok
+voiture,mbuji-mayi,kabinda,123,3.8,32,58,moyen,Taxi interurbain / location avec chauffeur,,,ok
+moto,mbuji-mayi,kabinda,123,3.2,11,20,moyen,Moto-taxi,,,ok
+bus,mwene-ditu,kamina,323,16.4,22,40,mauvais,Transporteurs privés / minibus,,Itinéraire à vérifier,ok
+voiture,mwene-ditu,kamina,323,16.4,110,198,mauvais,Taxi interurbain / location avec chauffeur,,Itinéraire à vérifier,ok
+bus,kamina,lubumbashi,529,26.7,36,65,mauvais,Transporteurs privés / minibus,,"Via Bukama, itinéraire à vérifier",ok
+voiture,kamina,lubumbashi,529,26.7,181,325,mauvais,Taxi interurbain / location avec chauffeur,,"Via Bukama, itinéraire à vérifier",ok
+bus,kolwezi,likasi,177,3.8,9,17,bon,Transporteurs privés / minibus,,,ok
+voiture,kolwezi,likasi,177,3.8,46,84,bon,Taxi interurbain / location avec chauffeur,,,ok
+moto,kolwezi,likasi,177,3.2,16,29,bon,Moto-taxi,,,ok
+bus,likasi,lubumbashi,138,3.0,7,13,bon,Transporteurs privés / minibus,,,ok
+voiture,likasi,lubumbashi,138,3.0,36,65,bon,Taxi interurbain / location avec chauffeur,,,ok
+moto,likasi,lubumbashi,138,2.5,12,22,bon,Moto-taxi,,,ok
+bus,lubumbashi,kasumbalesa,94,2.1,5,9,bon,Transporteurs privés / minibus,,Poste frontière avec la Zambie,ok
+voiture,lubumbashi,kasumbalesa,94,2.1,25,44,bon,Taxi interurbain / location avec chauffeur,,Poste frontière avec la Zambie,ok
+moto,lubumbashi,kasumbalesa,94,1.8,8,15,bon,Moto-taxi,,Poste frontière avec la Zambie,ok
+bus,kamina,kolwezi,283,14.4,19,35,mauvais,Transporteurs privés / minibus,,Itinéraire à vérifier,ok
+voiture,kamina,kolwezi,283,14.4,97,174,mauvais,Taxi interurbain / location avec chauffeur,,Itinéraire à vérifier,ok
+bus,gbadolite,gemena,224,6.7,12,21,moyen,Transporteurs privés / minibus,,Itinéraire à vérifier,ok
+voiture,gbadolite,gemena,224,6.7,59,106,moyen,Taxi interurbain / location avec chauffeur,,Itinéraire à vérifier,ok
+bus,gemena,libenge,166,8.6,11,20,mauvais,Transporteurs privés / minibus,,,ok
+voiture,gemena,libenge,166,8.6,57,102,mauvais,Taxi interurbain / location avec chauffeur,,,ok
+moto,gemena,libenge,166,7.2,19,35,mauvais,Moto-taxi,,,ok
+bus,libenge,zongo,97,5.1,7,12,mauvais,Transporteurs privés / minibus,,,ok
+voiture,libenge,zongo,97,5.1,33,60,mauvais,Taxi interurbain / location avec chauffeur,,,ok
+moto,libenge,zongo,97,4.3,11,20,mauvais,Moto-taxi,,,ok
+bus,kisangani,buta,323,16.4,22,40,mauvais,Transporteurs privés / minibus,,,ok
+voiture,kisangani,buta,323,16.4,110,198,mauvais,Taxi interurbain / location avec chauffeur,,,ok
+bus,buta,isiro,401,20.3,27,49,mauvais,Transporteurs privés / minibus,,,ok
+voiture,buta,isiro,401,20.3,137,246,mauvais,Taxi interurbain / location avec chauffeur,,,ok
+bus,isiro,bunia,402,20.4,27,49,mauvais,Transporteurs privés / minibus,,Itinéraire à vérifier Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+voiture,isiro,bunia,402,20.4,137,247,mauvais,Taxi interurbain / location avec chauffeur,,Itinéraire à vérifier Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bus,goma,kalehe,73,2.3,4,7,moyen,Transporteurs privés / minibus,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+voiture,goma,kalehe,73,2.3,19,34,moyen,Taxi interurbain / location avec chauffeur,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+moto,goma,kalehe,73,2.0,7,12,moyen,Moto-taxi,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bus,kalehe,bukavu,57,1.9,3,5,moyen,Transporteurs privés / minibus,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+voiture,kalehe,bukavu,57,1.9,15,27,moyen,Taxi interurbain / location avec chauffeur,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+moto,kalehe,bukavu,57,1.6,5,9,moyen,Moto-taxi,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bus,goma,rutshuru,75,2.4,4,7,moyen,Transporteurs privés / minibus,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+voiture,goma,rutshuru,75,2.4,20,35,moyen,Taxi interurbain / location avec chauffeur,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+moto,goma,rutshuru,75,2.0,7,12,moyen,Moto-taxi,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bus,rutshuru,bunagana,29,1.1,2,3,moyen,Transporteurs privés / minibus,,Poste frontière avec l'Ouganda Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+voiture,rutshuru,bunagana,29,1.1,8,14,moyen,Taxi interurbain / location avec chauffeur,,Poste frontière avec l'Ouganda Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+moto,rutshuru,bunagana,29,0.9,3,5,moyen,Moto-taxi,,Poste frontière avec l'Ouganda Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bus,goma,butembo,253,7.5,13,24,moyen,Transporteurs privés / minibus,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+voiture,goma,butembo,253,7.5,66,120,moyen,Taxi interurbain / location avec chauffeur,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bus,butembo,beni,55,1.8,3,5,moyen,Transporteurs privés / minibus,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+voiture,butembo,beni,55,1.8,14,26,moyen,Taxi interurbain / location avec chauffeur,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+moto,butembo,beni,55,1.6,5,9,moyen,Moto-taxi,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bus,beni,kasindi,70,2.2,4,7,moyen,Transporteurs privés / minibus,,Poste frontière avec l'Ouganda Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+voiture,beni,kasindi,70,2.2,18,33,moyen,Taxi interurbain / location avec chauffeur,,Poste frontière avec l'Ouganda Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+moto,beni,kasindi,70,1.9,6,11,moyen,Moto-taxi,,Poste frontière avec l'Ouganda Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bus,beni,mambasa,134,7.0,9,16,mauvais,Transporteurs privés / minibus,,RN4 très dégradée Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+voiture,beni,mambasa,134,7.0,46,82,mauvais,Taxi interurbain / location avec chauffeur,,RN4 très dégradée Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+moto,beni,mambasa,134,5.8,16,28,mauvais,Moto-taxi,,RN4 très dégradée Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bus,mambasa,bunia,169,8.7,12,21,mauvais,Transporteurs privés / minibus,,RN4 très dégradée Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+voiture,mambasa,bunia,169,8.7,58,104,mauvais,Taxi interurbain / location avec chauffeur,,RN4 très dégradée Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+moto,mambasa,bunia,169,7.3,20,36,mauvais,Moto-taxi,,RN4 très dégradée Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bus,mambasa,kisangani,549,27.7,37,67,mauvais,Transporteurs privés / minibus,,RN4 très dégradée Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+voiture,mambasa,kisangani,549,27.7,187,337,mauvais,Taxi interurbain / location avec chauffeur,,RN4 très dégradée Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bus,bunia,mahagi,145,7.5,10,18,mauvais,Transporteurs privés / minibus,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+voiture,bunia,mahagi,145,7.5,49,89,mauvais,Taxi interurbain / location avec chauffeur,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+moto,bunia,mahagi,145,6.3,17,31,mauvais,Moto-taxi,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bus,bukavu,uvira,130,4.0,7,12,moyen,Transporteurs privés / minibus,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+voiture,bukavu,uvira,130,4.0,34,61,moyen,Taxi interurbain / location avec chauffeur,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+moto,bukavu,uvira,130,3.3,12,21,moyen,Moto-taxi,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bus,uvira,baraka,98,5.2,7,12,mauvais,Transporteurs privés / minibus,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+voiture,uvira,baraka,98,5.2,33,60,mauvais,Taxi interurbain / location avec chauffeur,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+moto,uvira,baraka,98,4.3,11,21,mauvais,Moto-taxi,,Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bac,kinshasa,brazzaville,8,0.5,19,34,,Bacs et vedettes (Beach Ngobila),Plusieurs traversées par jour,"Traversée internationale : passeport, visa et vaccin fièvre jaune.",ok
+fleuve,kinshasa,mbandaka,822,102.8,18,33,,Armateurs privés / SCTP,,"Fleuve Congo, baleinières et barges (4 à 7 jours)",a_verifier
+fleuve,mbandaka,lisala,602,75.2,14,24,,Armateurs privés / SCTP,,Fleuve Congo,a_verifier
+fleuve,lisala,bumba,148,18.5,6,11,,Armateurs privés / SCTP,,Fleuve Congo,a_verifier
+fleuve,bumba,kisangani,498,62.2,11,20,,Armateurs privés / SCTP,,Fleuve Congo,a_verifier
+fleuve,kinshasa,bandundu,358,44.8,8,14,,Armateurs privés / SCTP,,Rivière Kwa / Kasaï,a_verifier
+fleuve,bandundu,ilebo,521,65.1,12,21,,Armateurs privés / SCTP,,"Rivière Kasaï, irrégulier",a_verifier
+fleuve,kinshasa,inongo,591,73.9,13,24,,Armateurs privés / SCTP,,"Via lac Mai-Ndombe, irrégulier",a_verifier
+fleuve,kisangani,kindu,552,69.0,12,22,,Bateaux et rail (via Ubundu),,Liaison très irrégulière,a_verifier
+lac,goma,bukavu,121,5.5,11,20,,Vedettes rapides lac Kivu,,"Lac Kivu, service irrégulier selon la situation Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.",a_verifier
+lac,kalemie,uvira,338,15.4,30,55,,Bateaux lac Tanganyika,,"Lac Tanganyika, service irrégulier Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.",a_verifier
+train,kinshasa,matadi,316,10.5,7,13,,CFMK / SCTP,,Service voyageurs irrégulier ou suspendu : à confirmer,a_verifier
+train,lubumbashi,kolwezi,291,9.7,7,12,,SNCC,,Service voyageurs irrégulier ou suspendu : à confirmer,a_verifier
+train,lubumbashi,kamina,508,16.9,11,21,,SNCC,,Service voyageurs irrégulier ou suspendu : à confirmer,a_verifier
+train,kamina,mwene-ditu,310,10.3,7,13,,SNCC,,Service voyageurs irrégulier ou suspendu : à confirmer,a_verifier
+train,mwene-ditu,kananga,200,6.7,4,8,,SNCC,,Service voyageurs irrégulier ou suspendu : à confirmer,a_verifier
+train,kananga,ilebo,322,10.7,7,13,,SNCC,,Service voyageurs irrégulier ou suspendu : à confirmer,a_verifier
+avion,kinshasa,lubumbashi,1568,3.1,235,423,,Congo Airways / Compagnie Africaine d'Aviation (CAA),Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,ok
+avion,kinshasa,kisangani,1223,2.5,183,330,,Congo Airways / Compagnie Africaine d'Aviation (CAA),Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,ok
+avion,kinshasa,mbuji-mayi,939,2.1,141,253,,Congo Airways / Compagnie Africaine d'Aviation (CAA),Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,ok
+avion,kinshasa,kananga,807,1.8,121,218,,Congo Airways / Compagnie Africaine d'Aviation (CAA),Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,ok
+avion,kinshasa,mbandaka,587,1.5,88,158,,Congo Airways,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,ok
+avion,kinshasa,kolwezi,1326,2.7,199,358,,Congo Airways / Compagnie Africaine d'Aviation (CAA),Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,ok
+avion,kinshasa,gemena,978,2.1,147,264,,Congo Airways,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,ok
+avion,kinshasa,gbadolite,1148,2.4,172,310,,Congo Airways,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,ok
+avion,kinshasa,kindu,1187,2.5,178,321,,Congo Airways,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,ok
+avion,kinshasa,goma,1572,3.1,236,425,,Congo Airways / Compagnie Africaine d'Aviation (CAA),Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie. Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+avion,kinshasa,bunia,1785,3.5,268,482,,CAA,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie. Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+avion,kinshasa,tshikapa,651,1.6,98,176,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,a_verifier
+avion,kinshasa,kikwit,397,1.2,82,148,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,a_verifier
+avion,kinshasa,bandundu,256,0.9,82,148,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,a_verifier
+avion,kinshasa,matadi,264,0.9,82,148,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,a_verifier
+avion,kinshasa,lodja,906,2.0,136,245,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,a_verifier
+avion,kinshasa,lisala,997,2.2,150,269,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,a_verifier
+avion,lubumbashi,kolwezi,243,0.9,82,148,,Congo Airways / Compagnie Africaine d'Aviation (CAA),Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,ok
+avion,lubumbashi,mbuji-mayi,748,1.7,112,202,,Congo Airways,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,ok
+avion,lubumbashi,goma,1126,2.4,169,304,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie. Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+avion,lubumbashi,kalemie,664,1.6,100,179,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,a_verifier
+avion,kisangani,goma,510,1.4,82,148,,Busy Bee Congo / Compagnie Africaine d'Aviation (CAA),Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie. Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+avion,kisangani,bunia,574,1.5,86,155,,CAA / Busy Bee Congo,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie. Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+avion,kisangani,kindu,394,1.2,82,148,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,a_verifier
+avion,kisangani,isiro,368,1.1,82,148,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,a_verifier
+avion,goma,bukavu,101,0.7,82,148,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie. Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+avion,goma,bunia,378,1.1,82,148,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie. Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier

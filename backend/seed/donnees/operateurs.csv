@@ -1,0 +1,9 @@
+id,nom,type,note
+congo-airways,Congo Airways,avion,Compagnie nationale
+caa,Compagnie Africaine d'Aviation (CAA),avion,
+busy-bee,Busy Bee Congo,avion,
+sctp,SCTP (ex-ONATRA),fleuve,Société commerciale des transports et des ports
+sncc,SNCC,train,Chemins de fer du Congo (réseau Sud/Centre)
+cfmk,CFMK / SCTP,train,Axe Kinshasa-Matadi
+transco,Transco,bus,Transport urbain à Kinshasa
+prives,Transporteurs privés,bus,"Minibus, cars, taxis interurbains, moto-taxis"
