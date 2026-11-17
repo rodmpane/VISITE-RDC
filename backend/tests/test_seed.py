@@ -18,7 +18,7 @@ class RealSeedTests(unittest.TestCase):
     def test_included_csv_import_and_counts(self):
         rows = from_directory(SEED_DIR)
         self.assertEqual({name: len(data) for name, data in rows.items()}, {
-            "provinces": 26, "lieux": 49, "points": 100, "operateurs": 8, "liaisons": 145,
+            "provinces": 26, "lieux": 51, "points": 100, "operateurs": 8, "liaisons": 155,
         })
         with tempfile.TemporaryDirectory() as temp, patch.dict(os.environ, {"DATABASE_URL": f"sqlite:///{temp}/seed-test.db"}):
             import_rows(rows)
