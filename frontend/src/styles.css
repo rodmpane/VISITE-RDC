@@ -157,3 +157,23 @@ body{color:var(--rdc-navy);background:#f5f7fc}
 .account-footer a{color:#f9b82f}
 .save-trip-bar{display:flex;justify-content:flex-end;padding:8px 0}
 @media(max-width:560px){.account-header{padding:10px 15px}.account-header img{width:120px}.account-header nav{gap:10px}.account-header a{font-size:12px}.account-main{padding:28px 14px}.account-card{padding:18px}.account-stats{gap:7px}.account-stats>div{padding:12px}.account-stats strong{font-size:22px}.account-stats span{font-size:11px}}
+
+/* Branded booking receipt and print layout */
+.account-booking-actions{display:flex;flex-direction:column;gap:9px;align-items:flex-start}
+.account-booking-actions button{border:1px solid #2052d9;background:white;color:#2052d9;padding:10px 13px;border-radius:9px;cursor:pointer;font-weight:700}
+.account-card select,.account-card textarea{display:block;width:100%;margin-top:8px;padding:12px;border:1px solid #bbc9e2;border-radius:9px;background:white;color:#0c234c}
+.receipt-overlay{position:fixed;inset:0;z-index:9999;background:#0c234ccc;overflow:auto;padding:25px 12px}
+.receipt-sheet{max-width:760px;margin:auto;background:#fff;padding:30px;color:#0c234c;border-radius:12px}
+.receipt-actions{display:flex;justify-content:flex-end;gap:10px;margin-bottom:24px}
+.receipt-actions button{background:#2052d9;color:#fff;border:0;padding:11px;border-radius:8px;cursor:pointer}
+.receipt-head{display:flex;gap:20px;align-items:center;border-bottom:4px solid #f9b82f;padding-bottom:18px}
+.receipt-head img{width:150px;max-width:32%}
+.receipt-head h1{font-size:21px;margin:0}
+.receipt-head p{font-size:12px;margin:5px 0}
+.receipt-sheet h2{margin-top:26px}
+.receipt-warning{background:#f2f5fc;border-left:4px solid #f9b82f;padding:12px;line-height:1.5}
+.receipt-table{width:100%;border-collapse:collapse;margin:20px 0}
+.receipt-table th,.receipt-table td{border-bottom:1px solid #dce5f5;padding:10px;text-align:left;overflow-wrap:anywhere}
+.receipt-table th{width:40%}
+.receipt-sheet footer{border-top:1px solid #dce5f5;padding-top:14px;font-size:12px}
+@media print{body *{visibility:hidden!important}.receipt-overlay,.receipt-overlay *{visibility:visible!important}.receipt-overlay{position:absolute;inset:0;background:white;padding:0;overflow:visible}.receipt-sheet{max-width:none;box-shadow:none;border:0;padding:10mm}.receipt-actions{display:none!important}@page{size:A4;margin:10mm}}
