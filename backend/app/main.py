@@ -206,6 +206,15 @@ if STATIC_DIR.is_dir():
     def serve_frontend():
         return FileResponse(STATIC_DIR / "index.html")
 
+    @app.get("/confidentialite", include_in_schema=False)
+    def serve_privacy():
+        # Direct visits and browser refreshes must load the React application.
+        return FileResponse(STATIC_DIR / "index.html")
+
+    @app.get("/voyage-rdc-logo.svg", include_in_schema=False)
+    def serve_brand_logo():
+        return FileResponse(STATIC_DIR / "voyage-rdc-logo.svg", media_type="image/svg+xml")
+
     @app.get("/favicon.svg", include_in_schema=False)
     def serve_favicon():
         return FileResponse(STATIC_DIR / "favicon.svg")
