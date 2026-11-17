@@ -1,3 +1,4 @@
+import { AboutPage, ContactPage } from "./InfoPages";
 import PrivacyPage from "./PrivacyPage";
 import { HOTELS } from "./hotels";
 import { AIR_CARRIERS } from "./airCarriers";
@@ -273,5 +274,5 @@ function AdminPage() {
   </main><Footer /></>;
 }
 
-function Footer() { return <footer className="footer"><div className="container footer-inner"><div><strong>voyage<span>rdc</span></strong><p>Le Congo est vaste. Vos possibilités aussi.</p></div><p>© {new Date().getFullYear()} Voyage RDC · Service d’information gratuit, uniquement en ligne. · <a href="/confidentialite">Politique de confidentialité</a></p></div></footer>; }
-export default function App() { return window.location.pathname.startsWith("/confidentialite") ? <PrivacyPage /> : window.location.pathname.startsWith("/admin") ? <AdminPage /> : <SearchPage />; }
+function Footer() { return <footer className="footer"><div className="container footer-inner"><div><strong>voyage<span>rdc</span></strong><p>Le Congo est vaste. Vos possibilités aussi.</p></div><p>© {new Date().getFullYear()} Voyage RDC · Service d’information gratuit, uniquement en ligne. · <a href="/a-propos">À propos</a> · <a href="/contact">Contact</a> · <a href="/confidentialite">Politique de confidentialité</a></p></div></footer>; }
+export default function App() { return window.location.pathname.startsWith("/a-propos") ? <AboutPage /> : window.location.pathname.startsWith("/contact") ? <ContactPage /> : window.location.pathname.startsWith("/confidentialite") ? <PrivacyPage /> : window.location.pathname.startsWith("/admin") ? <AdminPage /> : <SearchPage />; }
