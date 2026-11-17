@@ -45,3 +45,16 @@
 .booking-actions .booking-link:hover,.booking-actions button:not(:disabled):hover{background:#0c3f70}
 .booking-actions{display:flex;gap:10px;flex-wrap:wrap}
 @media(max-width:620px){.booking-actions .booking-link,.booking-actions button:not(:disabled){width:100%;text-align:center}}
+
+/* Brand header: prevent the logo and navigation from overflowing on phones. */
+.header .brand{flex:0 1 auto;min-width:0}
+.header .brand img{max-width:100%;object-fit:contain}
+@media(max-width:640px){
+  .header{height:auto;min-height:76px}
+  .header-inner{min-height:76px;gap:10px;padding-top:10px;padding-bottom:10px}
+  .header .brand{width:43%;flex:0 0 43%}
+  .header .brand img{width:100%!important;max-width:180px!important}
+  .header nav{gap:10px;min-width:0}
+  .header nav a{font-size:11px;white-space:nowrap}
+  .header-label{display:none}
+}
