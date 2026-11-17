@@ -320,6 +320,59 @@ class BookingRequest(BaseModel):
     modalite: str = Field(default="", max_length=120)
 
 
+class PublicBookingRequest(BookingRequest):
+    paiement_methode: str = Field(pattern="^(sur_place|mpesa|airtel_money|orange_money|carte)$")
+
+
+@router.post("/reservations/invite", status_code=201)
+def public_booking(body: PublicBookingRequest, authorization: str | None = Header(default=None)):
+    """Guest and signed-in booking requests; no payment collection or automatic confirmation."""
+    if not all((body.nom.strip(), body.postnom.strip(), body.prenom.strip(),
+                body.lieu_naissance.strip(), body.date_naissance, body.telephone.strip(),
+                body.itineraire.strip(), body.prestataire.strip())):
+        raise HTTPException(status_code=422, detail="Complétez nom, postnom, prénom, naissance, téléphone, itinéraire et prestataire.")
+    if body.date_naissance > date.today():
+        raise HTTPException(status_code=422, detail="Date de naissance invalide.")
+    if body.date_debut < date.today() or (body.type == "hebergement" and
+            (not body.date_fin or body.date_fin <= body.date_debut)):
+        raise HTTPException(status_code=422, detail="Vérifiez les dates du voyage ou du séjour.")
+    with connection() as conn:
+        init_tables(conn)
+        user_id = "invite-" + str(uuid4())
+        if authorization:
+            user_id = current_user(conn, authorization)["id"]
+        now = datetime.now(timezone.utc)
+        booking_id = str(uuid4())
+        reference = booking_reference(conn, body.prestataire, now)
+        info = {k:getattr(body,k) for k in ("nom","postnom","prenom","lieu_naissance",
+            "telephone","email","numero_identite","itineraire","prix_unitaire","devise","modalite")}
+        info["date_naissance"] = body.date_naissance.isoformat()
+        info["nuits"] = (body.date_fin-body.date_debut).days if body.type == "hebergement" else None
+        info["total_estime"] = round(body.prix_unitaire * (info["nuits"] if body.type == "hebergement" else body.voyageurs),2) if body.prix_unitaire is not None else None
+        status = ("Paiement sur place envisagé — sous réserve de validation"
+                  if body.paiement_methode == "sur_place" else
+                  "Moyen souhaité — aucun paiement initié")
+        execute(conn, """INSERT INTO demandes_reservation
+            (id,user_id,type,prestataire,ville,date_debut,date_fin,voyageurs,details,
+             statut,paiement_statut,paiement_methode,created_at,reference,voyageur_infos,reservation_infos)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (booking_id,user_id,body.type,body.prestataire.strip(),body.ville.strip(),
+             body.date_debut.isoformat(),body.date_fin.isoformat() if body.date_fin else None,
+             body.voyageurs,body.details.strip(),"Demande enregistrée — non confirmée",
+             status,body.paiement_methode,now.isoformat(),reference,
+             json.dumps(info,ensure_ascii=False),json.dumps(info,ensure_ascii=False)))
+        return {"id":booking_id,"reference":reference,"type":body.type,
+                "prestataire":body.prestataire,"ville":body.ville,
+                "date_debut":body.date_debut.isoformat(),
+                "date_fin":body.date_fin.isoformat() if body.date_fin else None,
+                "voyageurs":body.voyageurs,"details":body.details,
+                "statut":"Demande enregistrée — non confirmée",
+                "paiement_statut":status,"paiement_methode":body.paiement_methode,
+                "created_at":now.isoformat(),"reservation_infos":info,
+                "message":"Demande reçue. Validation par le prestataire en attente ; aucun paiement encaissé.",
+                "email_envoye":False}
+
+
 class PaymentChoice(BaseModel):
     methode: str = Field(pattern="^(mpesa|airtel_money|orange_money|carte|sur_place)$")
 
@@ -411,7 +464,7 @@ def admin_bookings(authorization: str | None = Header(default=None)):
     with connection() as conn:
         init_tables(conn)
         return fetchall(conn, """SELECT r.*, v.nom AS voyageur_nom, v.email AS voyageur_email
-            FROM demandes_reservation r JOIN voyageurs v ON v.id=r.user_id
+            FROM demandes_reservation r LEFT JOIN voyageurs v ON v.id=r.user_id
             ORDER BY r.created_at DESC LIMIT 200""")
 
 
