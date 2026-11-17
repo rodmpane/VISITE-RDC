@@ -58,3 +58,52 @@
   .header nav a{font-size:11px;white-space:nowrap}
   .header-label{display:none}
 }
+
+/* Identité Voyage RDC : bleu marine, bleu royal, jaune et blanc du logo. */
+:root{--rdc-navy:#0c234c;--rdc-blue:#2052d9;--rdc-yellow:#f9b82f;--rdc-white:#fff}
+body{color:var(--rdc-navy);background:#f5f7fc}
+.header{background:var(--rdc-white);border-bottom:2px solid #e3eaf9}
+.header-inner{gap:18px}
+.header .brand{display:flex;align-items:center;flex:0 0 auto;min-width:0;letter-spacing:normal}
+.header .brand-logo{display:block;width:270px;max-width:100%;height:auto;object-fit:contain}
+.header nav a:hover,.header nav a.nav-active{color:var(--rdc-blue);border-bottom-color:var(--rdc-yellow)}
+.header-label{color:var(--rdc-blue);background:#eff3ff;border-color:#dce5ff}
+.status-dot{background:var(--rdc-yellow);box-shadow:0 0 0 4px #fff2c7}
+.hero,.footer{background:var(--rdc-navy)}
+.hero h1 em,.eyebrow,.kicker,.eyebrow-mark{color:var(--rdc-yellow)}
+.hero-benefits svg,.field-icon,.swap-btn,.hero-copy .icon{color:var(--rdc-blue)}
+.hero-copy>p,.hero-benefits{color:#e4eafb}
+.art-pin{background:var(--rdc-blue);border-color:#153f9b}
+.pin-b{background:var(--rdc-yellow);border-color:#9e7116}
+.art-ring{border-color:#668be0}
+.art-line{border-color:var(--rdc-yellow)}
+.tab.active{color:var(--rdc-blue);border-color:var(--rdc-yellow)}
+.select-wrap:focus-within{border-color:var(--rdc-blue);box-shadow:0 0 0 3px #2052d923}
+.swap-btn{background:#eff3ff;border-color:#dce5ff}
+.mode.selected{color:var(--rdc-blue);background:#eef3ff;border-color:var(--rdc-blue)}
+.voice-choice input,.checkbox-line input{accent-color:var(--rdc-blue)}
+.search-submit,.admin-login button{background:var(--rdc-yellow);color:var(--rdc-navy)}
+.search-submit:hover,.admin-login button:hover{background:#ffd066}
+.search-progress{background:#fff;border:1px solid #dce5ff;box-shadow:0 16px 36px #0c234c13;color:var(--rdc-navy);padding:36px 20px}
+.search-progress strong{font-size:18px}
+.search-progress small{color:#53658c;font-size:12px}
+.rdc-spinner{background:conic-gradient(var(--rdc-blue) 0deg 145deg,var(--rdc-yellow) 145deg 290deg,#e6edff 290deg 360deg);box-shadow:0 0 0 8px #eef3ff}
+.rdc-spinner-small{box-shadow:none}
+.route-available{background:#eff3ff;color:var(--rdc-navy);border-left:5px solid var(--rdc-yellow);display:flex;flex-direction:column;gap:5px}
+.route-available strong{font-size:15px}
+.route-available span{font-size:12px;font-weight:500;line-height:1.6}
+.booking-actions .booking-link,.booking-actions button:not(:disabled){background:var(--rdc-blue);border-color:var(--rdc-blue)}
+.booking-actions .booking-link:hover,.booking-actions button:not(:disabled):hover{background:var(--rdc-navy)}
+.footer{color:#fff}
+.footer strong span{color:var(--rdc-yellow)}
+.footer a{color:var(--rdc-yellow);text-decoration:underline;text-underline-offset:3px}
+@media(max-width:700px){
+  .header{height:auto;min-height:104px}
+  .header-inner{min-height:104px;gap:8px;padding:12px 16px;flex-wrap:nowrap}
+  .header .brand{width:58%;flex:0 1 58%}
+  .header .brand-logo{width:100%!important;max-width:265px!important;height:auto;max-height:94px;object-fit:contain}
+  .header nav{flex:1 1 auto;justify-content:flex-end;gap:9px;min-width:0}
+  .header nav a{font-size:11px;white-space:nowrap}
+  .header-label{display:none}
+}
+@media(max-width:390px){.header .brand{flex-basis:54%;width:54%}.header nav a{font-size:10px}.header nav{gap:7px}}
