@@ -463,7 +463,7 @@ def admin_bookings(authorization: str | None = Header(default=None)):
     require_booking_admin(authorization)
     with connection() as conn:
         init_tables(conn)
-        return fetchall(conn, """SELECT r.*, v.nom AS voyageur_nom, v.email AS voyageur_email
+        return fetchall(conn, """SELECT r.*, COALESCE(v.nom, 'Voyageur invité') AS voyageur_nom, v.email AS voyageur_email
             FROM demandes_reservation r LEFT JOIN voyageurs v ON v.id=r.user_id
             ORDER BY r.created_at DESC LIMIT 200""")
 
