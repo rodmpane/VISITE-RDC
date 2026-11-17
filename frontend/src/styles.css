@@ -305,3 +305,11 @@ body{color:var(--rdc-navy);background:#f5f7fc}
  .account-apk .account-profile-circle{width:24px;height:24px;min-width:24px}
  .account-apk .account-bottom-tab span:last-child{font-size:9px}
 }
+
+/* APK-only booking detail and PDF document controls */
+.account-apk .account-apk-booking-fields{margin:13px 0;padding:13px;border:1.5px solid #2052d9;border-left:4px solid #f9b82f;border-radius:9px;background:var(--apk-surface)}
+.account-apk .account-apk-booking-fields h3{margin:0 0 10px;color:var(--apk-text);font-size:15px;font-weight:900}
+.account-apk .account-apk-booking-fields label{font-weight:800}
+.account-apk .account-apk-booking-fields small,.account-apk .account-apk-note{font-size:11px;line-height:1.5}
+.account-apk .account-booking-actions button{font-weight:800;border-radius:7px;border:1.5px solid #2052d9}
+@media print{.receipt-overlay{position:static!important;overflow:visible!important;background:#fff!important}.receipt-sheet{box-shadow:none!important;max-height:none!important;overflow:visible!important}.receipt-actions{display:none!important}}
