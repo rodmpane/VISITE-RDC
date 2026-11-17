@@ -23,7 +23,7 @@ export default function BookingReceipt({ booking, traveler, onClose }) {
   return <div className="receipt-overlay" role="dialog" aria-modal="true" aria-label="Document Voyage RDC">
     <div className="receipt-sheet">
       <div className="receipt-actions"><button onClick={onClose} type="button">Fermer</button><button type="button" onClick={() => window.print()}>Imprimer / Enregistrer en PDF</button></div>
-      <header className="receipt-head"><img src="/voyage-rdc-logo.svg" alt="Logo Voyage RDC" /><div><h1>VOYAGE RDC · VISITE RDC</h1><p>38, avenue Ndelo, Sans-fil, Masina, Kinshasa, RDC</p><p>Tél. +243 830 033 332 · contact@voyage-rdc.com</p></div></header>
+      <header className="receipt-head"><img src="/voyage-rdc-logo.svg" alt="Logo Voyage RDC" /><div><h1>VOYAGE RDC</h1><p>38, avenue Ndelo, Sans-fil, Masina, Kinshasa, RDC</p><p>Tél. +243 830 033 332 · contact@voyage-rdc.com</p></div></header>
       <h2>{confirmed ? "Confirmation de réservation" : "Accusé de réception de demande"}</h2>
       <p className="receipt-warning">{confirmed ? "Réservation validée. Ce document n'est pas une preuve de paiement." : "Demande non confirmée : ce document ne garantit ni réservation ni disponibilité."}</p>
       <table className="receipt-table"><tbody>{lines.map(([label,value]) => <tr key={label}><th>{label}</th><td>{value}</td></tr>)}</tbody></table>
