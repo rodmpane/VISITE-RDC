@@ -27,7 +27,7 @@ async function api(path, opts = {}) {
   const res = await fetch(`/api${path}`, { ...opts, headers: { ...(opts.body ? { "Content-Type": "application/json" } : {}), ...(opts.headers || {}) }, cache: "no-store" });
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const detail = typeof json.detail === "string" ? json.detail : "Le serveur a rencontré un problème.";
+    const detail = typeof json.detail === "string" ? json.detail : Array.isArray(json.detail) ? json.detail.map(d=>`${(d.loc||[]).slice(-1).join("")}: ${d.msg}`).join(" ; ") : "Le serveur a rencontré un problème.";
     throw new Error(detail);
   }
   return json;
@@ -107,8 +107,13 @@ function JourneyBooking({ route, destination, hotel, onBack }) {
   const [emailWanted,setEmailWanted]=useState(false);
   const isHotel=!!hotel;
   const itinerary=route.segments.map(s=>s.depart_nom+" → "+s.arrivee_nom+" ("+(MODE_LABEL[s.mode]||s.mode)+")").join(" · ");
-  const operator=route.segments.map(s=>s.operateur).filter(s=>s && !/^(transporteur|compagnie|à confirmer)/i.test(s));
-  const provider=isHotel ? hotel.name : (operator.length===1 ? operator[0] : "");
+  const operators=route.segments.map(s=> {
+    const listed=transportOptions(s);
+    const direct=(s.operateur||"").trim();
+    if(direct && !/^(transporteur|compagnie|à confirmer|non renseigné|inconnu)/i.test(direct)) return direct;
+    return listed.length===1 ? listed[0].carrier.name : "";
+  }).filter(Boolean);
+  const provider=isHotel ? hotel.name : ([...new Set(operators)].join(" / ").slice(0,180) || "Transporteur à confirmer");
   const nights=arrival && departure && departure>arrival ? Math.round((new Date(departure+"T00:00:00")-new Date(arrival+"T00:00:00"))/86400000) : 0;
   async function submit(e) {
     e.preventDefault();setBusy(true);setFormError("");
@@ -132,7 +137,7 @@ function JourneyBooking({ route, destination, hotel, onBack }) {
   return <div className="journey-booking-form"><h3>3. Informations de réservation {isHotel?"— hôtel":"— transport"}</h3>
     <p>Réservation libre, avec ou sans compte. Les informations ci-dessous servent uniquement à transmettre une demande au prestataire.</p>
     <p><strong>Itinéraire :</strong> {itinerary}</p>
-    {isHotel && <p><strong>Hôtel :</strong> {hotel.name} · {hotel.address || destination}</p>}
+    {isHotel && <p><strong>Hôtel :</strong> {hotel.name} · {hotel.address || destination}</p>}{!isHotel && <p><strong>Transporteur sélectionné automatiquement :</strong> {provider}{provider === "Transporteur à confirmer" && <small> — le nom du transporteur n’est pas encore enregistré pour cet itinéraire.</small>}</p>}
     <form onSubmit={submit}>
       <div className="journey-form-grid">
         <label>Nom *<input name="nom" required maxLength={120}/></label>
@@ -143,7 +148,7 @@ function JourneyBooking({ route, destination, hotel, onBack }) {
         <label>Téléphone *<input name="telephone" type="tel" required maxLength={35}/></label>
         <label>E-mail (facultatif)<input name="email" type="email" maxLength={254}/></label>
         <label>Numéro de pièce d'identité (facultatif)<input name="numero_identite" maxLength={100}/></label>
-        <label>{isHotel?"Établissement":"Compagnie / transporteur"} *<input name="prestataire" defaultValue={provider} required minLength={2} maxLength={180} placeholder="Nom communiqué par le prestataire"/></label>
+        <label>{isHotel?"Établissement":"Compagnie / transporteur (issu de l'itinéraire)"} *<input name="prestataire" value={provider} readOnly required minLength={2} maxLength={180}/></label>
         <label>{isHotel?"Date d'arrivée":"Date de départ"} *<input name="date_debut" type="date" required min={new Date().toISOString().slice(0,10)} value={arrival} onChange={e=>setArrival(e.target.value)}/></label>
         {isHotel && <label>Date de départ de l'hôtel *<input name="date_fin" type="date" required min={arrival||new Date().toISOString().slice(0,10)} value={departure} onChange={e=>setDeparture(e.target.value)}/></label>}
         <label>Nombre de voyageurs *<input name="voyageurs" type="number" min="1" max="20" defaultValue="1" required/></label>
