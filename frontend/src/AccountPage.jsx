@@ -72,7 +72,7 @@ export default function AccountPage() {
   const [bookingType, setBookingType] = useState("hebergement");
   const [receipt, setReceipt] = useState(null);
   const [register, setRegister] = useState(false);
-  const [section, setSection] = useState("profil");
+  const [section, setSection] = useState(typeof window !== "undefined" && !!window.VoyageRDCAndroid ? "reservations" : "profil");
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const isAndroidApp = typeof window !== "undefined" && !!window.VoyageRDCAndroid;
   const [filter, setFilter] = useState("toutes");
@@ -96,7 +96,7 @@ export default function AccountPage() {
         })
       });
       sessionStorage.setItem(KEY, data.token);
-      setToken(data.token); setUser(data.user); setSection("profil");
+      setToken(data.token); setUser(data.user); setSection(isAndroidApp ? "reservations" : "profil");
       setMessage("Bienvenue dans votre espace Voyage RDC.");
     } catch (e) { setError(e.message); }
     finally { setBusy(false); }
@@ -163,11 +163,9 @@ export default function AccountPage() {
   const confirmedBookings = bookings.filter(b => b.statut === "Réservation confirmée");
   const visibleBookings = bookings.filter(b => filter === "toutes" || (filter === "confirmees" ? b.statut === "Réservation confirmée" : filter === "attente" ? b.statut !== "Réservation confirmée" && b.statut !== "Demande refusée" : b.statut === "Demande refusée"));
   return <div className={isAndroidApp ? "account-shell account-apk" : "account-shell"}>{receipt && <BookingReceipt booking={receipt} traveler={user} onClose={() => setReceipt(null)} />}
-    <header className="account-header"><a href="/"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC" /></a><nav><a href="/">Rechercher un itinéraire</a><a href="/compte" className="account-header-profile"><span className="account-avatar account-avatar-small" aria-hidden="true">●</span> Mon compte</a></nav></header>
-    <main className="account-main">
-      {user && isAndroidApp && <div className="account-top-actions">
+    <header className="account-header"><a href="/"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC" /></a><nav><a href="/">Rechercher un itinéraire</a><a href="/compte" className="account-header-profile"><span className="account-avatar account-avatar-small" aria-hidden="true">●</span> Mon compte</a></nav>      {user && isAndroidApp && <div className="account-top-actions">
         <div className="account-profile-menu-wrap">
-          <button type="button" className="account-top-profile" aria-expanded={profileMenuOpen} onClick={()=>{setProfileMenuOpen(!profileMenuOpen);setSection("profil");}}>
+          <button type="button" className="account-top-profile" aria-expanded={profileMenuOpen} onClick={()=>setProfileMenuOpen(!profileMenuOpen)}>
             <span aria-hidden="true">◉</span> Mon profil <span aria-hidden="true">⌄</span>
           </button>
           {profileMenuOpen && <div className="account-profile-submenu">
@@ -176,6 +174,8 @@ export default function AccountPage() {
         </div>
         <button type="button" className="account-top-logout" onClick={logout}>Se déconnecter</button>
       </div>}
+</header>
+    <main className="account-main">
       <div className="account-heading"><span>VOYAGE RDC · ESPACE VOYAGEUR</span><h1>{user ? "Bonjour, " + user.nom : register ? "Créer mon compte" : "Mon espace voyageur"}</h1>
         <p>Gérez vos réservations, suivez leur validation, préparez vos paiements et retrouvez vos documents.</p></div>
       {error && <p className="account-alert" role="alert">{error}</p>}
@@ -190,17 +190,17 @@ export default function AccountPage() {
         </form>
         <p className="account-note">Après connexion : Mes réservations, suivi, gestion des demandes, mes paiements, documents et itinéraires. Les paiements en ligne ne sont pas encore activés.</p>
       </section> : <>
-        <div className="account-profile-hero">
+        {!isAndroidApp && <div className="account-profile-hero">
           <div className="account-avatar" aria-hidden="true">{(user.prenom || user.nom || "V").trim().charAt(0).toLocaleUpperCase("fr")}</div>
           <div className="account-profile-hero-info"><span className="account-eyebrow">MON PROFIL VOYAGE RDC</span><h2>{[user.nom,user.postnom,user.prenom].filter(Boolean).join(" ")}</h2><p>{user.email}</p><button type="button" onClick={()=>setSection("parametres")}>⚙ Paramètres de mon compte</button></div>
           {!isAndroidApp && <button type="button" className="account-signout" onClick={logout}>Se déconnecter</button>}
-        </div>
+        </div>}
         <div className="account-stats"><div><strong>{bookings.length}</strong><span>Mes réservations et demandes</span></div><div><strong>{confirmedBookings.length}</strong><span>Réservations confirmées</span></div><div><strong>{bookings.filter(b => b.paiement_methode).length}</strong><span>Préférences de paiement</span></div></div>
         {!isAndroidApp && <nav className="account-dashboard-nav" aria-label="Rubriques de mon compte">
           {[["profil","Mon profil"],["reservations","Mes réservations"],["suivi","Suivre mes réservations"],["nouvelle","Nouvelle réservation"],["paiements","Mes paiements"],["itineraires","Mes itinéraires"],["parametres","Paramètres de mon compte"]].map(([key,label]) =>
             <button type="button" key={key} className={section === key ? "selected" : ""} onClick={() => {setSection(key);setError("");}}>{label}</button>)}
         </nav>}
-        {section === "profil" && <section className="account-card account-profile-overview">
+        {!isAndroidApp && section === "profil" && <section className="account-card account-profile-overview">
           <h2>Mon profil</h2><p>Retrouvez vos informations personnelles et accédez à vos paramètres pour les compléter.</p>
           <div className="account-profile-details">
             <div><span>Nom complet</span><strong>{[user.nom,user.postnom,user.prenom].filter(Boolean).join(" ")}</strong></div>
