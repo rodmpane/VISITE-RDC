@@ -187,3 +187,5 @@ body{color:var(--rdc-navy);background:#f5f7fc}
 .account-filters select{display:inline-block;width:auto;margin:0 0 0 8px}
 .account-filters button{background:#2052d9;color:white;border:0;border-radius:9px;padding:10px 13px;font-weight:700;cursor:pointer}
 @media(max-width:560px){.account-dashboard-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.account-dashboard-nav button{font-size:12px;padding:11px 8px}.account-trip{align-items:flex-start;flex-direction:column}}
+
+.account-profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px}.account-profile-grid label{min-width:0}.account-card form:has(.account-profile-grid){max-width:none}.account-profile-summary{border:1px solid #dce5f5;border-radius:12px;background:#f5f8ff;padding:16px;margin:16px 0}.account-profile-summary h3{margin:0 0 8px}.account-profile-summary button{border:1px solid #2052d9;background:white;color:#2052d9;border-radius:8px;padding:9px;cursor:pointer}@media(max-width:560px){.account-profile-grid{grid-template-columns:1fr}}
