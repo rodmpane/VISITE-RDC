@@ -4,7 +4,7 @@ export default function BookingReceipt({ booking, traveler, onClose }) {
   if (!booking) return null;
   const confirmed = booking.statut === "Réservation confirmée";
   const lines = [
-    ["Référence", booking.id],
+    ["Référence", booking.reference || booking.id],
     ["Voyageur", traveler?.nom || "Compte voyageur"],
     ["E-mail", traveler?.email || "—"],
     ["Prestation", booking.type === "hebergement" ? "Hébergement" : "Transport"],
@@ -28,7 +28,7 @@ export default function BookingReceipt({ booking, traveler, onClose }) {
       <p className="receipt-warning">{confirmed ? "Réservation validée. Ce document n'est pas une preuve de paiement." : "Demande non confirmée : ce document ne garantit ni réservation ni disponibilité."}</p>
       <table className="receipt-table"><tbody>{lines.map(([label,value]) => <tr key={label}><th>{label}</th><td>{value}</td></tr>)}</tbody></table>
       <p className="receipt-warning"><strong>Aucun paiement encaissé par Voyage RDC.</strong> En cas de paiement sur place, le reçu de règlement doit être délivré par le prestataire après encaissement effectif.</p>
-      <footer>Voyage RDC — Document généré le {new Date().toLocaleString("fr-FR")} · Référence {booking.id}</footer>
+      <footer>Voyage RDC — Document généré le {new Date().toLocaleString("fr-FR")} · Référence {booking.reference || booking.id}</footer>
     </div>
   </div>;
 }
