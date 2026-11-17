@@ -14,7 +14,7 @@ const AIRLINES = [
 ];
 const CONTACT = "+243810151533";
 const EAST_PROVINCES = new Set(["nord-kivu", "sud-kivu", "ituri", "haut-uele", "bas-uele", "maniema", "tanganyika", "tshopo"]);
-const CRITERE_LABEL = { rapide: "Le plus rapide", economique: "Le plus économique", court: "Le plus court" };
+const CRITERE_LABEL = { rapide: "Le plus rapide", economique: "Le plus économique", court: "Le plus court", alternative: "Autre itinéraire avec correspondance" };
 
 async function api(path, opts = {}) {
   const res = await fetch(`/api${path}`, { ...opts, headers: { ...(opts.body ? { "Content-Type": "application/json" } : {}), ...(opts.headers || {}) }, cache: "no-store" });
