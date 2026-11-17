@@ -182,7 +182,7 @@ class BookingRequest(BaseModel):
 
 
 class PaymentChoice(BaseModel):
-    methode: str = Field(pattern="^(mpesa|airtel_money|orange_money|carte)$")
+    methode: str = Field(pattern="^(mpesa|airtel_money|orange_money|carte|sur_place)$")
 
 
 @router.get("/reservations")
@@ -226,8 +226,8 @@ def choose_payment(booking_id: str, body: PaymentChoice, authorization: str | No
         if not booking:
             raise HTTPException(status_code=404,detail="Demande introuvable.")
         execute(conn, """UPDATE demandes_reservation SET paiement_methode=?,
-            paiement_statut='En attente de configuration — aucun débit'
-            WHERE id=? AND user_id=?""",(body.methode,booking_id,user["id"]))
+            paiement_statut=CASE WHEN ?='sur_place' THEN 'Paiement sur place envisagé — sous réserve de validation' ELSE 'En attente de configuration — aucun débit' END
+            WHERE id=? AND user_id=?""",(body.methode,body.methode,booking_id,user["id"]))
         return {"message":"Préférence enregistrée. Aucun paiement initié ni débité."}
 
 
