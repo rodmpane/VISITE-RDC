@@ -28,6 +28,7 @@ export default function AccountPage() {
   const [register, setRegister] = useState(false);
   const [section, setSection] = useState("reservations");
   const [filter, setFilter] = useState("toutes");
+  const [identityFile, setIdentityFile] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -51,6 +52,34 @@ export default function AccountPage() {
       setMessage("Bienvenue dans votre espace Voyage RDC.");
     } catch (e) { setError(e.message); }
     finally { setBusy(false); }
+  }
+  async function saveProfile(event) {
+    event.preventDefault(); setBusy(true);setError("");setMessage("");
+    const f = new FormData(event.currentTarget);
+    const keys = ["nom","postnom","prenom","lieu_naissance","date_naissance","telephone","pays","ville","adresse"];
+    const data = Object.fromEntries(keys.map(k=>[k,f.get(k) || (k==="date_naissance" ? null : "")]));
+    try {
+      await request("/moi",{method:"PATCH",body:JSON.stringify(data)},token);
+      if (identityFile) {
+        if(identityFile.size>3*1024*1024)throw Error("La pièce d'identité ne doit pas dépasser 3 Mo.");
+        if(!["application/pdf","image/jpeg","image/png"].includes(identityFile.type))throw Error("Choisissez un fichier PDF, JPG ou PNG.");
+        const encoded = await new Promise((resolve,reject)=>{
+          const reader=new FileReader();
+          reader.onload=()=>resolve(String(reader.result).split(",")[1]);
+          reader.onerror=()=>reject(new Error("Lecture du document impossible."));
+          reader.readAsDataURL(identityFile);
+        });
+        await request("/moi/piece-identite",{method:"POST",body:JSON.stringify({filename:identityFile.name,content_type:identityFile.type,data:encoded})},token);
+        setIdentityFile(null);
+      }
+      await refresh(token);setMessage("Informations de votre compte enregistrées.");
+    } catch(e) {setError(e.message);}
+    finally {setBusy(false);}
+  }
+  async function removeIdentity() {
+    if(!window.confirm("Supprimer votre pièce d'identité enregistrée ?"))return;
+    try {await request("/moi/piece-identite",{method:"DELETE"},token);await refresh(token);setMessage("Pièce d'identité supprimée.");}
+    catch(e){setError(e.message);}
   }
   async function logout() {
     try { await request("/deconnexion", { method: "POST" }, token); } catch {}
@@ -105,9 +134,29 @@ export default function AccountPage() {
         <div className="account-toolbar"><span>{user.email}</span><button type="button" onClick={logout}>Se déconnecter</button></div>
         <div className="account-stats"><div><strong>{bookings.length}</strong><span>Mes réservations et demandes</span></div><div><strong>{confirmedBookings.length}</strong><span>Réservations confirmées</span></div><div><strong>{bookings.filter(b => b.paiement_methode).length}</strong><span>Préférences de paiement</span></div></div>
         <nav className="account-dashboard-nav" aria-label="Rubriques de mon compte">
-          {[["reservations","Mes réservations"],["suivi","Suivre mes réservations"],["nouvelle","Nouvelle réservation"],["paiements","Mes paiements"],["itineraires","Mes itinéraires"]].map(([key,label]) =>
+          {[["reservations","Mes réservations"],["suivi","Suivre mes réservations"],["nouvelle","Nouvelle réservation"],["paiements","Mes paiements"],["itineraires","Mes itinéraires"],["parametres","Paramètres de mon compte"]].map(([key,label]) =>
             <button type="button" key={key} className={section === key ? "selected" : ""} onClick={() => {setSection(key);setError("");}}>{label}</button>)}
         </nav>
+        {section === "parametres" && <section className="account-card"><h2>Paramètres de mon compte · Mes informations</h2>
+          <p>Complétez vos informations personnelles. Elles seront reprises automatiquement lors de vos nouvelles demandes de réservation.</p>
+          <form key={user.id + JSON.stringify(user)} onSubmit={saveProfile}>
+            <div className="account-profile-grid">
+              <label>Nom<input name="nom" defaultValue={user.nom || ""} maxLength={120} required /></label>
+              <label>Postnom<input name="postnom" defaultValue={user.postnom || ""} maxLength={120} /></label>
+              <label>Prénom<input name="prenom" defaultValue={user.prenom || ""} maxLength={120} /></label>
+              <label>Lieu de naissance<input name="lieu_naissance" defaultValue={user.lieu_naissance || ""} maxLength={150} /></label>
+              <label>Date de naissance<input name="date_naissance" type="date" max={new Date().toISOString().slice(0,10)} defaultValue={user.date_naissance || ""} /></label>
+              <label>Numéro de téléphone<input name="telephone" type="tel" defaultValue={user.telephone || ""} maxLength={35} placeholder="+243..." /></label>
+              <label>Pays<input name="pays" defaultValue={user.pays || ""} maxLength={100} /></label>
+              <label>Ville<input name="ville" defaultValue={user.ville || ""} maxLength={120} /></label>
+              <label>Adresse<input name="adresse" defaultValue={user.adresse || ""} maxLength={300} /></label>
+            </div>
+            <label>Pièce d'identité (facultatif) · PDF, JPG ou PNG · 3 Mo maximum<input type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" onChange={e=>setIdentityFile(e.target.files?.[0]||null)} /></label>
+            {user.piece_identite && <p>Document enregistré : <strong>{user.piece_identite}</strong> <button type="button" onClick={removeIdentity}>Supprimer le document</button></p>}
+            <p>La pièce d'identité est conservée chiffrée et n'est pas automatiquement transmise aux prestataires. Vous pouvez la supprimer à tout moment.</p>
+            <button className="account-primary" type="submit" disabled={busy}>{busy ? "Enregistrement…" : "Enregistrer mes informations"}</button>
+          </form>
+        </section>}
         {section === "itineraires" && <section className="account-card"><h2>Mes itinéraires</h2>
           {trips.length ? trips.map(trip => <article className="account-trip" key={trip.id}>
             <div><h3>{trip.depart} → {trip.arrivee}</h3><p>Transport : {trip.modes.replaceAll(",", ", ")}</p><p><strong>{trip.statut}</strong></p><small>Enregistré le {new Date(trip.created_at).toLocaleDateString("fr-FR")}</small></div>
@@ -117,6 +166,7 @@ export default function AccountPage() {
         </section>}
         {section === "nouvelle" && <section className="account-card"><h2>Nouvelle demande de réservation</h2>
           <p>Préparez une demande d'hébergement ou de transport. Les partenaires et disponibilités ne sont pas encore connectés : la demande doit être validée par le prestataire avant tout paiement sur place.</p>
+          <div className="account-profile-summary"><h3>Informations du voyageur reprises depuis mon compte</h3><p><strong>{[user.nom,user.postnom,user.prenom].filter(Boolean).join(" ")}</strong> · {user.telephone || "Téléphone non renseigné"} · {[user.ville,user.pays].filter(Boolean).join(", ") || "Adresse non renseignée"}</p><p>{user.date_naissance ? "Né(e) le "+user.date_naissance+" à "+(user.lieu_naissance||"—") : "Date de naissance non renseignée"} · {user.piece_identite ? "Pièce d’identité enregistrée (non transmise)" : "Aucune pièce d’identité jointe"}</p><button type="button" onClick={()=>setSection("parametres")}>Modifier mes informations</button></div>
           <form onSubmit={createBooking}>
             <label>Type de demande<select value={bookingType} onChange={e => setBookingType(e.target.value)}><option value="hebergement">Hébergement</option><option value="transport">Transport</option></select></label>
             <label>Nom de l'établissement ou du transporteur<input name="prestataire" minLength={2} maxLength={180} placeholder="Prestataire à contacter" required /></label>
