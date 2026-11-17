@@ -154,3 +154,34 @@ voiture,aru,kampala,,,,,a_verifier,Transporteur à confirmer,,Proposition utilis
 bus,mahagi,kampala,,,,,a_verifier,Transporteur à confirmer,,Proposition utilisateur : trajet international ; frontière et sécurité à vérifier,a_verifier
 voiture,mahagi,kampala,,,,,a_verifier,Transporteur à confirmer,,Proposition utilisateur : trajet international ; frontière et sécurité à vérifier,a_verifier
 avion,kampala,kinshasa,,,,,,Compagnie et vol à confirmer,,Proposition utilisateur : vol international non confirmé ; formalités à vérifier,a_verifier
+avion,kinshasa,kisangani,,,,,,Tracep Aviation,,Liaison déclarée par utilisateur ; disponibilité et horaires à confirmer,a_verifier
+avion,kinshasa,lubumbashi,,,,,,Tracep Aviation,,Liaison déclarée par utilisateur ; disponibilité et horaires à confirmer,a_verifier
+avion,kinshasa,bunia,,,,,,Tracep Aviation,,Liaison déclarée par utilisateur ; disponibilité et horaires à confirmer,a_verifier
+avion,kinshasa,isiro,,,,,,Tracep Aviation,,Liaison déclarée par utilisateur ; disponibilité et horaires à confirmer,a_verifier
+avion,kisangani,isiro,,,,,,Tracep Aviation,,Liaison déclarée par utilisateur ; disponibilité et horaires à confirmer,a_verifier
+avion,kisangani,mambasa,,,,,,Tracep Aviation,,Liaison déclarée par utilisateur ; disponibilité et horaires à confirmer,a_verifier
+avion,kinshasa,bandundu,,,,,,Kin Avia,,Lun-sam 07h30-08h30 déclarés ; vol à confirmer,a_verifier
+avion,bandundu,nioki,,,,,,Kin Avia,,Lun mer ven 09h00-09h30 déclarés ; vol à confirmer,a_verifier
+avion,kinshasa,moanda,,,,,,Air Congo,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,kisangani,,,,,,Air Congo,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,kindu,,,,,,Air Congo,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,kananga,,,,,,Air Congo,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,gemena,,,,,,Air Congo,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,kalemie,,,,,,Air Congo,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,kolwezi,,,,,,Air Congo,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,lubumbashi,,,,,,Air Congo,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,lubumbashi,,,,,,Mont Gabaon Airlines,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,goma,,,,,,Mont Gabaon Airlines,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,kindu,,,,,,Mont Gabaon Airlines,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,kalemie,,,,,,Mont Gabaon Airlines,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,kisangani,,,,,,Mont Gabaon Airlines,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,beni,,,,,,Mont Gabaon Airlines,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,bunia,,,,,,Mont Gabaon Airlines,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,isiro,,,,,,Mont Gabaon Airlines,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,kinshasa,aru,,,,,,Mont Gabaon Airlines,,Destination déclarée ; vol et horaire à confirmer,a_verifier
+avion,bunia,mahagi,,,,,,MAF,,Liaison déclarée ; nature du service et horaires à confirmer,a_verifier
+avion,mahagi,bunia,,,,,,MAF,,Liaison déclarée ; nature du service et horaires à confirmer,a_verifier
+avion,mahagi,aru,,,,,,MAF,,Liaison déclarée ; nature du service et horaires à confirmer,a_verifier
+avion,aru,mahagi,,,,,,MAF,,Liaison déclarée ; nature du service et horaires à confirmer,a_verifier
+avion,bunia,aru,,,,,,MAF,,Liaison déclarée ; nature du service et horaires à confirmer,a_verifier
+avion,aru,bunia,,,,,,MAF,,Liaison déclarée ; nature du service et horaires à confirmer,a_verifier
