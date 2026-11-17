@@ -2,6 +2,7 @@ import BookingAdmin from "./BookingAdmin";
 import { AboutPage, ContactPage } from "./InfoPages";
 import PrivacyPage from "./PrivacyPage";
 import AccountPage, { saveTravelerTrip, getTravelerToken } from "./AccountPage";
+import BookingReceipt from "./BookingReceipt";
 import { HOTELS } from "./hotels";
 import { AIR_CARRIERS } from "./airCarriers";
 import React, { useEffect, useMemo, useState } from "react";
@@ -94,6 +95,74 @@ function Header({ admin }) {
   </div></header>;
 }
 
+function JourneyBooking({ route, destination, hotel, onBack }) {
+  const [formError,setFormError]=useState("");
+  const [busy,setBusy]=useState(false);
+  const [receipt,setReceipt]=useState(null);
+  const [arrival,setArrival]=useState("");
+  const [departure,setDeparture]=useState("");
+  const [payment,setPayment]=useState("sur_place");
+  const [price,setPrice]=useState("");
+  const [emailWanted,setEmailWanted]=useState(false);
+  const isHotel=!!hotel;
+  const itinerary=route.segments.map(s=>s.depart_nom+" → "+s.arrivee_nom+" ("+(MODE_LABEL[s.mode]||s.mode)+")").join(" · ");
+  const operator=route.segments.map(s=>s.operateur).filter(s=>s && !/^(transporteur|compagnie|à confirmer)/i.test(s));
+  const provider=isHotel ? hotel.name : (operator.length===1 ? operator[0] : "");
+  const nights=arrival && departure && departure>arrival ? Math.round((new Date(departure+"T00:00:00")-new Date(arrival+"T00:00:00"))/86400000) : 0;
+  async function submit(e) {
+    e.preventDefault();setBusy(true);setFormError("");
+    const f=new FormData(e.currentTarget);
+    const body={type:isHotel?"hebergement":"transport",prestataire:f.get("prestataire"),ville:destination,
+      date_debut:f.get("date_debut"),date_fin:isHotel?f.get("date_fin"):null,voyageurs:Number(f.get("voyageurs")),
+      nom:f.get("nom"),postnom:f.get("postnom"),prenom:f.get("prenom"),lieu_naissance:f.get("lieu_naissance"),
+      date_naissance:f.get("date_naissance"),telephone:f.get("telephone"),email:f.get("email")||"",
+      numero_identite:f.get("numero_identite")||"",itineraire:itinerary,
+      prix_unitaire:f.get("prix_unitaire")?Number(f.get("prix_unitaire")):null,
+      devise:f.get("devise")||"USD",modalite:f.get("modalite")||"",
+      paiement_methode:payment,details:f.get("details")||""};
+    try {
+      const token=getTravelerToken();
+      const result=await api("/compte/reservations/invite",{method:"POST",headers:token?{Authorization:"Bearer "+token}:{},body:JSON.stringify(body)});
+      setReceipt(result);
+    }catch(err){setFormError(err.message);}
+    finally{setBusy(false);}
+  }
+  if(receipt)return <div className="journey-booking-form"><h3>Demande enregistrée</h3><p><strong>Référence : {receipt.reference}</strong></p><p>{receipt.message}</p><p>Votre récépissé est disponible ci-dessous. Il ne constitue pas une réservation confirmée ni une preuve de paiement.</p>{emailWanted && <p>L'envoi automatique par e-mail n'est pas encore activé. Téléchargez votre document pour le conserver.</p>}<button type="button" onClick={()=>setReceipt(null)}>Nouvelle demande</button><BookingReceipt booking={receipt} traveler={JSON.parse(JSON.stringify(receipt.reservation_infos||{}))} onClose={()=>setReceipt(null)}/></div>;
+  return <div className="journey-booking-form"><h3>3. Informations de réservation {isHotel?"— hôtel":"— transport"}</h3>
+    <p>Réservation libre, avec ou sans compte. Les informations ci-dessous servent uniquement à transmettre une demande au prestataire.</p>
+    <p><strong>Itinéraire :</strong> {itinerary}</p>
+    {isHotel && <p><strong>Hôtel :</strong> {hotel.name} · {hotel.address || destination}</p>}
+    <form onSubmit={submit}>
+      <div className="journey-form-grid">
+        <label>Nom *<input name="nom" required maxLength={120}/></label>
+        <label>Postnom *<input name="postnom" required maxLength={120}/></label>
+        <label>Prénom *<input name="prenom" required maxLength={120}/></label>
+        <label>Lieu de naissance *<input name="lieu_naissance" required maxLength={150}/></label>
+        <label>Date de naissance *<input name="date_naissance" type="date" required max={new Date().toISOString().slice(0,10)}/></label>
+        <label>Téléphone *<input name="telephone" type="tel" required maxLength={35}/></label>
+        <label>E-mail (facultatif)<input name="email" type="email" maxLength={254}/></label>
+        <label>Numéro de pièce d'identité (facultatif)<input name="numero_identite" maxLength={100}/></label>
+        <label>{isHotel?"Établissement":"Compagnie / transporteur"} *<input name="prestataire" defaultValue={provider} required minLength={2} maxLength={180} placeholder="Nom communiqué par le prestataire"/></label>
+        <label>{isHotel?"Date d'arrivée":"Date de départ"} *<input name="date_debut" type="date" required min={new Date().toISOString().slice(0,10)} value={arrival} onChange={e=>setArrival(e.target.value)}/></label>
+        {isHotel && <label>Date de départ de l'hôtel *<input name="date_fin" type="date" required min={arrival||new Date().toISOString().slice(0,10)} value={departure} onChange={e=>setDeparture(e.target.value)}/></label>}
+        <label>Nombre de voyageurs *<input name="voyageurs" type="number" min="1" max="20" defaultValue="1" required/></label>
+        <label>{isHotel?"Prix communiqué par nuit":"Prix communiqué par billet"} (facultatif)<input name="prix_unitaire" type="number" min="0" step="0.01" value={price} onChange={e=>setPrice(e.target.value)} placeholder="À confirmer"/></label>
+        <label>Devise<select name="devise"><option value="USD">USD</option><option value="CDF">CDF</option></select></label>
+        {isHotel && <label>Modalités communiquées par l'hôtel<input name="modalite" maxLength={120} placeholder="À confirmer"/></label>}
+      </div>
+      {isHotel && <p><strong>Durée du séjour : {nights||"—"} nuit(s)</strong>{price && nights ? " · Total estimé : "+(nights*Number(price)).toLocaleString("fr-FR")+" (devise sélectionnée)" : ""}</p>}
+      <label>Informations complémentaires<textarea name="details" maxLength={500}/></label>
+      <h4>4. Mode de paiement souhaité</h4>
+      <label>Choisir une modalité<select value={payment} onChange={e=>setPayment(e.target.value)}><option value="sur_place">Payer sur place après confirmation</option><option value="mpesa">M-Pesa — non activé</option><option value="airtel_money">Airtel Money — non activé</option><option value="orange_money">Orange Money — non activé</option><option value="carte">Carte bancaire — non activée</option></select></label>
+      <p><small>Le paiement en ligne n'est pas activé. Le choix d'un moyen de paiement n'entraîne aucun débit. La demande doit être validée par le prestataire.</small></p>
+      <label><input type="checkbox" checked={emailWanted} onChange={e=>setEmailWanted(e.target.checked)}/> Je souhaite recevoir mon document par e-mail lorsqu'un service d'envoi sera disponible.</label>
+      <p><small>Le PDF est disponible immédiatement après l'enregistrement. L'envoi automatique par e-mail n'est pas encore opérationnel.</small></p>
+      {formError && <p role="alert" className="message error">{formError}</p>}
+      <div className="booking-actions"><button type="submit" disabled={busy}>{busy?"Enregistrement…":"5. Valider ma demande et voir le PDF"}</button><button type="button" onClick={onBack}>Retour au choix de l'hôtel</button></div>
+    </form>
+  </div>;
+}
+
 function SearchPage() {
   const [lieux, setLieux] = useState([]);
   const [from, setFrom] = useState("");
@@ -112,6 +181,8 @@ function SearchPage() {
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [chosenJourney, setChosenJourney] = useState(null);
   const [showHotels, setShowHotels] = useState(false);
+  const [bookingStep,setBookingStep]=useState(false);
+  const [selectedHotel,setSelectedHotel]=useState(null);
   const [saveMessage, setSaveMessage] = useState("");
 
   useEffect(() => {
@@ -123,7 +194,7 @@ function SearchPage() {
     if (!from || !to || from === to) { setError("Choisissez deux villes différentes."); return; }
     if (!modes.length) { setError("Sélectionnez au moins un transport."); return; }
     const loadingStartedAt = Date.now();
-    setLoading(true); setError(""); setSearched(true); setRoutes([]); setPoints(null); setSelectedRoute(null); setChosenJourney(null); setShowHotels(false);
+    setLoading(true); setError(""); setSearched(true); setRoutes([]); setPoints(null); setSelectedRoute(null); setChosenJourney(null); setShowHotels(false);setBookingStep(false);setSelectedHotel(null);
     try {
       const params = new URLSearchParams({ depart_id: from, arrivee_id: to, modes: modes.join(",") });
       const data = await api(`/itineraire?${params}`);
@@ -206,7 +277,7 @@ function SearchPage() {
       {searched && !loading && !error && !routes.length && <div className="empty-state"><span className="empty-symbol">⌁</span><h3>Aucun itinéraire enregistré pour cette combinaison.</h3><p>Le réseau est en cours de complément. Essayez d’autres villes ou modes de transport ; aucune liaison ne sera inventée.</p></div>}
       {easternRoad && from && to && <div className="message error" role="alert"><strong>⚠ Insécurité — Est de la RDC</strong><p>Certains trajets en bus, voiture ou moto traversent ou rejoignent les provinces de l’Est et du Nord-Est de la RDC. Risques de violences, barrages et fermetures soudaines. Ce signalement est préventif, pas une information en temps réel. Vérifiez les avis de sécurité et l’état des routes avant tout départ ; ne considérez jamais cet itinéraire comme sûr sans confirmation récente.</p></div>}
       {saveMessage && <p role="status" className="message">{saveMessage} <a href="/compte">Voir mes voyages</a></p>}
-      {routes.map((route, i) => <article key={i} className="route-card"><div className="save-trip-bar"><button type="button" onClick={async () => { try { if (!getTravelerToken()) { window.location.href = "/compte"; return; } await saveTravelerTrip(placeById[from]?.nom || from, placeById[to]?.nom || to, modes.join(",")); setSaveMessage("Itinéraire enregistré dans votre compte."); } catch (e) { setSaveMessage(e.message); } }}>☆ Enregistrer dans mon compte</button></div><div className="route-top"><span className="route-ranking">{CRITERE_LABEL[route.critere]}</span>{route.segments.some(s => s.niveau_publication === "hypothese_retour") ? <span className="unverified"><Icon type="info" size={14} /> Sens retour théorique — non confirmé</span> : route.segments.some(s => s.niveau_publication === "a_verifier") ? <span className="unverified"><Icon type="info" size={14} /> Liaison à vérifier — non confirmée</span> : route.segments.some(s => s.niveau_publication === "indicatif") ? <span className="unverified"><Icon type="info" size={14} /> Estimation non vérifiée</span> : <span className="verified"><Icon type="shield" size={14} /> Source vérifiée</span>}</div><div className="route-main"><div className="route-path"><h3>{places.find(l => l.id === from)?.nom} <span>→</span> {places.find(l => l.id === to)?.nom}</h3><div className="route-modes">{route.segments.map(s => <span key={s.id}>{MODE_LABEL[s.mode] || s.mode}</span>)}</div></div><div className="route-metrics"><div><small>DURÉE ESTIMÉE</small><strong>{fmtDuration(route.duree_h)}</strong></div><div><small>TARIF INDIQUÉ DÈS</small><strong>{fmtMoney(route.prix_min_usd)}</strong></div></div></div><div className="booking-actions" style={{marginTop:16,flexWrap:"wrap"}}><button type="button" aria-pressed={chosenJourney === i} onClick={() => {setChosenJourney(i);setShowHotels(false);setSelectedRoute(null);}}>{chosenJourney === i ? "✓ Itinéraire sélectionné" : "Choisir cet itinéraire →"}</button>
+      {routes.map((route, i) => <article key={i} className="route-card"><div className="save-trip-bar"><button type="button" onClick={async () => { try { if (!getTravelerToken()) { window.location.href = "/compte"; return; } await saveTravelerTrip(placeById[from]?.nom || from, placeById[to]?.nom || to, modes.join(",")); setSaveMessage("Itinéraire enregistré dans votre compte."); } catch (e) { setSaveMessage(e.message); } }}>☆ Enregistrer dans mon compte</button></div><div className="route-top"><span className="route-ranking">{CRITERE_LABEL[route.critere]}</span>{route.segments.some(s => s.niveau_publication === "hypothese_retour") ? <span className="unverified"><Icon type="info" size={14} /> Sens retour théorique — non confirmé</span> : route.segments.some(s => s.niveau_publication === "a_verifier") ? <span className="unverified"><Icon type="info" size={14} /> Liaison à vérifier — non confirmée</span> : route.segments.some(s => s.niveau_publication === "indicatif") ? <span className="unverified"><Icon type="info" size={14} /> Estimation non vérifiée</span> : <span className="verified"><Icon type="shield" size={14} /> Source vérifiée</span>}</div><div className="route-main"><div className="route-path"><h3>{places.find(l => l.id === from)?.nom} <span>→</span> {places.find(l => l.id === to)?.nom}</h3><div className="route-modes">{route.segments.map(s => <span key={s.id}>{MODE_LABEL[s.mode] || s.mode}</span>)}</div></div><div className="route-metrics"><div><small>DURÉE ESTIMÉE</small><strong>{fmtDuration(route.duree_h)}</strong></div><div><small>TARIF INDIQUÉ DÈS</small><strong>{fmtMoney(route.prix_min_usd)}</strong></div></div></div><div className="booking-actions" style={{marginTop:16,flexWrap:"wrap"}}><button type="button" aria-pressed={chosenJourney === i} onClick={() => {setChosenJourney(i);setShowHotels(false);setSelectedRoute(null);setBookingStep(false);setSelectedHotel(null);}}>{chosenJourney === i ? "✓ Itinéraire sélectionné" : "Choisir cet itinéraire →"}</button>
         {route.segments.some(s => ["hypothese_retour", "a_verifier"].includes(s.niveau_publication)) ? <span>Réservation indisponible : au moins une correspondance n’est pas confirmée</span> : route.segments.some(s => s.mode === "avion") ? <>
           <button type="button" onClick={() => setSelectedRoute(selectedRoute === i ? null : i)}>✈ Réserver un billet d'avion</button>
           <button type="button" onClick={() => setSelectedRoute(selectedRoute === i ? null : i)}>💳 Payer sur le site de la compagnie</button>
@@ -226,10 +297,10 @@ function SearchPage() {
         <hr style={{margin:"20px 0"}}/>
         <strong>2. Souhaitez-vous aussi un hôtel à {hotelCity} ?</strong>
         <p>Découvrez les hébergements locaux, leurs chambres, les photos et les contacts lorsqu'ils sont vérifiés.</p>
-        <div className="booking-actions"><button type="button" onClick={() => setShowHotels(true)}>Oui, voir les hôtels</button><button type="button" onClick={() => setShowHotels(false)}>Non, continuer sans hôtel</button></div>
+        <div className="booking-actions"><button type="button" onClick={() => {setShowHotels(true);setBookingStep(false);setSelectedHotel(null);}}>Oui, voir les hôtels</button><button type="button" onClick={() => {setShowHotels(false);setBookingStep(true);setSelectedHotel(null);}}>Non, continuer sans hôtel</button></div>
         {showHotels && <div style={{marginTop:16}}><h4>Hébergements à {hotelCity}</h4>
           {localHotels.length ? localHotels.map(h => <article key={h.id} className="points-panel" style={{marginTop:12}}>
-            <h4>{h.name}</h4><p>{h.address}</p><p>{h.priceFrom != null ? "À partir de "+h.priceFrom+" "+(h.currency || "USD")+" — à confirmer" : "Tarif à confirmer"}</p>
+            <h4>{h.name}</h4><p>{h.address}</p><button type="button" onClick={()=>{setSelectedHotel(h);setBookingStep(true);}}>Choisir cet hôtel et continuer →</button><p>{h.priceFrom != null ? "À partir de "+h.priceFrom+" "+(h.currency || "USD")+" — à confirmer" : "Tarif à confirmer"}</p>
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{(h.cityPhotos || []).map((url,k) => <img key={"city"+k} src={url} alt={"Vue de "+hotelCity} loading="lazy" style={{width:150,height:110,objectFit:"cover",borderRadius:8}} />)}{(h.roomPhotos || []).map((url,k) => <img key={"room"+k} src={url} alt={"Chambre de "+h.name} loading="lazy" style={{width:150,height:110,objectFit:"cover",borderRadius:8}} />)}</div>
             {h.phone && <p><a href={"tel:"+h.phone}>Appeler l'hôtel : {h.phone}</a></p>}
             {h.email && <p><a href={"mailto:"+h.email}>Écrire à l'hôtel</a></p>}
@@ -237,6 +308,7 @@ function SearchPage() {
             <p><small>Disponibilité des chambres à confirmer directement avec l'hôtel.</small></p>
           </article>) : <div className="empty-state" style={{padding:22}}><strong>Hôtels partenaires à venir à {hotelCity}</strong><p>Nous n'avons pas encore d'hôtel avec coordonnées, photos de ville et chambres vérifiées pour cette destination. Aucun établissement ou prix fictif ne sera affiché.</p><a href={"https://wa.me/"+CONTACT.slice(1)+"?text="+encodeURIComponent("Bonjour Voyage RDC, je cherche un hôtel à "+hotelCity+". Merci de m'indiquer les hébergements et contacts vérifiés.")} target="_blank" rel="noopener noreferrer">Demander des contacts d'hôtels via WhatsApp ↗</a></div>}
         </div>}
+        {bookingStep && <JourneyBooking key={i+"-"+(selectedHotel?.id||"transport")} route={route} destination={hotelCity} hotel={selectedHotel} onBack={()=>{setBookingStep(false);setShowHotels(true);}}/>}
       </div>}
       <details className="route-details"><summary>Voir les étapes et informations <span>⌄</span></summary><div className="route-legs">{route.segments.map((s, index) => <div className="leg" key={s.id}><span className="leg-index">{index + 1}</span><div><strong>{s.depart_nom} → {s.arrivee_nom}</strong><p>{MODE_LABEL[s.mode]} · {fmtDuration(s.duree_h)} · {fmtMoney(s.prix_min_usd)}{s.prix_max_usd != null ? ` à ${fmtMoney(s.prix_max_usd)}` : ""}</p><small>{s.niveau_publication === "hypothese_retour" ? "Sens retour théorique non enregistré" : s.niveau_publication === "a_verifier" ? "Liaison non confirmée — vérification nécessaire" : s.niveau_publication === "indicatif" ? "Source initiale non vérifiée" : `Dernière vérification : ${s.verifie_le}`} · {s.source_info || "Transporteur à contacter pour confirmation"}</small><div><button className="text-link" onClick={() => showPoints(s.depart_id, s.depart_nom)} type="button">Points de départ</button> · <button className="text-link" onClick={() => showPoints(s.arrivee_id, s.arrivee_nom)} type="button">Points d’arrivée</button></div><SegmentOperators segment={s} /></div></div>)}</div>{points && <div className="points-panel"><h4>Points d’embarquement — {points.name}</h4>{points.loading ? <p>Chargement…</p> : points.error ? <p>{points.error}</p> : points.list.length ? points.list.map(p => <p key={p.id}>{p.nom} {p.verifie ? "· Emplacement indiqué comme vérifié" : "· Emplacement à confirmer"} {p.latitude && p.longitude && <a target="_blank" rel="noreferrer" href={`https://www.openstreetmap.org/?mlat=${p.latitude}&mlon=${p.longitude}#map=13/${p.latitude}/${p.longitude}`}>Voir sur la carte ↗</a>}</p>) : <p>Aucun point enregistré pour cette ville.</p>}</div>}</details></article>)}
       {!!routes.length && <div className="disclaimer"><Icon type="info" size={20} /><p>{notice} Les horaires et places ne sont pas disponibles en temps réel. Réservations et paiements : mise en relation uniquement. Tarifs déclarés par le gestionnaire ; disponibilité et montant à confirmer auprès du transporteur.</p></div>}
