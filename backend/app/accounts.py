@@ -338,7 +338,7 @@ def public_booking(body: PublicBookingRequest, authorization: str | None = Heade
         raise HTTPException(status_code=422, detail="Vérifiez les dates du voyage ou du séjour.")
     with connection() as conn:
         init_tables(conn)
-        user_id = "invite-" + str(uuid4())
+        user_id = str(uuid4())  # Guest ID fits VARCHAR(40); no voyageurs row for guests.
         if authorization:
             user_id = current_user(conn, authorization)["id"]
         now = datetime.now(timezone.utc)
