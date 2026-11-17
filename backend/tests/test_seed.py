@@ -24,9 +24,9 @@ class RealSeedTests(unittest.TestCase):
             import_rows(rows)
             import_rows(rows)
             with connection() as conn:
-                self.assertEqual(fetchone(conn, "SELECT COUNT(*) AS n FROM liaisons")["n"], 145)
+                self.assertEqual(fetchone(conn, "SELECT COUNT(*) AS n FROM liaisons")["n"], 155)
                 self.assertEqual(fetchone(conn, "SELECT COUNT(*) AS n FROM liaisons WHERE publie=1")["n"], 0)
-                self.assertEqual(fetchone(conn, "SELECT COUNT(*) AS n FROM liaisons WHERE statut='a_verifier'")["n"], 71)
+                self.assertEqual(fetchone(conn, "SELECT COUNT(*) AS n FROM liaisons WHERE statut='a_verifier'")["n"], 81)
 
     def test_publishing_verified_seed_route_makes_it_searchable(self):
         rows = from_directory(SEED_DIR)
