@@ -192,7 +192,7 @@ def update_profile(body: ProfileUpdate, authorization: str | None = Header(defau
         values = [v.isoformat() if isinstance(v,date) else v.strip() if isinstance(v,str) else v for v in values]
         if body.date_naissance and (body.date_naissance > date.today() or body.date_naissance.year < 1900):
             raise HTTPException(status_code=422,detail="Date de naissance invalide.")
-        execute(conn,"UPDATE voyageurs SET "+",".join(k+"=?" for k in PROFILE_FIELDS)+" WHERE id=?",(*[values,user["id"]]))
+        execute(conn,"UPDATE voyageurs SET "+",".join(k+"=?" for k in PROFILE_FIELDS)+" WHERE id=?",tuple(values+[user["id"]]))
         return profile(conn,user["id"])
 
 class IdentityUpload(BaseModel):
