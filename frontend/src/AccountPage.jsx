@@ -135,7 +135,7 @@ export default function AccountPage() {
           {!bookings.length && <p>Aucune demande enregistrée pour le moment.</p>}
           {(section === "reservations" ? visibleBookings : bookings).map(b => <article className="account-trip" key={b.id}>
             <div><h3>{b.type === "hebergement" ? "🏨" : "🚌"} {b.prestataire} · {b.ville}</h3>
-              <p>{b.date_debut}{b.date_fin ? " → " + b.date_fin : ""} · {b.voyageurs} voyageur(s)</p><small>Référence : {b.id}</small>
+              <p>{b.date_debut}{b.date_fin ? " → " + b.date_fin : ""} · {b.voyageurs} voyageur(s)</p><small>Référence : {b.reference || b.id}</small>
               <p><strong>{b.statut}</strong></p>{section === "suivi" && <p>{b.statut === "Réservation confirmée" ? "✓ Réservation validée — téléchargez votre confirmation ci-dessous." : b.statut === "Demande refusée" ? "Demande refusée — contactez Voyage RDC pour une autre option." : "⏳ En attente de validation par Voyage RDC et le prestataire."}</p>}
               <p>Paiement : {b.paiement_statut}</p>
               <label>Mode de paiement envisagé<select value={b.paiement_methode || ""} onChange={e => paymentChoice(b.id,e.target.value)}>
