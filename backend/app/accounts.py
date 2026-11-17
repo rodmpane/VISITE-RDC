@@ -1,0 +1,161 @@
+"""Voyageur accounts and saved itinerary plans. No booking or payment processing."""
+import hashlib
+import hmac
+import os
+import secrets
+from datetime import datetime, timedelta, timezone
+from uuid import uuid4
+
+from fastapi import APIRouter, Header, HTTPException
+from pydantic import BaseModel, EmailStr, Field
+
+from .db import connection, execute, fetchall, fetchone
+
+router = APIRouter(prefix="/api/compte", tags=["Compte voyageur"])
+
+
+def init_tables(conn):
+    execute(conn, """CREATE TABLE IF NOT EXISTS voyageurs (
+        id VARCHAR(40) PRIMARY KEY, nom VARCHAR(120) NOT NULL,
+        email VARCHAR(254) NOT NULL UNIQUE, password_hash TEXT NOT NULL,
+        created_at VARCHAR(40) NOT NULL)""")
+    execute(conn, """CREATE TABLE IF NOT EXISTS sessions_voyageurs (
+        token_hash VARCHAR(64) PRIMARY KEY, user_id VARCHAR(40) NOT NULL,
+        expires_at VARCHAR(40) NOT NULL)""")
+    execute(conn, """CREATE TABLE IF NOT EXISTS voyages_enregistres (
+        id VARCHAR(40) PRIMARY KEY, user_id VARCHAR(40) NOT NULL,
+        depart VARCHAR(120) NOT NULL, arrivee VARCHAR(120) NOT NULL,
+        modes VARCHAR(150) NOT NULL, statut VARCHAR(40) NOT NULL,
+        hebergement VARCHAR(240), paiement VARCHAR(60) NOT NULL,
+        created_at VARCHAR(40) NOT NULL)""")
+
+
+def hash_password(password, salt=None):
+    salt = salt or secrets.token_hex(16)
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode(), bytes.fromhex(salt), 260000).hex()
+    return salt + ":" + digest
+
+
+def verify_password(password, stored):
+    try:
+        salt, digest = stored.split(":", 1)
+        return hmac.compare_digest(hash_password(password, salt), stored)
+    except (ValueError, TypeError):
+        return False
+
+
+def new_session(conn, user_id):
+    token = secrets.token_urlsafe(40)
+    expiry = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
+    execute(conn, "INSERT INTO sessions_voyageurs (token_hash,user_id,expires_at) VALUES (?,?,?)",
+            (hashlib.sha256(token.encode()).hexdigest(), user_id, expiry))
+    return token
+
+
+def current_user(conn, authorization):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Connectez-vous pour accéder à votre espace.")
+    token = authorization[7:]
+    if len(token) > 200:
+        raise HTTPException(status_code=401, detail="Session invalide.")
+    session = fetchone(conn, """SELECT v.id,v.nom,v.email FROM sessions_voyageurs s
+        JOIN voyageurs v ON v.id=s.user_id
+        WHERE s.token_hash=? AND s.expires_at>?""",
+        (hashlib.sha256(token.encode()).hexdigest(), datetime.now(timezone.utc).isoformat()))
+    if not session:
+        raise HTTPException(status_code=401, detail="Session expirée. Reconnectez-vous.")
+    return session
+
+
+class Register(BaseModel):
+    nom: str = Field(min_length=2, max_length=120)
+    email: EmailStr
+    password: str = Field(min_length=10, max_length=128)
+
+
+class Login(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class SavedTrip(BaseModel):
+    depart: str = Field(min_length=1, max_length=120)
+    arrivee: str = Field(min_length=1, max_length=120)
+    modes: str = Field(min_length=1, max_length=150)
+
+
+@router.post("/inscription", status_code=201)
+def register(body: Register):
+    email = str(body.email).strip().lower()
+    with connection() as conn:
+        init_tables(conn)
+        if fetchone(conn, "SELECT id FROM voyageurs WHERE email=?", (email,)):
+            raise HTTPException(status_code=409, detail="Cette adresse e-mail est déjà utilisée.")
+        uid = str(uuid4())
+        try:
+            execute(conn, "INSERT INTO voyageurs (id,nom,email,password_hash,created_at) VALUES (?,?,?,?,?)",
+                    (uid, body.nom.strip(), email, hash_password(body.password), datetime.now(timezone.utc).isoformat()))
+        except Exception:
+            raise HTTPException(status_code=409, detail="Impossible de créer ce compte. Vérifiez votre adresse.")
+        return {"token": new_session(conn, uid), "user": {"id": uid, "nom": body.nom.strip(), "email": email}}
+
+
+@router.post("/connexion")
+def login(body: Login):
+    with connection() as conn:
+        init_tables(conn)
+        user = fetchone(conn, "SELECT * FROM voyageurs WHERE email=?", (str(body.email).lower(),))
+        if not user or not verify_password(body.password, user["password_hash"]):
+            raise HTTPException(status_code=401, detail="Adresse e-mail ou mot de passe incorrect.")
+        return {"token": new_session(conn, user["id"]), "user": {"id": user["id"], "nom": user["nom"], "email": user["email"]}}
+
+
+@router.get("/moi")
+def me(authorization: str | None = Header(default=None)):
+    with connection() as conn:
+        init_tables(conn)
+        return current_user(conn, authorization)
+
+
+@router.post("/deconnexion")
+def logout(authorization: str | None = Header(default=None)):
+    with connection() as conn:
+        init_tables(conn)
+        current_user(conn, authorization)
+        execute(conn, "DELETE FROM sessions_voyageurs WHERE token_hash=?",
+                (hashlib.sha256(authorization[7:].encode()).hexdigest(),))
+    return {"ok": True}
+
+
+@router.get("/voyages")
+def trips(authorization: str | None = Header(default=None)):
+    with connection() as conn:
+        init_tables(conn)
+        user = current_user(conn, authorization)
+        return fetchall(conn, """SELECT id,depart,arrivee,modes,statut,hebergement,paiement,created_at
+            FROM voyages_enregistres WHERE user_id=? ORDER BY created_at DESC LIMIT 100""", (user["id"],))
+
+
+@router.post("/voyages", status_code=201)
+def save_trip(body: SavedTrip, authorization: str | None = Header(default=None)):
+    if body.depart == body.arrivee:
+        raise HTTPException(status_code=422, detail="Choisissez deux villes différentes.")
+    with connection() as conn:
+        init_tables(conn)
+        user = current_user(conn, authorization)
+        trip_id = str(uuid4())
+        execute(conn, """INSERT INTO voyages_enregistres
+            (id,user_id,depart,arrivee,modes,statut,hebergement,paiement,created_at)
+            VALUES (?,?,?,?,?,?,?,?,?)""",
+            (trip_id, user["id"], body.depart, body.arrivee, body.modes,
+             "Projet de voyage — non réservé", None, "Aucun paiement", datetime.now(timezone.utc).isoformat()))
+        return {"id": trip_id, "message": "Projet de voyage enregistré. Aucune réservation effectuée."}
+
+
+@router.delete("/voyages/{trip_id}")
+def delete_trip(trip_id: str, authorization: str | None = Header(default=None)):
+    with connection() as conn:
+        init_tables(conn)
+        user = current_user(conn, authorization)
+        execute(conn, "DELETE FROM voyages_enregistres WHERE id=? AND user_id=?", (trip_id, user["id"]))
+        return {"ok": True}
