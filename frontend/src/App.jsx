@@ -299,7 +299,7 @@ function SearchPage() {
         <strong>2. Souhaitez-vous aussi un hôtel à {hotelCity} ?</strong>
         <p>Découvrez les hébergements locaux, leurs chambres, les photos et les contacts lorsqu'ils sont vérifiés.</p>
         <div className="booking-actions"><button type="button" onClick={() => {setShowHotels(true);setBookingStep(false);setSelectedHotel(null);}}>Oui, voir les hôtels</button><button type="button" onClick={() => {setShowHotels(false);setBookingStep(true);setSelectedHotel(null);}}>Non, continuer sans hôtel</button></div>
-        {showHotels && <div style={{marginTop:16}}><h4>Hébergements à {hotelCity}</h4>
+        {showHotels && <div style={{marginTop:16}}><h4>Hébergements à {hotelCity}</h4><button type="button" onClick={()=>{setSelectedHotel(null);setBookingStep(true);}}>Continuer sans hôtel →</button>
           {localHotels.length ? localHotels.map(h => <article key={h.id} className="points-panel" style={{marginTop:12}}>
             <h4>{h.name}</h4><p>{h.address}</p><button type="button" onClick={()=>{setSelectedHotel(h);setBookingStep(true);}}>Choisir cet hôtel et continuer →</button><p>{h.priceFrom != null ? "À partir de "+h.priceFrom+" "+(h.currency || "USD")+" — à confirmer" : "Tarif à confirmer"}</p>
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{(h.cityPhotos || []).map((url,k) => <img key={"city"+k} src={url} alt={"Vue de "+hotelCity} loading="lazy" style={{width:150,height:110,objectFit:"cover",borderRadius:8}} />)}{(h.roomPhotos || []).map((url,k) => <img key={"room"+k} src={url} alt={"Chambre de "+h.name} loading="lazy" style={{width:150,height:110,objectFit:"cover",borderRadius:8}} />)}</div>
