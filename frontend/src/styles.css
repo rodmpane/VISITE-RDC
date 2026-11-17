@@ -250,3 +250,18 @@ body{color:var(--rdc-navy);background:#f5f7fc}
  .account-bottom-tab.active{background:#eaf0ff;color:#2052d9}
  .account-main{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 }
+
+/* APK only: permanent top profile menu outside the dashboard */
+.account-apk .account-header{position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:7px 12px;justify-content:space-between;align-items:center;padding:9px 12px}
+.account-apk .account-header>nav{display:none}
+.account-apk .account-header img{width:110px}
+.account-apk .account-header .account-top-actions{display:flex;align-items:center;gap:6px;margin:0;z-index:110}
+.account-apk .account-header .account-top-actions button{font-size:11px;padding:8px 9px;min-height:40px}
+.account-apk .account-profile-submenu{z-index:120}
+.account-apk .account-dashboard-nav{display:none}
+@media(max-width:410px){
+ .account-apk .account-header img{width:90px}
+ .account-apk .account-header .account-top-actions{gap:4px}
+ .account-apk .account-header .account-top-actions button{font-size:10px;padding:7px 6px}
+ .account-apk .account-profile-submenu{left:auto;right:0;min-width:220px}
+}
