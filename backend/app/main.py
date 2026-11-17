@@ -63,10 +63,12 @@ EDGES_SQL = """
 SELECT l.id,l.mode,l.depart_id,l.arrivee_id,l.distance_km,l.duree_h,
  l.prix_min_usd,l.prix_max_usd,l.etat_route,l.operateur,l.frequence,l.note,
  l.verifie_le,l.source_info,
- CASE WHEN l.publie=1 THEN 'verifie' ELSE 'indicatif' END AS niveau_publication,
+ CASE WHEN l.publie=1 THEN 'verifie' WHEN l.statut='a_verifier' THEN 'a_verifier' ELSE 'indicatif' END AS niveau_publication,
  d.nom AS depart_nom, a.nom AS arrivee_nom
 FROM liaisons l JOIN lieux d ON d.id=l.depart_id JOIN lieux a ON a.id=l.arrivee_id
-WHERE l.statut='ok' AND (
+WHERE l.statut!='suspendu' AND (
+    (l.statut='a_verifier' AND l.source_hash IS NOT NULL)
+    OR (l.statut='ok' AND (
     l.publie=1
     OR (
         -- Showcase initial estimates separately from verified publications.
@@ -77,7 +79,7 @@ WHERE l.statut='ok' AND (
         AND LOWER(COALESCE(l.note,'')) NOT LIKE '%%vérifier%%'
         AND LOWER(COALESCE(l.note,'')) NOT LIKE '%%insécurité%%'
         AND LOWER(COALESCE(l.note,'')) NOT LIKE '%%conflit%%'
-    )
+    ))
 )
 ORDER BY l.id
 """
@@ -122,7 +124,7 @@ def chercher_itineraire(
         routes = itineraries(edges + reverse, depart_id, arrivee_id, allowed)
     return {
         "itinéraires": routes,
-        "avertissement": "Les trajets issus des données initiales sont des estimations NON VÉRIFIÉES. Aucun horaire, tarif, état de route ou départ n'est garanti. Vérifiez toujours la sécurité, l'existence du trajet, les prix et la disponibilité directement auprès du transporteur avant tout déplacement.",
+        "avertissement": "Les liaisons en attente de vérification sont des PROPOSITIONS NON CONFIRMÉES. Les trajets initiaux restent des estimations NON VÉRIFIÉES. Aucun horaire, tarif, état de route ou départ n'est garanti. Vérifiez toujours la sécurité, l'existence du trajet, les prix et la disponibilité directement auprès du transporteur avant tout déplacement.",
         "tarifs_valides_par_gestionnaire": True,
         "temps_reel": False,
     }
