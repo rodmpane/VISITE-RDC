@@ -74,6 +74,8 @@ export default function AccountPage() {
   const [register, setRegister] = useState(false);
   const [section, setSection] = useState(typeof window !== "undefined" && !!window.VoyageRDCAndroid ? "reservations" : "profil");
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [apkTheme, setApkTheme] = useState(() => { try { return localStorage.getItem("voyage_rdc_apk_theme") === "dark" ? "dark" : "light"; } catch { return "light"; } });
+  function toggleApkTheme() { const next = apkTheme === "dark" ? "light" : "dark"; setApkTheme(next); try { localStorage.setItem("voyage_rdc_apk_theme", next); } catch {} }
   const isAndroidApp = typeof window !== "undefined" && !!window.VoyageRDCAndroid;
   const [filter, setFilter] = useState("toutes");
   const [identityFile, setIdentityFile] = useState(null);
@@ -162,16 +164,17 @@ export default function AccountPage() {
   }
   const confirmedBookings = bookings.filter(b => b.statut === "Réservation confirmée");
   const visibleBookings = bookings.filter(b => filter === "toutes" || (filter === "confirmees" ? b.statut === "Réservation confirmée" : filter === "attente" ? b.statut !== "Réservation confirmée" && b.statut !== "Demande refusée" : b.statut === "Demande refusée"));
-  return <div className={isAndroidApp ? "account-shell account-apk" : "account-shell"}>{receipt && <BookingReceipt booking={receipt} traveler={user} onClose={() => setReceipt(null)} />}
+  return <div className={isAndroidApp ? "account-shell account-apk account-apk-" + apkTheme : "account-shell"}>{receipt && <BookingReceipt booking={receipt} traveler={user} onClose={() => setReceipt(null)} />}
     <header className="account-header"><a href="/"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC" /></a><nav><a href="/">Rechercher un itinéraire</a><a href="/compte" className="account-header-profile"><span className="account-avatar account-avatar-small" aria-hidden="true">●</span> Mon compte</a></nav>      {user && isAndroidApp && <div className="account-top-actions">
         <div className="account-profile-menu-wrap">
           <button type="button" className="account-top-profile" aria-expanded={profileMenuOpen} onClick={()=>setProfileMenuOpen(!profileMenuOpen)}>
-            <span aria-hidden="true">◉</span> Mon profil <span aria-hidden="true">⌄</span>
+            <span className="account-profile-circle" aria-hidden="true">{(user.prenom || user.nom || "V").trim().charAt(0).toLocaleUpperCase("fr")}</span> <span className="account-profile-label">Mon profil</span> <span aria-hidden="true">⌄</span>
           </button>
           {profileMenuOpen && <div className="account-profile-submenu">
             <button type="button" onClick={()=>{setSection("parametres");setProfileMenuOpen(false);}}>⚙ Paramètres de mon compte</button>
           </div>}
         </div>
+        <button type="button" className="account-theme-toggle" aria-label={apkTheme === "dark" ? "Activer le thème clair" : "Activer le thème sombre"} title={apkTheme === "dark" ? "Thème clair" : "Thème sombre"} onClick={toggleApkTheme}>{apkTheme === "dark" ? "☀" : "☾"}</button>
         <button type="button" className="account-top-logout" onClick={logout}>Se déconnecter</button>
       </div>}
 </header>
