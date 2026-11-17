@@ -204,3 +204,25 @@ body{color:var(--rdc-navy);background:#f5f7fc}
 .account-profile-details>div{display:flex;flex-direction:column;gap:6px;border:1px solid #e1e8f5;border-radius:10px;padding:14px;min-width:0}
 .account-profile-details span{font-size:12px;color:#52617a}.account-profile-details strong{overflow-wrap:anywhere;color:#0c234c}
 @media(max-width:650px){.account-profile-hero{flex-wrap:wrap;gap:12px;padding:18px}.account-avatar{width:68px;height:68px;font-size:28px}.account-signout{margin-left:auto}.account-profile-details{grid-template-columns:1fr}}
+
+/* Mobile application shell: thumb-friendly navigation and safe-area spacing */
+.account-bottom-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:26px 0 8px}
+.account-bottom-actions button{display:flex;align-items:center;justify-content:center;gap:9px;min-height:52px;padding:12px;border-radius:13px;font-weight:800;font-size:14px;cursor:pointer}
+.account-bottom-profile{border:1px solid #2052d9;background:#2052d9;color:#fff}
+.account-bottom-profile.active{box-shadow:0 0 0 3px #2052d925}
+.account-bottom-logout{border:1px solid #cbd4e5;background:#fff;color:#9a2432}
+.account-bottom-actions button span{font-size:20px}
+@media(max-width:700px){
+  .account-shell{background:#f5f7fc;min-height:100dvh}
+  .account-header{position:sticky;top:0;z-index:50;background:#fff;box-shadow:0 3px 14px #0c234c0d;padding-top:env(safe-area-inset-top,0px)}
+  .account-main{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+  .account-heading h1{font-size:clamp(23px,6vw,31px)}
+  .account-card,.account-profile-hero,.account-stats>div{border-radius:16px}
+  .account-dashboard-nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .account-dashboard-nav button{min-height:49px;line-height:1.3}
+  .account-bottom-actions{position:fixed;bottom:0;left:0;right:0;z-index:80;margin:0;padding:12px 15px calc(12px + env(safe-area-inset-bottom,0px));background:#fffffffa;border-top:1px solid #dce5f5;box-shadow:0 -5px 24px #0c234c12;gap:10px}
+  .account-bottom-actions button{min-height:52px}
+  .account-profile-hero-info h2{font-size:19px}
+  .account-card input,.account-card select,.account-card textarea{min-height:48px;font-size:16px}
+  .account-footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}
+}
