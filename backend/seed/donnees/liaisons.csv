@@ -144,3 +144,13 @@ avion,kisangani,kindu,394,1.2,82,148,,À confirmer,Variable selon la semaine,Hor
 avion,kisangani,isiro,368,1.1,82,148,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie.,a_verifier
 avion,goma,bukavu,101,0.7,82,148,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie. Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
 avion,goma,bunia,378,1.1,82,148,,À confirmer,Variable selon la semaine,Horaires et tarifs très variables : confirmer auprès de la compagnie. Zone touchée par l'insécurité / le conflit : vérifier la situation avant de partir.,a_verifier
+bus,aru,bunia,,,,,a_verifier,Transporteur à confirmer,,Proposition utilisateur : itinéraire routier à confirmer ; zone d'insécurité,a_verifier
+voiture,aru,bunia,,,,,a_verifier,Transporteur à confirmer,,Proposition utilisateur : itinéraire routier à confirmer ; zone d'insécurité,a_verifier
+avion,aru,bunia,,,,,,Compagnie et vol à confirmer,,Proposition utilisateur : liaison aérienne non confirmée,a_verifier
+avion,mahagi,bunia,,,,,,Compagnie et vol à confirmer,,Proposition utilisateur : liaison aérienne non confirmée,a_verifier
+avion,isiro,bunia,,,,,,Compagnie et vol à confirmer,,Proposition utilisateur : liaison aérienne non confirmée,a_verifier
+bus,aru,kampala,,,,,a_verifier,Transporteur à confirmer,,Proposition utilisateur : trajet international ; frontière et sécurité à vérifier,a_verifier
+voiture,aru,kampala,,,,,a_verifier,Transporteur à confirmer,,Proposition utilisateur : trajet international ; frontière et sécurité à vérifier,a_verifier
+bus,mahagi,kampala,,,,,a_verifier,Transporteur à confirmer,,Proposition utilisateur : trajet international ; frontière et sécurité à vérifier,a_verifier
+voiture,mahagi,kampala,,,,,a_verifier,Transporteur à confirmer,,Proposition utilisateur : trajet international ; frontière et sécurité à vérifier,a_verifier
+avion,kampala,kinshasa,,,,,,Compagnie et vol à confirmer,,Proposition utilisateur : vol international non confirmé ; formalités à vérifier,a_verifier
