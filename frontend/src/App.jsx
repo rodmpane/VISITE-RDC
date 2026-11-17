@@ -1,3 +1,4 @@
+import PrivacyPage from "./PrivacyPage";
 import { HOTELS } from "./hotels";
 import { AIR_CARRIERS } from "./airCarriers";
 import React, { useEffect, useMemo, useState } from "react";
@@ -84,7 +85,7 @@ function SegmentOperators({ segment }) {
 
 function Header({ admin }) {
   return <header className="header"><div className="container header-inner">
-    <a href="/" className="brand" aria-label="Voyage RDC, accueil"><span className="brand-mark"><Icon type="pin" size={24} /></span><span>voyage<span className="brand-rdc">rdc</span><small>Explorez sans limites</small></span></a>
+    <a href="/" className="brand" aria-label="Voyage RDC, accueil"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC — Itinéraires partout en RDC" style={{width:180,maxWidth:"45vw",height:"auto",display:"block"}} /></a>
     <nav aria-label="Navigation principale"><a className={!admin ? "nav-active" : ""} href="/">Itinéraires</a><a className={admin ? "nav-active" : ""} href="/admin">Administration</a></nav>
     <span className="header-label"><span className="status-dot" /> Service en ligne</span>
   </div></header>;
@@ -272,5 +273,5 @@ function AdminPage() {
   </main><Footer /></>;
 }
 
-function Footer() { return <footer className="footer"><div className="container footer-inner"><div><strong>voyage<span>rdc</span></strong><p>Le Congo est vaste. Vos possibilités aussi.</p></div><p>© {new Date().getFullYear()} Voyage RDC · Service d’information gratuit, uniquement en ligne.</p></div></footer>; }
-export default function App() { return window.location.pathname.startsWith("/admin") ? <AdminPage /> : <SearchPage />; }
+function Footer() { return <footer className="footer"><div className="container footer-inner"><div><strong>voyage<span>rdc</span></strong><p>Le Congo est vaste. Vos possibilités aussi.</p></div><p>© {new Date().getFullYear()} Voyage RDC · Service d’information gratuit, uniquement en ligne. · <a href="/confidentialite">Politique de confidentialité</a></p></div></footer>; }
+export default function App() { return window.location.pathname.startsWith("/confidentialite") ? <PrivacyPage /> : window.location.pathname.startsWith("/admin") ? <AdminPage /> : <SearchPage />; }
