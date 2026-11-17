@@ -99,6 +99,7 @@ function JourneyBooking({ route, destination, hotel, onBack }) {
   const [formError,setFormError]=useState("");
   const [busy,setBusy]=useState(false);
   const [receipt,setReceipt]=useState(null);
+  const [showDocument,setShowDocument]=useState(false);
   const [arrival,setArrival]=useState("");
   const [departure,setDeparture]=useState("");
   const [payment,setPayment]=useState("sur_place");
@@ -123,11 +124,11 @@ function JourneyBooking({ route, destination, hotel, onBack }) {
     try {
       const token=getTravelerToken();
       const result=await api("/compte/reservations/invite",{method:"POST",headers:token?{Authorization:"Bearer "+token}:{},body:JSON.stringify(body)});
-      setReceipt(result);
+      setReceipt(result);setShowDocument(true);
     }catch(err){setFormError(err.message);}
     finally{setBusy(false);}
   }
-  if(receipt)return <div className="journey-booking-form"><h3>Demande enregistrée</h3><p><strong>Référence : {receipt.reference}</strong></p><p>{receipt.message}</p><p>Votre récépissé est disponible ci-dessous. Il ne constitue pas une réservation confirmée ni une preuve de paiement.</p>{emailWanted && <p>L'envoi automatique par e-mail n'est pas encore activé. Téléchargez votre document pour le conserver.</p>}<button type="button" onClick={()=>setReceipt(null)}>Nouvelle demande</button><BookingReceipt booking={receipt} traveler={JSON.parse(JSON.stringify(receipt.reservation_infos||{}))} onClose={()=>setReceipt(null)}/></div>;
+  if(receipt)return <div className="journey-booking-form"><h3>Demande enregistrée</h3><p><strong>Référence : {receipt.reference}</strong></p><p>{receipt.message}</p><p>Votre récépissé est disponible ci-dessous. Il ne constitue pas une réservation confirmée ni une preuve de paiement.</p>{emailWanted && <p>L'envoi automatique par e-mail n'est pas encore activé. Téléchargez votre document pour le conserver.</p>}<div className="booking-actions"><button type="button" onClick={()=>setShowDocument(true)}>Voir / Télécharger le PDF</button><button type="button" onClick={()=>{setReceipt(null);setShowDocument(false);}}>Nouvelle demande</button></div>{showDocument && <BookingReceipt booking={receipt} traveler={receipt.reservation_infos||{}} onClose={()=>setShowDocument(false)}/>}</div>;
   return <div className="journey-booking-form"><h3>3. Informations de réservation {isHotel?"— hôtel":"— transport"}</h3>
     <p>Réservation libre, avec ou sans compte. Les informations ci-dessous servent uniquement à transmettre une demande au prestataire.</p>
     <p><strong>Itinéraire :</strong> {itinerary}</p>
