@@ -1,5 +1,8 @@
 """Voyageur accounts and saved itinerary plans. No booking or payment processing."""
 import hashlib
+import base64
+import binascii
+import json
 import hmac
 import os
 import secrets
@@ -50,6 +53,20 @@ def init_tables(conn):
     else:
         execute(conn, "ALTER TABLE demandes_reservation ADD COLUMN IF NOT EXISTS reference VARCHAR(255)")
     execute(conn, "CREATE UNIQUE INDEX IF NOT EXISTS idx_demandes_reference ON demandes_reservation(reference)")
+
+    fields = {"postnom":"VARCHAR(120)","prenom":"VARCHAR(120)","lieu_naissance":"VARCHAR(150)","date_naissance":"VARCHAR(20)","telephone":"VARCHAR(35)","pays":"VARCHAR(100)","ville":"VARCHAR(120)","adresse":"VARCHAR(300)"}
+    existing = {r["name"] for r in fetchall(conn, "PRAGMA table_info(voyageurs)")} if is_sqlite() else set()
+    for name, kind in fields.items():
+        if not is_sqlite() or name not in existing:
+            execute(conn, f"ALTER TABLE voyageurs ADD COLUMN {'IF NOT EXISTS ' if not is_sqlite() else ''}{name} {kind}")
+    execute(conn, """CREATE TABLE IF NOT EXISTS pieces_identite_voyageurs (
+        user_id VARCHAR(40) PRIMARY KEY, filename VARCHAR(160) NOT NULL,
+        content_type VARCHAR(60) NOT NULL, encrypted_data TEXT NOT NULL,
+        updated_at VARCHAR(40) NOT NULL)""")
+    booking_cols = {r["name"] for r in fetchall(conn, "PRAGMA table_info(demandes_reservation)")} if is_sqlite() else set()
+    if not is_sqlite() or "voyageur_infos" not in booking_cols:
+        execute(conn, "ALTER TABLE demandes_reservation ADD COLUMN " + ("IF NOT EXISTS " if not is_sqlite() else "") + "voyageur_infos TEXT")
+
 
 
 def provider_key(name):
@@ -146,11 +163,91 @@ def login(body: Login):
         return {"token": new_session(conn, user["id"]), "user": {"id": user["id"], "nom": user["nom"], "email": user["email"]}}
 
 
+
+PROFILE_FIELDS = ("nom","postnom","prenom","lieu_naissance","date_naissance","telephone","pays","ville","adresse")
+
+class ProfileUpdate(BaseModel):
+    nom: str = Field(min_length=2,max_length=120)
+    postnom: str = Field(default="",max_length=120)
+    prenom: str = Field(default="",max_length=120)
+    lieu_naissance: str = Field(default="",max_length=150)
+    date_naissance: date | None = None
+    telephone: str = Field(default="",max_length=35)
+    pays: str = Field(default="",max_length=100)
+    ville: str = Field(default="",max_length=120)
+    adresse: str = Field(default="",max_length=300)
+
+def profile(conn, uid):
+    data = fetchone(conn, "SELECT id,email," + ",".join(PROFILE_FIELDS) + " FROM voyageurs WHERE id=?", (uid,))
+    doc = fetchone(conn,"SELECT filename FROM pieces_identite_voyageurs WHERE user_id=?",(uid,))
+    data["piece_identite"] = doc["filename"] if doc else None
+    return data
+
+@router.patch("/moi")
+def update_profile(body: ProfileUpdate, authorization: str | None = Header(default=None)):
+    with connection() as conn:
+        init_tables(conn)
+        user = current_user(conn,authorization)
+        values = [getattr(body,k) for k in PROFILE_FIELDS]
+        values = [v.isoformat() if isinstance(v,date) else v.strip() if isinstance(v,str) else v for v in values]
+        if body.date_naissance and (body.date_naissance > date.today() or body.date_naissance.year < 1900):
+            raise HTTPException(status_code=422,detail="Date de naissance invalide.")
+        execute(conn,"UPDATE voyageurs SET "+",".join(k+"=?" for k in PROFILE_FIELDS)+" WHERE id=?",(*[values,user["id"]]))
+        return profile(conn,user["id"])
+
+class IdentityUpload(BaseModel):
+    filename: str = Field(min_length=1,max_length=160)
+    content_type: str
+    data: str = Field(max_length=4500000)
+
+def identity_cipher():
+    key = os.getenv("IDENTITY_DOCUMENT_KEY","")
+    if not key:
+        raise HTTPException(status_code=503,detail="Stockage sécurisé des pièces d'identité non configuré.")
+    from cryptography.fernet import Fernet
+    try:
+        return Fernet(key.encode())
+    except (ValueError, binascii.Error):
+        raise HTTPException(status_code=503,detail="Clé de chiffrement invalide.")
+
+@router.post("/moi/piece-identite")
+def upload_identity(body: IdentityUpload,authorization: str | None = Header(default=None)):
+    allowed = {"application/pdf":b"%PDF-","image/jpeg":bytes([255,216,255]),"image/png":bytes([137,80,78,71,13,10,26,10])}
+    if body.content_type not in allowed:
+        raise HTTPException(status_code=422,detail="Formats acceptés : PDF, JPG, PNG.")
+    try:
+        raw = base64.b64decode(body.data,validate=True)
+    except (ValueError,binascii.Error):
+        raise HTTPException(status_code=422,detail="Fichier invalide.")
+    if not raw or len(raw)>3*1024*1024:
+        raise HTTPException(status_code=413,detail="Taille maximale : 3 Mo.")
+    if not raw.startswith(allowed[body.content_type]):
+        raise HTTPException(status_code=422,detail="Format de fichier invalide.")
+    cipher = identity_cipher()
+    with connection() as conn:
+        init_tables(conn)
+        user = current_user(conn,authorization)
+        filename = os.path.basename(body.filename).replace(chr(92),"_")
+        execute(conn,"""INSERT INTO pieces_identite_voyageurs (user_id,filename,content_type,encrypted_data,updated_at)
+            VALUES (?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET filename=excluded.filename,
+            content_type=excluded.content_type,encrypted_data=excluded.encrypted_data,updated_at=excluded.updated_at""",
+            (user["id"],filename,body.content_type,cipher.encrypt(raw).decode(),datetime.now(timezone.utc).isoformat()))
+        return {"filename":filename,"message":"Pièce d'identité enregistrée de manière chiffrée."}
+
+@router.delete("/moi/piece-identite")
+def remove_identity(authorization: str | None = Header(default=None)):
+    with connection() as conn:
+        init_tables(conn)
+        user = current_user(conn,authorization)
+        execute(conn,"DELETE FROM pieces_identite_voyageurs WHERE user_id=?",(user["id"],))
+        return {"ok":True}
+
 @router.get("/moi")
 def me(authorization: str | None = Header(default=None)):
     with connection() as conn:
         init_tables(conn)
-        return current_user(conn, authorization)
+        user = current_user(conn, authorization)
+        return profile(conn,user["id"])
 
 
 @router.post("/deconnexion")
@@ -233,14 +330,15 @@ def request_booking(body: BookingRequest, authorization: str | None = Header(def
         booking_id = str(uuid4())
         created_at = datetime.now(timezone.utc)
         reference = booking_reference(conn, body.prestataire, created_at)
+        traveler_snapshot = json.dumps({k:profile(conn,user["id"]).get(k) for k in PROFILE_FIELDS},ensure_ascii=False)
         execute(conn, """INSERT INTO demandes_reservation
             (id,user_id,type,prestataire,ville,date_debut,date_fin,voyageurs,details,
-             statut,paiement_statut,paiement_methode,created_at,reference)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+             statut,paiement_statut,paiement_methode,created_at,reference,voyageur_infos)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (booking_id,user["id"],body.type,body.prestataire.strip(),body.ville.strip(),
              body.date_debut.isoformat(),body.date_fin.isoformat() if body.date_fin else None,
              body.voyageurs,body.details.strip(),"Demande enregistrée — non confirmée",
-             "Aucun paiement",None,created_at.isoformat(),reference))
+             "Aucun paiement",None,created_at.isoformat(),reference,traveler_snapshot))
         return {"id":booking_id,"reference":reference,"message":"Demande enregistrée, sans réservation confirmée ni paiement."}
 
 
