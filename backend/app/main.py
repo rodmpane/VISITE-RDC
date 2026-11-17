@@ -12,11 +12,12 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .db import connection, execute, fetchall, fetchone
+from .accounts import router as accounts_router
 from .routing import MODES, itineraries
 
 app = FastAPI(title="Voyage RDC", version="1.1.0", description="Recherche d'itinéraires informatifs, sans vente de billets")
 origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",") if o.strip()]
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "PATCH"], allow_headers=["Authorization", "Content-Type"])
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "PATCH", "DELETE"], allow_headers=["Authorization", "Content-Type"])
 
 
 def require_admin(authorization: str | None = Header(default=None)):
@@ -209,6 +210,11 @@ if STATIC_DIR.is_dir():
     @app.get("/a-propos", include_in_schema=False)
     @app.get("/contact", include_in_schema=False)
     def serve_information_pages():
+        return FileResponse(STATIC_DIR / "index.html")
+
+    @app.get("/compte", include_in_schema=False)
+    @app.get("/mes-voyages", include_in_schema=False)
+    def serve_accounts():
         return FileResponse(STATIC_DIR / "index.html")
 
     @app.get("/confidentialite", include_in_schema=False)
