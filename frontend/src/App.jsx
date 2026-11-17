@@ -119,6 +119,7 @@ function SearchPage() {
     event.preventDefault();
     if (!from || !to || from === to) { setError("Choisissez deux villes différentes."); return; }
     if (!modes.length) { setError("Sélectionnez au moins un transport."); return; }
+    const loadingStartedAt = Date.now();
     setLoading(true); setError(""); setSearched(true); setRoutes([]); setPoints(null); setSelectedRoute(null); setChosenJourney(null); setShowHotels(false);
     try {
       const params = new URLSearchParams({ depart_id: from, arrivee_id: to, modes: modes.join(",") });
@@ -138,7 +139,12 @@ function SearchPage() {
       }
       setNotice(data.avertissement || "");
     } catch (e) { setError(e.message); }
-    finally { setLoading(false); }
+    finally {
+      // Keep the full-screen loading animation visible even for instant API responses.
+      const remaining = Math.max(0, 1100 - (Date.now() - loadingStartedAt));
+      if (remaining) await new Promise(resolve => setTimeout(resolve, remaining));
+      setLoading(false);
+    }
   }
   async function showSection(next) {
     setSection(next); setError("");
