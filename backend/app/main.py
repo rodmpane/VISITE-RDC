@@ -81,6 +81,7 @@ WHERE l.statut!='suspendu' AND (
         AND LOWER(COALESCE(l.note,'')) NOT LIKE '%%conflit%%'
     ))
 )
+)
 ORDER BY l.id
 """
 
@@ -98,30 +99,28 @@ def chercher_itineraire(
         raise HTTPException(status_code=422, detail="Modes invalides")
     with connection() as conn:
         edges = fetchall(conn, EDGES_SQL)
-    # First prefer the registered, directed network.
-    routes = itineraries(edges, depart_id, arrivee_id, allowed)
-    if not routes:
-        # Try the network with clearly labeled reverse-direction hypotheses.
-        # Do not infer new roads, ferries, flights or prices from geography.
-        pairs = {(e["depart_id"], e["arrivee_id"], e["mode"]) for e in edges}
-        reverse = []
-        for e in edges:
-            if (e["arrivee_id"], e["depart_id"], e["mode"]) in pairs:
-                continue
-            copy = dict(e)
-            copy["depart_id"], copy["arrivee_id"] = e["arrivee_id"], e["depart_id"]
-            copy["depart_nom"], copy["arrivee_nom"] = e["arrivee_nom"], e["depart_nom"]
-            copy["id"] = f"hypothese-retour-{e['id']}"
-            copy["niveau_publication"] = "hypothese_retour"
-            copy["source_info"] = "Sens retour non enregistré : trajet théorique à confirmer"
-            # Reverse direction may have a different fare and duration.
-            copy["prix_min_usd"] = None
-            copy["prix_max_usd"] = None
-            copy["duree_h"] = None
-            reverse.append(copy)
-        # Search by geographical link count when reverse prices/durations
-        # are unknown; never silently reuse an outbound fare.
-        routes = itineraries(edges + reverse, depart_id, arrivee_id, allowed)
+    # Combine recorded connections and clearly labeled reverse hypotheses.
+    # Try the network with clearly labeled reverse-direction hypotheses.
+    # Do not infer new roads, ferries, flights or prices from geography.
+    pairs = {(e["depart_id"], e["arrivee_id"], e["mode"]) for e in edges}
+    reverse = []
+    for e in edges:
+        if (e["arrivee_id"], e["depart_id"], e["mode"]) in pairs:
+            continue
+        copy = dict(e)
+        copy["depart_id"], copy["arrivee_id"] = e["arrivee_id"], e["depart_id"]
+        copy["depart_nom"], copy["arrivee_nom"] = e["arrivee_nom"], e["depart_nom"]
+        copy["id"] = f"hypothese-retour-{e['id']}"
+        copy["niveau_publication"] = "hypothese_retour"
+        copy["source_info"] = "Sens retour non enregistré : trajet théorique à confirmer"
+        # Reverse direction may have a different fare and duration.
+        copy["prix_min_usd"] = None
+        copy["prix_max_usd"] = None
+        copy["duree_h"] = None
+        reverse.append(copy)
+    # Search by geographical link count when reverse prices/durations
+    # are unknown; never silently reuse an outbound fare.
+    routes = itineraries(edges + reverse, depart_id, arrivee_id, allowed)
     return {
         "itinéraires": routes,
         "avertissement": "Les liaisons en attente de vérification sont des PROPOSITIONS NON CONFIRMÉES. Les trajets initiaux restent des estimations NON VÉRIFIÉES. Aucun horaire, tarif, état de route ou départ n'est garanti. Vérifiez toujours la sécurité, l'existence du trajet, les prix et la disponibilité directement auprès du transporteur avant tout déplacement.",
