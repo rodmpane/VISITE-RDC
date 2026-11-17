@@ -1,3 +1,4 @@
+import BookingReceipt from "./BookingReceipt";
 import React, { useEffect, useState } from "react";
 
 const KEY = "voyage_rdc_session";
@@ -23,6 +24,7 @@ export default function AccountPage() {
   const [trips, setTrips] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [bookingType, setBookingType] = useState("hebergement");
+  const [receipt, setReceipt] = useState(null);
   const [register, setRegister] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -79,7 +81,7 @@ export default function AccountPage() {
     try { await request("/reservations/" + id, { method: "DELETE" }, token); await refresh(token); }
     catch(e) { setError(e.message); }
   }
-  return <div className="account-shell">
+  return <div className="account-shell">{receipt && <BookingReceipt booking={receipt} traveler={user} onClose={() => setReceipt(null)} />}
     <header className="account-header"><a href="/"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC" /></a><nav><a href="/">Rechercher un itinéraire</a><a href="/compte">Mon compte</a></nav></header>
     <main className="account-main">
       <div className="account-heading"><span>VOYAGE RDC · ESPACE VOYAGEUR</span><h1>{user ? "Bonjour, " + user.nom : register ? "Créer mon compte" : "Mon espace voyageur"}</h1>
@@ -129,7 +131,7 @@ export default function AccountPage() {
                 <option value="" disabled>Choisir pour plus tard</option><option value="sur_place">Paiement sur place (après validation)</option><option value="mpesa">M-Pesa</option><option value="airtel_money">Airtel Money</option><option value="orange_money">Orange Money</option><option value="carte">Carte bancaire</option>
               </select></label>
               <small>Le paiement sur place dépend de l’accord du prestataire et de la confirmation de votre réservation. Les paiements en ligne ne sont pas encore activés.</small>
-            </div><button type="button" onClick={() => deleteBooking(b.id)}>Supprimer</button>
+            </div><div className="account-booking-actions"><button type="button" onClick={() => setReceipt(b)}>{b.statut === "Réservation confirmée" ? "Voir la confirmation" : "Voir le récépissé"}</button><button type="button" onClick={() => deleteBooking(b.id)}>Supprimer</button></div>
           </article>)}
           <p><strong>Important :</strong> aucun tarif ni disponibilité n'est garanti, aucune carte ni donnée Mobile Money n'est demandée, aucun débit n'est effectué. Les confirmations et paiements réels seront activés après connexion des partenaires et d'un prestataire agréé.</p>
           <p>Contact : <a href="https://wa.me/243830033332" target="_blank" rel="noopener noreferrer">WhatsApp Voyage RDC</a>.</p>
