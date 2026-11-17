@@ -73,6 +73,7 @@ export default function AccountPage() {
   const [receipt, setReceipt] = useState(null);
   const [register, setRegister] = useState(false);
   const [section, setSection] = useState("profil");
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [filter, setFilter] = useState("toutes");
   const [identityFile, setIdentityFile] = useState(null);
   const [error, setError] = useState("");
@@ -163,6 +164,17 @@ export default function AccountPage() {
   return <div className="account-shell">{receipt && <BookingReceipt booking={receipt} traveler={user} onClose={() => setReceipt(null)} />}
     <header className="account-header"><a href="/"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC" /></a><nav><a href="/">Rechercher un itinéraire</a><a href="/compte" className="account-header-profile"><span className="account-avatar account-avatar-small" aria-hidden="true">●</span> Mon compte</a></nav></header>
     <main className="account-main">
+      {user && <div className="account-top-actions">
+        <div className="account-profile-menu-wrap">
+          <button type="button" className="account-top-profile" aria-expanded={profileMenuOpen} onClick={()=>{setProfileMenuOpen(!profileMenuOpen);setSection("profil");}}>
+            <span aria-hidden="true">◉</span> Mon profil <span aria-hidden="true">⌄</span>
+          </button>
+          {profileMenuOpen && <div className="account-profile-submenu">
+            <button type="button" onClick={()=>{setSection("parametres");setProfileMenuOpen(false);}}>⚙ Paramètres de mon compte</button>
+          </div>}
+        </div>
+        <button type="button" className="account-top-logout" onClick={logout}>Se déconnecter</button>
+      </div>}
       <div className="account-heading"><span>VOYAGE RDC · ESPACE VOYAGEUR</span><h1>{user ? "Bonjour, " + user.nom : register ? "Créer mon compte" : "Mon espace voyageur"}</h1>
         <p>Gérez vos réservations, suivez leur validation, préparez vos paiements et retrouvez vos documents.</p></div>
       {error && <p className="account-alert" role="alert">{error}</p>}
@@ -257,9 +269,11 @@ export default function AccountPage() {
           <p><strong>Important :</strong> aucun tarif ni disponibilité n'est garanti, aucune carte ni donnée Mobile Money n'est demandée, aucun débit n'est effectué. Les confirmations et paiements réels seront activés après connexion des partenaires et d'un prestataire agréé.</p>
           <p>Contact : <a href="https://wa.me/243830033332" target="_blank" rel="noopener noreferrer">WhatsApp Voyage RDC</a>.</p>
         </section>}
-        <nav className="account-bottom-actions" aria-label="Accès rapide au compte">
-          <button type="button" className={section === "profil" ? "account-bottom-profile active" : "account-bottom-profile"} onClick={()=>{setSection("profil");setError("");window.scrollTo({top:0,behavior:"smooth"});}}><span aria-hidden="true">◉</span> Mon profil</button>
-          <button type="button" className="account-bottom-logout" onClick={logout}><span aria-hidden="true">⇥</span> Se déconnecter</button>
+        <nav className="account-bottom-actions" aria-label="Navigation de mon compte">
+          {[["reservations","▤","Mes réservations"],["nouvelle","＋","Nouvelle réservation"],["suivi","◎","Suivre mes réservations"],["paiements","▣","Mes paiements"],["itineraires","⌁","Mes itinéraires"]].map(([key,icon,label])=>
+            <button key={key} type="button" className={section===key?"account-bottom-tab active":"account-bottom-tab"} aria-current={section===key?"page":undefined} onClick={()=>{setSection(key);setError("");setProfileMenuOpen(false);window.scrollTo({top:0,behavior:"smooth"});}}>
+              <span aria-hidden="true">{icon}</span><span>{label}</span>
+            </button>)}
         </nav>
       </>}
     </main>
