@@ -265,3 +265,43 @@ body{color:var(--rdc-navy);background:#f5f7fc}
  .account-apk .account-header .account-top-actions button{font-size:10px;padding:7px 6px}
  .account-apk .account-profile-submenu{left:auto;right:0;min-width:220px}
 }
+
+/* Compact Android-only shell: Voyage RDC navy, blue and gold */
+.account-apk{--apk-navy:#0c234c;--apk-blue:#2052d9;--apk-gold:#f9b82f;--apk-bg:#f3f6fc;--apk-surface:#fff;--apk-text:#0c234c;--apk-border:#d8e2f4;background:var(--apk-bg);color:var(--apk-text);font-size:13px}
+.account-apk .account-header{background:var(--apk-surface);border-bottom:2px solid var(--apk-gold);padding:6px 9px;gap:5px}
+.account-apk .account-header img{width:91px;max-height:43px}
+.account-apk .account-header .account-top-actions{gap:4px}
+.account-apk .account-header .account-top-actions button{min-height:34px;font-size:10px;font-weight:800;padding:5px 7px;border-radius:8px}
+.account-apk .account-top-profile{background:transparent;color:var(--apk-text);border:1.5px solid var(--apk-blue);gap:4px}
+.account-apk .account-profile-circle{width:28px;height:28px;min-width:28px;border-radius:50%;background:var(--apk-navy);border:2px solid var(--apk-gold);color:#fff;display:inline-grid;place-items:center;font-weight:900;font-size:13px}
+.account-apk .account-theme-toggle{background:var(--apk-surface);border:1.5px solid var(--apk-gold);color:var(--apk-text);font-size:17px!important;min-width:33px}
+.account-apk .account-top-logout{background:var(--apk-surface);color:#9e2c3d;border:1px solid #d7aab2}
+.account-apk .account-main{padding-top:10px;padding-bottom:calc(95px + env(safe-area-inset-bottom,0px))}
+.account-apk .account-heading{margin-bottom:13px}
+.account-apk .account-heading h1{font-size:clamp(19px,5vw,24px);line-height:1.2;margin:5px 0}
+.account-apk .account-heading p{font-size:12px;line-height:1.45}
+.account-apk .account-card{padding:14px;border-radius:11px;background:var(--apk-surface);border:1px solid var(--apk-border)}
+.account-apk .account-stats>div{padding:11px;border-radius:10px;background:var(--apk-surface)}
+.account-apk .account-card input,.account-apk .account-card select,.account-apk .account-card textarea{min-height:42px;font-size:14px}
+.account-apk .account-bottom-actions{position:fixed;bottom:0;left:0;right:0;z-index:90;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin:0;padding:7px 5px calc(8px + env(safe-area-inset-bottom,0px));background:var(--apk-surface);border-top:2px solid var(--apk-gold);box-shadow:0 -4px 18px #0c234c1c}
+.account-apk .account-bottom-actions .account-bottom-tab{min-width:0;min-height:62px;padding:5px 2px;display:flex;flex-direction:column;gap:4px;border:2px solid var(--apk-blue);border-radius:5px;background:var(--apk-surface);color:var(--apk-navy);font-weight:900;box-shadow:none}
+.account-apk .account-bottom-tab span:first-child{font-size:20px;font-weight:900;line-height:1}
+.account-apk .account-bottom-tab span:last-child{font-size:10px;font-weight:900;line-height:1.12;overflow-wrap:anywhere}
+.account-apk .account-bottom-actions .account-bottom-tab:nth-child(2){border-color:var(--apk-gold)}
+.account-apk .account-bottom-actions .account-bottom-tab:nth-child(4){border-color:var(--apk-navy)}
+.account-apk .account-bottom-actions .account-bottom-tab.active{background:var(--apk-blue);border-color:var(--apk-gold);color:#fff}
+.account-apk .account-profile-submenu{background:var(--apk-surface);border:1px solid var(--apk-gold);min-width:215px}
+.account-apk .account-profile-submenu button{color:var(--apk-text);background:var(--apk-bg)}
+.account-apk-dark{--apk-navy:#dce8ff;--apk-blue:#7398ff;--apk-bg:#0b1630;--apk-surface:#142444;--apk-text:#eef3ff;--apk-border:#34486d;color-scheme:dark}
+.account-apk-dark .account-header,.account-apk-dark .account-card,.account-apk-dark .account-bottom-actions{color:var(--apk-text)}
+.account-apk-dark .account-bottom-actions .account-bottom-tab{color:var(--apk-text)}
+.account-apk-dark .account-bottom-actions .account-bottom-tab.active{background:#284cb4;color:#fff}
+.account-apk-dark .account-profile-circle{background:#2052d9;color:#fff}
+.account-apk-dark .account-top-logout{background:var(--apk-surface);color:#ffb3bc}
+.account-apk-dark .account-heading h1,.account-apk-dark .account-heading p{color:var(--apk-text)}
+@media(max-width:380px){
+ .account-apk .account-header img{width:74px}
+ .account-apk .account-header .account-top-actions button{font-size:9px;padding:4px}
+ .account-apk .account-profile-circle{width:24px;height:24px;min-width:24px}
+ .account-apk .account-bottom-tab span:last-child{font-size:9px}
+}
