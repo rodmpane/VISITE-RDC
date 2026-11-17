@@ -106,7 +106,7 @@ export default function AccountPage() {
           <a className="account-link" href="/">+ Rechercher un nouvel itinéraire</a>
         </section>
         <section className="account-card"><h2>Demander une réservation</h2>
-          <p>Préparez une demande d'hébergement ou de transport. Les partenaires et disponibilités ne sont pas encore connectés : aucune réservation n'est confirmée automatiquement.</p>
+          <p>Préparez une demande d'hébergement ou de transport. Les partenaires et disponibilités ne sont pas encore connectés : la demande doit être validée par le prestataire avant tout paiement sur place.</p>
           <form onSubmit={createBooking}>
             <label>Type de demande<select value={bookingType} onChange={e => setBookingType(e.target.value)}><option value="hebergement">Hébergement</option><option value="transport">Transport</option></select></label>
             <label>Nom de l'établissement ou du transporteur<input name="prestataire" minLength={2} maxLength={180} placeholder="Prestataire à contacter" required /></label>
@@ -126,9 +126,9 @@ export default function AccountPage() {
               <p><strong>{b.statut}</strong></p>
               <p>Paiement : {b.paiement_statut}</p>
               <label>Mode de paiement envisagé<select value={b.paiement_methode || ""} onChange={e => paymentChoice(b.id,e.target.value)}>
-                <option value="" disabled>Choisir pour plus tard</option><option value="mpesa">M-Pesa</option><option value="airtel_money">Airtel Money</option><option value="orange_money">Orange Money</option><option value="carte">Carte bancaire</option>
+                <option value="" disabled>Choisir pour plus tard</option><option value="sur_place">Paiement sur place (après validation)</option><option value="mpesa">M-Pesa</option><option value="airtel_money">Airtel Money</option><option value="orange_money">Orange Money</option><option value="carte">Carte bancaire</option>
               </select></label>
-              <small>Aucun paiement possible tant que le prestataire de paiement n'est pas configuré.</small>
+              <small>Le paiement sur place dépend de l’accord du prestataire et de la confirmation de votre réservation. Les paiements en ligne ne sont pas encore activés.</small>
             </div><button type="button" onClick={() => deleteBooking(b.id)}>Supprimer</button>
           </article>)}
           <p><strong>Important :</strong> aucun tarif ni disponibilité n'est garanti, aucune carte ni donnée Mobile Money n'est demandée, aucun débit n'est effectué. Les confirmations et paiements réels seront activés après connexion des partenaires et d'un prestataire agréé.</p>
