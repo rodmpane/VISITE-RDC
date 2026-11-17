@@ -206,6 +206,11 @@ if STATIC_DIR.is_dir():
     def serve_frontend():
         return FileResponse(STATIC_DIR / "index.html")
 
+    @app.get("/a-propos", include_in_schema=False)
+    @app.get("/contact", include_in_schema=False)
+    def serve_information_pages():
+        return FileResponse(STATIC_DIR / "index.html")
+
     @app.get("/confidentialite", include_in_schema=False)
     def serve_privacy():
         # Direct visits and browser refreshes must load the React application.
