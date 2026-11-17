@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from fastapi import APIRouter, Header, HTTPException
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 
 from .db import connection, execute, fetchall, fetchone
 
@@ -69,12 +69,12 @@ def current_user(conn, authorization):
 
 class Register(BaseModel):
     nom: str = Field(min_length=2, max_length=120)
-    email: EmailStr
+    email: str = Field(min_length=5, max_length=254, pattern=r"^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
     password: str = Field(min_length=10, max_length=128)
 
 
 class Login(BaseModel):
-    email: EmailStr
+    email: str = Field(min_length=5, max_length=254, pattern=r"^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
     password: str
 
 
