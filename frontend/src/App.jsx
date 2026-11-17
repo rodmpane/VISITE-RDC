@@ -1,3 +1,4 @@
+import { HOTELS } from "./hotels";
 import { AIR_CARRIERS } from "./airCarriers";
 import React, { useEffect, useMemo, useState } from "react";
 
@@ -105,6 +106,8 @@ function SearchPage() {
   const [points, setPoints] = useState(null);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [selectedRoute, setSelectedRoute] = useState(null);
+  const [chosenJourney, setChosenJourney] = useState(null);
+  const [showHotels, setShowHotels] = useState(false);
 
   useEffect(() => {
     api("/lieux").then(setLieux).catch(e => setError(`Impossible de charger les villes : ${e.message}`));
@@ -114,7 +117,7 @@ function SearchPage() {
     event.preventDefault();
     if (!from || !to || from === to) { setError("Choisissez deux villes différentes."); return; }
     if (!modes.length) { setError("Sélectionnez au moins un transport."); return; }
-    setLoading(true); setError(""); setSearched(true); setRoutes([]); setPoints(null); setSelectedRoute(null);
+    setLoading(true); setError(""); setSearched(true); setRoutes([]); setPoints(null); setSelectedRoute(null); setChosenJourney(null); setShowHotels(false);
     try {
       const params = new URLSearchParams({ depart_id: from, arrivee_id: to, modes: modes.join(",") });
       const data = await api(`/itineraire?${params}`);
@@ -155,6 +158,11 @@ function SearchPage() {
     const msg = `Bonjour Voyage RDC, je souhaite ${kind} pour le trajet ${desc}. Merci de confirmer la disponibilité, le prix et les modalités officielles.`;
     return `https://wa.me/${CONTACT.slice(1)}?text=${encodeURIComponent(msg)}`;
   };
+  const chosen = chosenJourney == null ? null : routes[chosenJourney];
+  const hotelCity = placeById[to]?.nom || "votre destination";
+  const localHotels = HOTELS.filter(h => h.cityId === to);
+  const journeyIsUnconfirmed = chosen?.segments.some(s => ["a_verifier", "hypothese_retour"].includes(s.niveau_publication));
+  const contactJourney = chosen ? whatsappLink("obtenir les contacts et les conditions de réservation", chosen) : "";
   const fmtMoney = (n) => n == null ? "À confirmer" : `${Math.round(n).toLocaleString("fr-FR")} $`;
   const fmtDuration = (n) => n == null ? "À confirmer" : n >= 24 ? `${Math.floor(n / 24)} j ${Math.round(n % 24)} h` : `${Math.floor(n)} h ${Math.round((n % 1) * 60)} min`;
 
@@ -186,7 +194,7 @@ function SearchPage() {
       {searched && !loading && !error && !!routes.length && <div className="route-available" role="status">✓ Des propositions d’itinéraires ont été trouvées — chaque correspondance reste à confirmer auprès du transporteur.</div>}
       {searched && !loading && !error && !routes.length && <div className="empty-state"><span className="empty-symbol">⌁</span><h3>Aucun itinéraire enregistré pour cette combinaison.</h3><p>Le réseau est en cours de complément. Essayez d’autres villes ou modes de transport ; aucune liaison ne sera inventée.</p></div>}
       {easternRoad && from && to && <div className="message error" role="alert"><strong>⚠ Insécurité — Est de la RDC</strong><p>Certains trajets en bus, voiture ou moto traversent ou rejoignent les provinces de l’Est et du Nord-Est de la RDC. Risques de violences, barrages et fermetures soudaines. Ce signalement est préventif, pas une information en temps réel. Vérifiez les avis de sécurité et l’état des routes avant tout départ ; ne considérez jamais cet itinéraire comme sûr sans confirmation récente.</p></div>}
-      {routes.map((route, i) => <article key={i} className="route-card"><div className="route-top"><span className="route-ranking">{CRITERE_LABEL[route.critere]}</span>{route.segments.some(s => s.niveau_publication === "hypothese_retour") ? <span className="unverified"><Icon type="info" size={14} /> Sens retour théorique — non confirmé</span> : route.segments.some(s => s.niveau_publication === "a_verifier") ? <span className="unverified"><Icon type="info" size={14} /> Liaison à vérifier — non confirmée</span> : route.segments.some(s => s.niveau_publication === "indicatif") ? <span className="unverified"><Icon type="info" size={14} /> Estimation non vérifiée</span> : <span className="verified"><Icon type="shield" size={14} /> Source vérifiée</span>}</div><div className="route-main"><div className="route-path"><h3>{places.find(l => l.id === from)?.nom} <span>→</span> {places.find(l => l.id === to)?.nom}</h3><div className="route-modes">{route.segments.map(s => <span key={s.id}>{MODE_LABEL[s.mode] || s.mode}</span>)}</div></div><div className="route-metrics"><div><small>DURÉE ESTIMÉE</small><strong>{fmtDuration(route.duree_h)}</strong></div><div><small>TARIF INDIQUÉ DÈS</small><strong>{fmtMoney(route.prix_min_usd)}</strong></div></div></div><div className="booking-actions" style={{marginTop:16,flexWrap:"wrap"}}>
+      {routes.map((route, i) => <article key={i} className="route-card"><div className="route-top"><span className="route-ranking">{CRITERE_LABEL[route.critere]}</span>{route.segments.some(s => s.niveau_publication === "hypothese_retour") ? <span className="unverified"><Icon type="info" size={14} /> Sens retour théorique — non confirmé</span> : route.segments.some(s => s.niveau_publication === "a_verifier") ? <span className="unverified"><Icon type="info" size={14} /> Liaison à vérifier — non confirmée</span> : route.segments.some(s => s.niveau_publication === "indicatif") ? <span className="unverified"><Icon type="info" size={14} /> Estimation non vérifiée</span> : <span className="verified"><Icon type="shield" size={14} /> Source vérifiée</span>}</div><div className="route-main"><div className="route-path"><h3>{places.find(l => l.id === from)?.nom} <span>→</span> {places.find(l => l.id === to)?.nom}</h3><div className="route-modes">{route.segments.map(s => <span key={s.id}>{MODE_LABEL[s.mode] || s.mode}</span>)}</div></div><div className="route-metrics"><div><small>DURÉE ESTIMÉE</small><strong>{fmtDuration(route.duree_h)}</strong></div><div><small>TARIF INDIQUÉ DÈS</small><strong>{fmtMoney(route.prix_min_usd)}</strong></div></div></div><div className="booking-actions" style={{marginTop:16,flexWrap:"wrap"}}><button type="button" aria-pressed={chosenJourney === i} onClick={() => {setChosenJourney(i);setShowHotels(false);setSelectedRoute(null);}}>{chosenJourney === i ? "✓ Itinéraire sélectionné" : "Choisir cet itinéraire →"}</button>
         {route.segments.some(s => ["hypothese_retour", "a_verifier"].includes(s.niveau_publication)) ? <span>Réservation indisponible : au moins une correspondance n’est pas confirmée</span> : route.segments.some(s => s.mode === "avion") ? <>
           <button type="button" onClick={() => setSelectedRoute(selectedRoute === i ? null : i)}>✈ Réserver un billet d'avion</button>
           <button type="button" onClick={() => setSelectedRoute(selectedRoute === i ? null : i)}>💳 Payer sur le site de la compagnie</button>
@@ -196,6 +204,28 @@ function SearchPage() {
         </>}
       </div>
       {selectedRoute === i && route.segments.some(s => s.mode === "avion") && <div className="points-panel"><strong>Compagnies aériennes — réservation et paiement sur leur site officiel</strong><p>Choisissez une compagnie qui dessert effectivement votre destination et confirmez les horaires et tarifs. Voyage RDC n'encaisse aucun paiement.</p>{AIRLINES.map(([name,url]) => <p key={name}><a href={url} rel="noopener noreferrer">{name} ↗</a></p>)}</div>}
+      {chosenJourney === i && <div className="points-panel" style={{marginTop:14}} role="region" aria-label="Parcours de réservation">
+        <strong>1. Votre itinéraire est sélectionné</strong>
+        <p>{route.segments.map(s => s.depart_nom+" → "+s.arrivee_nom+" ("+(MODE_LABEL[s.mode] || s.mode)+")").join(" · ")}</p>
+        <p>{journeyIsUnconfirmed ? "⚠ Certaines liaisons ne sont pas confirmées. Ceci est une demande d'information, pas une réservation." : "La disponibilité, le tarif définitif et les horaires doivent être confirmés par le transporteur."}</p>
+        {route.segments.map((s,j) => <div key={s.id} style={{marginBottom:10}}><strong>Étape {j+1} — {s.depart_nom} → {s.arrivee_nom}</strong><SegmentOperators segment={s} /></div>)}
+        <p><a className="booking-link" href={whatsappLink("demander la réservation et vérifier la disponibilité",route)} target="_blank" rel="noopener noreferrer">Contacter Voyage RDC pour ce trajet ↗</a></p>
+        <p><small>Aucun billet n'est réservé ou payé dans l'application.</small></p>
+        <hr style={{margin:"20px 0"}}/>
+        <strong>2. Souhaitez-vous aussi un hôtel à {hotelCity} ?</strong>
+        <p>Découvrez les hébergements locaux, leurs chambres, les photos et les contacts lorsqu'ils sont vérifiés.</p>
+        <div className="booking-actions"><button type="button" onClick={() => setShowHotels(true)}>Oui, voir les hôtels</button><button type="button" onClick={() => setShowHotels(false)}>Non, continuer sans hôtel</button></div>
+        {showHotels && <div style={{marginTop:16}}><h4>Hébergements à {hotelCity}</h4>
+          {localHotels.length ? localHotels.map(h => <article key={h.id} className="points-panel" style={{marginTop:12}}>
+            <h4>{h.name}</h4><p>{h.address}</p><p>{h.priceFrom != null ? "À partir de "+h.priceFrom+" "+(h.currency || "USD")+" — à confirmer" : "Tarif à confirmer"}</p>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{(h.cityPhotos || []).map((url,k) => <img key={"city"+k} src={url} alt={"Vue de "+hotelCity} loading="lazy" style={{width:150,height:110,objectFit:"cover",borderRadius:8}} />)}{(h.roomPhotos || []).map((url,k) => <img key={"room"+k} src={url} alt={"Chambre de "+h.name} loading="lazy" style={{width:150,height:110,objectFit:"cover",borderRadius:8}} />)}</div>
+            {h.phone && <p><a href={"tel:"+h.phone}>Appeler l'hôtel : {h.phone}</a></p>}
+            {h.email && <p><a href={"mailto:"+h.email}>Écrire à l'hôtel</a></p>}
+            {h.website && <p><a href={h.website} target="_blank" rel="noopener noreferrer">Site de l'hôtel ↗</a></p>}
+            <p><small>Disponibilité des chambres à confirmer directement avec l'hôtel.</small></p>
+          </article>) : <div className="empty-state" style={{padding:22}}><strong>Hôtels partenaires à venir à {hotelCity}</strong><p>Nous n'avons pas encore d'hôtel avec coordonnées, photos de ville et chambres vérifiées pour cette destination. Aucun établissement ou prix fictif ne sera affiché.</p><a href={"https://wa.me/"+CONTACT.slice(1)+"?text="+encodeURIComponent("Bonjour Voyage RDC, je cherche un hôtel à "+hotelCity+". Merci de m'indiquer les hébergements et contacts vérifiés.")} target="_blank" rel="noopener noreferrer">Demander des contacts d'hôtels via WhatsApp ↗</a></div>}
+        </div>}
+      </div>}
       <details className="route-details"><summary>Voir les étapes et informations <span>⌄</span></summary><div className="route-legs">{route.segments.map((s, index) => <div className="leg" key={s.id}><span className="leg-index">{index + 1}</span><div><strong>{s.depart_nom} → {s.arrivee_nom}</strong><p>{MODE_LABEL[s.mode]} · {fmtDuration(s.duree_h)} · {fmtMoney(s.prix_min_usd)}{s.prix_max_usd != null ? ` à ${fmtMoney(s.prix_max_usd)}` : ""}</p><small>{s.niveau_publication === "hypothese_retour" ? "Sens retour théorique non enregistré" : s.niveau_publication === "a_verifier" ? "Liaison non confirmée — vérification nécessaire" : s.niveau_publication === "indicatif" ? "Source initiale non vérifiée" : `Dernière vérification : ${s.verifie_le}`} · {s.source_info || "Transporteur à contacter pour confirmation"}</small><div><button className="text-link" onClick={() => showPoints(s.depart_id, s.depart_nom)} type="button">Points de départ</button> · <button className="text-link" onClick={() => showPoints(s.arrivee_id, s.arrivee_nom)} type="button">Points d’arrivée</button></div><SegmentOperators segment={s} /></div></div>)}</div>{points && <div className="points-panel"><h4>Points d’embarquement — {points.name}</h4>{points.loading ? <p>Chargement…</p> : points.error ? <p>{points.error}</p> : points.list.length ? points.list.map(p => <p key={p.id}>{p.nom} {p.verifie ? "· Emplacement indiqué comme vérifié" : "· Emplacement à confirmer"} {p.latitude && p.longitude && <a target="_blank" rel="noreferrer" href={`https://www.openstreetmap.org/?mlat=${p.latitude}&mlon=${p.longitude}#map=13/${p.latitude}/${p.longitude}`}>Voir sur la carte ↗</a>}</p>) : <p>Aucun point enregistré pour cette ville.</p>}</div>}</details></article>)}
       {!!routes.length && <div className="disclaimer"><Icon type="info" size={20} /><p>{notice} Les horaires et places ne sont pas disponibles en temps réel. Réservations et paiements : mise en relation uniquement. Tarifs déclarés par le gestionnaire ; disponibilité et montant à confirmer auprès du transporteur.</p></div>}
     </section>}
