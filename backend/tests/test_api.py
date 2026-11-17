@@ -8,7 +8,8 @@ from fastapi.testclient import TestClient
 from app.db import connection, execute, fetchone
 from app.main import app
 from app.schema import init_schema
-from scripts.import_csv import import_rows
+from scripts.import_csv import import_rows, from_directory
+from pathlib import Path
 
 
 def fixture():
@@ -74,7 +75,7 @@ class ApiTests(unittest.TestCase):
         data = self.client.get("/api/itineraire?depart_id=a&arrivee_id=c").json()
         ids = {seg["id"] for path in data["itinéraires"] for seg in path["segments"]}
         self.assertNotIn(2, ids)
-        self.assertNotIn(3, ids)
+        self.assertIn(3, ids)\n        self.assertTrue(any(seg["niveau_publication"] == "a_verifier" for path in data["itinéraires"] for seg in path["segments"]))
         self.publish(start=1, end=2)
         with connection() as conn:
             execute(conn, "UPDATE liaisons SET publie=0 WHERE id=1")
@@ -97,6 +98,19 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.json()["publie"], 0)
         result = self.client.get("/api/itineraire?depart_id=a&arrivee_id=c").json()["itinéraires"]
         self.assertNotIn(1, {s["id"] for p in result for s in p["segments"]})
+
+    def test_real_seed_multimodal_and_eastern_alerts(self):
+        data_dir = Path(__file__).resolve().parents[1] / "seed"
+        import_rows(from_directory(data_dir))
+        for start, end in [("boma", "kikwit"), ("boma", "bunia"), ("mahagi", "kinshasa"), ("aru", "kinshasa"), ("isiro", "kinshasa")]:
+            response = self.client.get("/api/itineraire", params={"depart_id": start, "arrivee_id": end})
+            self.assertEqual(response.status_code, 200, response.text)
+            routes = response.json()["itinéraires"]
+            self.assertTrue(routes, (start, end))
+            self.assertTrue(all(path["segments"][0]["depart_id"] == start and path["segments"][-1]["arrivee_id"] == end for path in routes))
+        mahagi = self.client.get("/api/itineraire?depart_id=mahagi&arrivee_id=kinshasa").json()["itinéraires"]
+        self.assertTrue(any(any(s["mode"] == "avion" for s in r["segments"]) for r in mahagi))
+        self.assertTrue(any(any(s["niveau_publication"] in ("a_verifier", "hypothese_retour") for s in r["segments"]) for r in mahagi))
 
     def test_multimodal_search_and_inputs(self):
         self.publish()
