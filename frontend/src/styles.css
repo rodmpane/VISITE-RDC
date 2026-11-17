@@ -313,3 +313,14 @@ body{color:var(--rdc-navy);background:#f5f7fc}
 .account-apk .account-apk-booking-fields small,.account-apk .account-apk-note{font-size:11px;line-height:1.5}
 .account-apk .account-booking-actions button{font-weight:800;border-radius:7px;border:1.5px solid #2052d9}
 @media print{.receipt-overlay{position:static!important;overflow:visible!important;background:#fff!important}.receipt-sheet{box-shadow:none!important;max-height:none!important;overflow:visible!important}.receipt-actions{display:none!important}}
+
+/* Public booking continuation for website and Android WebView */
+.journey-booking-form{margin-top:18px;padding:18px;border:2px solid #2052d9;border-radius:14px;background:#f7faff;color:#0c234c}
+.journey-booking-form h3,.journey-booking-form h4{color:#0c234c;margin:12px 0}
+.journey-booking-form form{display:grid;gap:14px}
+.journey-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.journey-booking-form label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:750}
+.journey-booking-form label:has(input[type="checkbox"]){flex-direction:row;align-items:flex-start}
+.journey-booking-form input:not([type="checkbox"]),.journey-booking-form select,.journey-booking-form textarea{box-sizing:border-box;width:100%;padding:11px;border:1px solid #a6b7d2;border-radius:7px;background:white;color:#0c234c;font:inherit}
+.journey-booking-form .booking-actions button{font-weight:800}
+@media(max-width:620px){.journey-form-grid{grid-template-columns:1fr}.journey-booking-form{padding:12px}}
