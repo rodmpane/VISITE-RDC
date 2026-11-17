@@ -177,3 +177,13 @@ body{color:var(--rdc-navy);background:#f5f7fc}
 .receipt-table th{width:40%}
 .receipt-sheet footer{border-top:1px solid #dce5f5;padding-top:14px;font-size:12px}
 @media print{body *{visibility:hidden!important}.receipt-overlay,.receipt-overlay *{visibility:visible!important}.receipt-overlay{position:absolute;inset:0;background:white;padding:0;overflow:visible}.receipt-sheet{max-width:none;box-shadow:none;border:0;padding:10mm}.receipt-actions{display:none!important}@page{size:A4;margin:10mm}}
+
+/* Account navigation and booking filters */
+.account-dashboard-nav{display:flex;flex-wrap:wrap;gap:9px;margin:22px 0}
+.account-dashboard-nav button{background:#fff;color:#0c234c;border:1px solid #c6d2eb;border-radius:10px;padding:12px 14px;font-weight:750;cursor:pointer}
+.account-dashboard-nav button.selected{background:#2052d9;color:#fff;border-color:#2052d9}
+.account-filters{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.account-filters label{margin:0}
+.account-filters select{display:inline-block;width:auto;margin:0 0 0 8px}
+.account-filters button{background:#2052d9;color:white;border:0;border-radius:9px;padding:10px 13px;font-weight:700;cursor:pointer}
+@media(max-width:560px){.account-dashboard-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.account-dashboard-nav button{font-size:12px;padding:11px 8px}.account-trip{align-items:flex-start;flex-direction:column}}
