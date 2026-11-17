@@ -70,7 +70,7 @@ def itineraries(edges, start, end, allowed_modes):
             values = [e.get(field) for e in path]
             return round(sum(float(v) for v in values), 2) if all(v is not None for v in values) else None
         out.append({
-            "critere": criterion,
+            "critere": criterion if not any(p["critere"] == criterion for p in out) else "alternative",
             "segments": path,
             "duree_h": total("duree_h"),
             "prix_min_usd": total("prix_min_usd"),
