@@ -226,3 +226,27 @@ body{color:var(--rdc-navy);background:#f5f7fc}
   .account-card input,.account-card select,.account-card textarea{min-height:48px;font-size:16px}
   .account-footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}
 }
+
+/* Traveler app navigation: five primary destinations and top-left account menu */
+.account-top-actions{display:flex;align-items:flex-start;justify-content:flex-start;gap:10px;position:relative;margin:12px 0 18px;z-index:20}
+.account-profile-menu-wrap{position:relative}
+.account-top-actions button{font-size:13px;font-weight:800;border-radius:12px;padding:11px 13px;min-height:44px;cursor:pointer}
+.account-top-profile{display:flex;align-items:center;gap:8px;background:#2052d9;color:#fff;border:1px solid #2052d9}
+.account-top-logout{background:#fff;color:#a72a39;border:1px solid #e2c8cf}
+.account-profile-submenu{position:absolute;top:calc(100% + 6px);left:0;z-index:40;min-width:245px;padding:6px;background:#fff;border:1px solid #dce5f5;border-radius:13px;box-shadow:0 12px 35px #0c234c25}
+.account-profile-submenu button{display:block;width:100%;text-align:left;border:0;background:#f3f6fc;color:#0c234c}
+.account-bottom-actions{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.account-bottom-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#fff;color:#52617a;border:1px solid #dce5f5;line-height:1.2}
+.account-bottom-tab span:first-child{font-size:23px;font-weight:800}
+.account-bottom-tab span:last-child{font-size:11px}
+.account-bottom-tab.active{background:#2052d9;color:#fff;border-color:#2052d9}
+@media(max-width:700px){
+ .account-top-actions{margin:8px 0 15px;gap:8px}
+ .account-top-actions button{font-size:12px;padding:10px}
+ .account-bottom-actions{grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px))}
+ .account-bottom-actions .account-bottom-tab{border:0;border-radius:10px;min-height:65px;padding:6px 2px;font-size:10px;box-shadow:none}
+ .account-bottom-tab span:first-child{font-size:22px}
+ .account-bottom-tab span:last-child{font-size:10px;line-height:1.12;overflow-wrap:anywhere}
+ .account-bottom-tab.active{background:#eaf0ff;color:#2052d9}
+ .account-main{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
+}
