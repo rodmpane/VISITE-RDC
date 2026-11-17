@@ -70,6 +70,12 @@ export default function AccountPage() {
   const [trips, setTrips] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [bookingType, setBookingType] = useState("hebergement");
+  const [arrival, setArrival] = useState("");
+  const [departure, setDeparture] = useState("");
+  const [rate, setRate] = useState("");
+  const [currency, setCurrency] = useState("USD");
+  const [travelerCount, setTravelerCount] = useState(1);
+  const [routeChoice, setRouteChoice] = useState("");
   const [receipt, setReceipt] = useState(null);
   const [register, setRegister] = useState(false);
   const [section, setSection] = useState(typeof window !== "undefined" && !!window.VoyageRDCAndroid ? "reservations" : "profil");
@@ -146,9 +152,10 @@ export default function AccountPage() {
       const data = await request("/reservations", { method: "POST", body: JSON.stringify({
         type: bookingType, prestataire: f.get("prestataire"), ville: f.get("ville"),
         date_debut: f.get("date_debut"), date_fin: bookingType === "hebergement" ? f.get("date_fin") : null,
-        voyageurs: Number(f.get("voyageurs")), details: f.get("details") || ""
+        voyageurs: Number(f.get("voyageurs")), details: f.get("details") || "",
+        ...(isAndroidApp ? {source_apk:true, nom:f.get("nom") || "",postnom:f.get("postnom") || "",prenom:f.get("prenom") || "",lieu_naissance:f.get("lieu_naissance") || "",date_naissance:f.get("date_naissance") || null,telephone:f.get("telephone") || "",email:f.get("email") || "",numero_identite:f.get("numero_identite") || "",itineraire:f.get("itineraire") || "",prix_unitaire:f.get("prix_unitaire") ? Number(f.get("prix_unitaire")) : null,devise:f.get("devise") || "USD",modalite:f.get("modalite") || ""} : {})
       }) }, token);
-      setMessage(data.message); event.currentTarget.reset(); await refresh(token);
+      setMessage(data.message); event.currentTarget.reset(); setArrival("");setDeparture("");setRate("");setTravelerCount(1);setRouteChoice("");await refresh(token);
     } catch(e) { setError(e.message); }
     finally { setBusy(false); }
   }
@@ -246,11 +253,38 @@ export default function AccountPage() {
           <div className="account-profile-summary"><h3>Informations du voyageur reprises depuis mon compte</h3><p><strong>{[user.nom,user.postnom,user.prenom].filter(Boolean).join(" ")}</strong> · {user.telephone || "Téléphone non renseigné"} · {[user.ville,user.pays].filter(Boolean).join(", ") || "Adresse non renseignée"}</p><p>{user.date_naissance ? "Né(e) le "+user.date_naissance+" à "+(user.lieu_naissance||"—") : "Date de naissance non renseignée"} · {user.piece_identite ? "Pièce d’identité enregistrée (non transmise)" : "Aucune pièce d’identité jointe"}</p><button type="button" onClick={()=>setSection("parametres")}>Modifier mes informations</button></div>
           <form onSubmit={createBooking}>
             <label>Type de demande<select value={bookingType} onChange={e => setBookingType(e.target.value)}><option value="hebergement">Hébergement</option><option value="transport">Transport</option></select></label>
-            <label>Nom de l'établissement ou du transporteur<input name="prestataire" minLength={2} maxLength={180} placeholder="Prestataire à contacter" required /></label>
+            {isAndroidApp && bookingType === "transport" && <div className="account-apk-booking-fields"><h3>Informations obligatoires du voyageur</h3>
+              <div className="account-profile-grid">
+                <label>Nom *<input name="nom" defaultValue={user.nom || ""} required maxLength={120} /></label>
+                <label>Postnom *<input name="postnom" defaultValue={user.postnom || ""} required maxLength={120} /></label>
+                <label>Prénom *<input name="prenom" defaultValue={user.prenom || ""} required maxLength={120} /></label>
+                <label>Lieu de naissance *<input name="lieu_naissance" defaultValue={user.lieu_naissance || ""} required maxLength={150} /></label>
+                <label>Date de naissance *<input name="date_naissance" type="date" max={new Date().toISOString().slice(0,10)} defaultValue={user.date_naissance || ""} required /></label>
+                <label>Téléphone *<input name="telephone" type="tel" defaultValue={user.telephone || ""} required maxLength={35} /></label>
+                <label>E-mail (facultatif)<input name="email" type="email" defaultValue={user.email || ""} maxLength={254} /></label>
+                <label>Numéro de pièce d'identité (facultatif)<input name="numero_identite" maxLength={100} /></label>
+              </div>
+              <label>Itinéraire *<select value={routeChoice} onChange={e=>setRouteChoice(e.target.value)} required>
+                <option value="">Choisir un itinéraire enregistré</option>
+                {trips.map(t=><option key={t.id} value={t.depart+" → "+t.arrivee}>{t.depart} → {t.arrivee} ({t.modes})</option>)}
+                <option value="autre">Saisir mon itinéraire</option>
+              </select></label>
+              {routeChoice === "autre" ? <input name="itineraire" placeholder="Départ → arrivée" required maxLength={250} /> : <input type="hidden" name="itineraire" value={routeChoice} />}
+              <p className="account-apk-note">La compagnie est indiquée dans le champ ci-dessous. Le prix du billet doit être communiqué par le transporteur.</p>
+            </div>}
+            <label>{bookingType === "hebergement" ? "Nom de l'hôtel" : "Nom de la compagnie de transport"}<input name="prestataire" minLength={2} maxLength={180} placeholder={bookingType === "hebergement" ? "Hôtel à contacter" : "Compagnie à contacter"} required /></label>
             <label>Ville<input name="ville" minLength={2} maxLength={120} required placeholder="Ex. Kinshasa" /></label>
-            <label>{bookingType === "hebergement" ? "Date d'arrivée" : "Date de départ"}<input name="date_debut" type="date" min={new Date().toISOString().slice(0,10)} required /></label>
-            {bookingType === "hebergement" && <label>Date de départ de l'hôtel<input name="date_fin" type="date" min={new Date().toISOString().slice(0,10)} required /></label>}
-            <label>Nombre de voyageurs<input name="voyageurs" type="number" min="1" max="20" defaultValue="1" required /></label>
+            <label>{bookingType === "hebergement" ? "Date d'arrivée" : "Date de départ"}<input name="date_debut" type="date" min={new Date().toISOString().slice(0,10)} value={isAndroidApp ? arrival : undefined} onChange={isAndroidApp ? e=>setArrival(e.target.value) : undefined} required /></label>
+            {bookingType === "hebergement" && <label>Date de départ de l'hôtel<input name="date_fin" type="date" min={arrival || new Date().toISOString().slice(0,10)} value={isAndroidApp ? departure : undefined} onChange={isAndroidApp ? e=>setDeparture(e.target.value) : undefined} required /></label>}
+            <label>Nombre de voyageurs<input name="voyageurs" type="number" min="1" max="20" value={isAndroidApp ? travelerCount : undefined} defaultValue={!isAndroidApp ? 1 : undefined} onChange={isAndroidApp ? e=>setTravelerCount(Number(e.target.value)) : undefined} required /></label>
+            {isAndroidApp && <div className="account-apk-booking-fields"><h3>{bookingType === "hebergement" ? "Séjour et montant estimatif" : "Billet et montant estimatif"}</h3>
+              {bookingType === "hebergement" && <p><strong>Nombre de nuits : {arrival && departure && departure > arrival ? Math.round((new Date(departure+"T00:00:00")-new Date(arrival+"T00:00:00"))/86400000) : "—"}</strong></p>}
+              <label>{bookingType === "hebergement" ? "Tarif communiqué par l’hôtel / nuit (facultatif)" : "Prix du billet communiqué par la compagnie / personne (facultatif)"}<input name="prix_unitaire" type="number" min="0" step="0.01" value={rate} onChange={e=>setRate(e.target.value)} placeholder="À confirmer auprès du prestataire" /></label>
+              <label>Devise<select name="devise" value={currency} onChange={e=>setCurrency(e.target.value)}><option value="USD">USD</option><option value="CDF">CDF</option></select></label>
+              {bookingType === "hebergement" && <label>Modalités proposées par l’hôtel (si connues)<input name="modalite" maxLength={120} placeholder="Ex. à l’arrivée, acompte selon l’hôtel" /></label>}
+              <p><strong>Total estimatif : {rate !== "" && (bookingType !== "hebergement" || (arrival && departure && departure > arrival)) ? (Number(rate) * (bookingType === "hebergement" ? Math.round((new Date(departure+"T00:00:00")-new Date(arrival+"T00:00:00"))/86400000) : travelerCount)).toLocaleString("fr-FR",{maximumFractionDigits:2})+" "+currency : "Tarif non communiqué"}</strong></p>
+              <small>Montant indicatif uniquement, calculé à partir du tarif renseigné. Aucune disponibilité, modalité ou prix partenaire n’est confirmé automatiquement ; aucun paiement n’est encaissé.</small>
+            </div>}
             <label>Précisions facultatives<textarea name="details" maxLength={500} placeholder="Chambre souhaitée, trajet, besoins particuliers…" /></label>
             <button className="account-primary" disabled={busy} type="submit">Enregistrer ma demande</button>
           </form>
@@ -269,7 +303,7 @@ export default function AccountPage() {
                 <option value="" disabled>Choisir pour plus tard</option><option value="sur_place">Paiement sur place (après validation)</option><option value="mpesa">M-Pesa</option><option value="airtel_money">Airtel Money</option><option value="orange_money">Orange Money</option><option value="carte">Carte bancaire</option>
               </select></label>
               <small>Le paiement sur place dépend de l’accord du prestataire et de la confirmation de votre réservation. Les paiements en ligne ne sont pas encore activés.</small>
-            </div><div className="account-booking-actions"><button type="button" onClick={() => setReceipt(b)}>{b.statut === "Réservation confirmée" ? "Voir la confirmation" : "Voir le récépissé"}</button>{b.statut !== "Réservation confirmée" && <button type="button" onClick={() => {if(window.confirm("Supprimer cette demande de votre compte ?")) deleteBooking(b.id);}}>Supprimer</button>}</div>
+            </div><div className="account-booking-actions"><button type="button" onClick={() => setReceipt(b)}>{b.statut === "Réservation confirmée" ? "Voir la confirmation" : "Voir le récépissé"}</button>{isAndroidApp && <button type="button" onClick={() => setReceipt(b)}>Voir / Télécharger PDF</button>}{b.statut !== "Réservation confirmée" && <button type="button" onClick={() => {if(window.confirm("Supprimer cette demande de votre compte ?")) deleteBooking(b.id);}}>Supprimer</button>}</div>
           </article>)}
           <p><strong>Important :</strong> aucun tarif ni disponibilité n'est garanti, aucune carte ni donnée Mobile Money n'est demandée, aucun débit n'est effectué. Les confirmations et paiements réels seront activés après connexion des partenaires et d'un prestataire agréé.</p>
           <p>Contact : <a href="https://wa.me/243830033332" target="_blank" rel="noopener noreferrer">WhatsApp Voyage RDC</a>.</p>
