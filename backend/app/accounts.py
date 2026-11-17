@@ -3,7 +3,7 @@ import hashlib
 import hmac
 import os
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from uuid import uuid4
 
 from fastapi import APIRouter, Header, HTTPException
@@ -27,6 +27,16 @@ def init_tables(conn):
         depart VARCHAR(120) NOT NULL, arrivee VARCHAR(120) NOT NULL,
         modes VARCHAR(150) NOT NULL, statut VARCHAR(40) NOT NULL,
         hebergement VARCHAR(240), paiement VARCHAR(60) NOT NULL,
+        created_at VARCHAR(40) NOT NULL)""")
+
+    execute(conn, """CREATE TABLE IF NOT EXISTS demandes_reservation (
+        id VARCHAR(40) PRIMARY KEY, user_id VARCHAR(40) NOT NULL,
+        type VARCHAR(20) NOT NULL, prestataire VARCHAR(180) NOT NULL,
+        ville VARCHAR(120) NOT NULL, date_debut VARCHAR(20) NOT NULL,
+        date_fin VARCHAR(20), voyageurs INTEGER NOT NULL,
+        details VARCHAR(500), statut VARCHAR(60) NOT NULL,
+        paiement_statut VARCHAR(60) NOT NULL,
+        paiement_methode VARCHAR(40),
         created_at VARCHAR(40) NOT NULL)""")
 
 
@@ -159,3 +169,73 @@ def delete_trip(trip_id: str, authorization: str | None = Header(default=None)):
         user = current_user(conn, authorization)
         execute(conn, "DELETE FROM voyages_enregistres WHERE id=? AND user_id=?", (trip_id, user["id"]))
         return {"ok": True}
+
+
+class BookingRequest(BaseModel):
+    type: str = Field(pattern="^(hebergement|transport)$")
+    prestataire: str = Field(min_length=2, max_length=180)
+    ville: str = Field(min_length=2, max_length=120)
+    date_debut: date
+    date_fin: date | None = None
+    voyageurs: int = Field(ge=1, le=20)
+    details: str = Field(default="", max_length=500)
+
+
+class PaymentChoice(BaseModel):
+    methode: str = Field(pattern="^(mpesa|airtel_money|orange_money|carte)$")
+
+
+@router.get("/reservations")
+def bookings(authorization: str | None = Header(default=None)):
+    with connection() as conn:
+        init_tables(conn)
+        user = current_user(conn, authorization)
+        return fetchall(conn, """SELECT id,type,prestataire,ville,date_debut,date_fin,voyageurs,
+            details,statut,paiement_statut,paiement_methode,created_at
+            FROM demandes_reservation WHERE user_id=? ORDER BY created_at DESC LIMIT 100""", (user["id"],))
+
+
+@router.post("/reservations", status_code=201)
+def request_booking(body: BookingRequest, authorization: str | None = Header(default=None)):
+    if body.date_debut < date.today() or (body.date_fin and body.date_fin < body.date_debut):
+        raise HTTPException(status_code=422, detail="Vérifiez les dates de votre demande.")
+    if body.type == "hebergement" and not body.date_fin:
+        raise HTTPException(status_code=422, detail="Indiquez la date de départ de l'hébergement.")
+    with connection() as conn:
+        init_tables(conn)
+        user = current_user(conn, authorization)
+        booking_id = str(uuid4())
+        execute(conn, """INSERT INTO demandes_reservation
+            (id,user_id,type,prestataire,ville,date_debut,date_fin,voyageurs,details,
+             statut,paiement_statut,paiement_methode,created_at)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (booking_id,user["id"],body.type,body.prestataire.strip(),body.ville.strip(),
+             body.date_debut.isoformat(),body.date_fin.isoformat() if body.date_fin else None,
+             body.voyageurs,body.details.strip(),"Demande enregistrée — non confirmée",
+             "Aucun paiement",None,datetime.now(timezone.utc).isoformat()))
+        return {"id":booking_id,"message":"Demande enregistrée, sans réservation confirmée ni paiement."}
+
+
+@router.patch("/reservations/{booking_id}/paiement")
+def choose_payment(booking_id: str, body: PaymentChoice, authorization: str | None = Header(default=None)):
+    with connection() as conn:
+        init_tables(conn)
+        user = current_user(conn, authorization)
+        booking = fetchone(conn,"SELECT id FROM demandes_reservation WHERE id=? AND user_id=?",
+                           (booking_id,user["id"]))
+        if not booking:
+            raise HTTPException(status_code=404,detail="Demande introuvable.")
+        execute(conn, """UPDATE demandes_reservation SET paiement_methode=?,
+            paiement_statut='En attente de configuration — aucun débit'
+            WHERE id=? AND user_id=?""",(body.methode,booking_id,user["id"]))
+        return {"message":"Préférence enregistrée. Aucun paiement initié ni débité."}
+
+
+@router.delete("/reservations/{booking_id}")
+def cancel_booking(booking_id: str, authorization: str | None = Header(default=None)):
+    with connection() as conn:
+        init_tables(conn)
+        user = current_user(conn, authorization)
+        execute(conn,"DELETE FROM demandes_reservation WHERE id=? AND user_id=?",
+                (booking_id,user["id"]))
+        return {"ok":True}
