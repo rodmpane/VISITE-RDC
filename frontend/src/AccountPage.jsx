@@ -1,3 +1,4 @@
+import { COUNTRIES, CITIES_BY_COUNTRY, countryCode } from "./countries";
 import BookingReceipt from "./BookingReceipt";
 import React, { useEffect, useState } from "react";
 
@@ -16,6 +17,51 @@ export async function saveTravelerTrip(depart, arrivee, modes) {
   const token = getTravelerToken();
   if (!token) { window.location.href = "/compte"; return null; }
   return request("/voyages", { method: "POST", body: JSON.stringify({ depart, arrivee, modes }) }, token);
+}
+
+
+function ProfileLocationFields({ traveler }) {
+  const [origin, setOrigin] = useState(traveler.pays_origine || "");
+  const [current, setCurrent] = useState(traveler.pays || "");
+  const [city, setCity] = useState(traveler.ville || "");
+  const [manual, setManual] = useState(false);
+  const suggestions = CITIES_BY_COUNTRY[countryCode(current)] || [];
+  const selectedCity = manual || (city && !suggestions.includes(city)) ? "__other" : city;
+  function chooseCountry(value) {
+    setCurrent(value);setCity("");setManual(false);
+  }
+  const countryOptions = (selected) => <>
+    <option value="">Sélectionnez un pays</option>
+    {selected && !COUNTRIES.some(c=>c.name===selected) && <option value={selected}>{selected}</option>}
+    {COUNTRIES.map(c=><option key={c.code} value={c.name}>{c.name}</option>)}
+  </>;
+  return <>
+    <label>Pays d'origine
+      <select name="pays_origine" value={origin} onChange={e=>setOrigin(e.target.value)}>
+        {countryOptions(origin)}
+      </select>
+    </label>
+    <label>Pays actuel
+      <select name="pays" value={current} onChange={e=>chooseCountry(e.target.value)}>
+        {countryOptions(current)}
+      </select>
+    </label>
+    <label>Ville actuelle
+      <select aria-label="Choisir une ville" value={selectedCity} onChange={e=>{
+        if(e.target.value==="__other"){setManual(true);setCity("");}
+        else{setManual(false);setCity(e.target.value);}
+      }}>
+        <option value="">Sélectionnez une ville</option>
+        {suggestions.map(name=><option key={name} value={name}>{name}</option>)}
+        <option value="__other">Ma ville n'est pas dans la liste — saisir manuellement</option>
+      </select>
+      {(manual || (city && !suggestions.includes(city))) && <input
+        aria-label="Saisir ma ville manuellement" type="text" maxLength={120}
+        placeholder="Saisissez le nom de votre ville" value={city} onChange={e=>setCity(e.target.value)} />}
+      <input type="hidden" name="ville" value={city} />
+      {!suggestions.length && <small>Vous pouvez saisir votre ville en choisissant « Ma ville n'est pas dans la liste ».</small>}
+    </label>
+  </>;
 }
 
 export default function AccountPage() {
@@ -56,7 +102,7 @@ export default function AccountPage() {
   async function saveProfile(event) {
     event.preventDefault(); setBusy(true);setError("");setMessage("");
     const f = new FormData(event.currentTarget);
-    const keys = ["nom","postnom","prenom","lieu_naissance","date_naissance","telephone","pays","ville","adresse"];
+    const keys = ["nom","postnom","prenom","lieu_naissance","date_naissance","telephone","pays_origine","pays","ville","adresse"];
     const data = Object.fromEntries(keys.map(k=>[k,f.get(k) || (k==="date_naissance" ? null : "")]));
     try {
       await request("/moi",{method:"PATCH",body:JSON.stringify(data)},token);
@@ -147,7 +193,7 @@ export default function AccountPage() {
             <div><span>Nom complet</span><strong>{[user.nom,user.postnom,user.prenom].filter(Boolean).join(" ")}</strong></div>
             <div><span>Adresse e-mail</span><strong>{user.email}</strong></div>
             <div><span>Téléphone</span><strong>{user.telephone || "À renseigner"}</strong></div>
-            <div><span>Localisation</span><strong>{[user.ville,user.pays].filter(Boolean).join(", ") || "À renseigner"}</strong></div>
+            <div><span>Pays d’origine</span><strong>{user.pays_origine || "À renseigner"}</strong></div><div><span>Pays et ville actuels</span><strong>{[user.ville,user.pays].filter(Boolean).join(", ") || "À renseigner"}</strong></div>
             <div><span>Date et lieu de naissance</span><strong>{[user.date_naissance,user.lieu_naissance].filter(Boolean).join(" · ") || "À renseigner"}</strong></div>
             <div><span>Pièce d'identité</span><strong>{user.piece_identite ? "Document enregistré" : "Facultative · non ajoutée"}</strong></div>
           </div>
@@ -163,8 +209,7 @@ export default function AccountPage() {
               <label>Lieu de naissance<input name="lieu_naissance" defaultValue={user.lieu_naissance || ""} maxLength={150} /></label>
               <label>Date de naissance<input name="date_naissance" type="date" max={new Date().toISOString().slice(0,10)} defaultValue={user.date_naissance || ""} /></label>
               <label>Numéro de téléphone<input name="telephone" type="tel" defaultValue={user.telephone || ""} maxLength={35} placeholder="+243..." /></label>
-              <label>Pays<input name="pays" defaultValue={user.pays || ""} maxLength={100} /></label>
-              <label>Ville<input name="ville" defaultValue={user.ville || ""} maxLength={120} /></label>
+              <ProfileLocationFields traveler={user} />
               <label>Adresse<input name="adresse" defaultValue={user.adresse || ""} maxLength={300} /></label>
             </div>
             <label>Pièce d'identité (facultatif) · PDF, JPG ou PNG · 3 Mo maximum<input type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" onChange={e=>setIdentityFile(e.target.files?.[0]||null)} /></label>
