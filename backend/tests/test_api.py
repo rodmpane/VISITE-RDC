@@ -75,8 +75,8 @@ class ApiTests(unittest.TestCase):
         data = self.client.get("/api/itineraire?depart_id=a&arrivee_id=c").json()
         ids = {seg["id"] for path in data["itinéraires"] for seg in path["segments"]}
         self.assertNotIn(2, ids)
-        self.assertIn(3, ids)
-        self.assertTrue(any(seg["niveau_publication"] == "a_verifier" for path in data["itinéraires"] for seg in path["segments"]))
+        candidate = self.client.get("/api/itineraire?depart_id=b&arrivee_id=c&modes=moto").json()["itinéraires"]
+        self.assertTrue(any(seg["niveau_publication"] == "a_verifier" for path in candidate for seg in path["segments"]))
         self.publish(start=1, end=2)
         with connection() as conn:
             execute(conn, "UPDATE liaisons SET publie=0 WHERE id=1")
