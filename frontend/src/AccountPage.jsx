@@ -26,7 +26,7 @@ export default function AccountPage() {
   const [bookingType, setBookingType] = useState("hebergement");
   const [receipt, setReceipt] = useState(null);
   const [register, setRegister] = useState(false);
-  const [section, setSection] = useState("reservations");
+  const [section, setSection] = useState("profil");
   const [filter, setFilter] = useState("toutes");
   const [identityFile, setIdentityFile] = useState(null);
   const [error, setError] = useState("");
@@ -48,7 +48,7 @@ export default function AccountPage() {
         })
       });
       sessionStorage.setItem(KEY, data.token);
-      setToken(data.token); setUser(data.user);
+      setToken(data.token); setUser(data.user); setSection("profil");
       setMessage("Bienvenue dans votre espace Voyage RDC.");
     } catch (e) { setError(e.message); }
     finally { setBusy(false); }
@@ -115,7 +115,7 @@ export default function AccountPage() {
   const confirmedBookings = bookings.filter(b => b.statut === "Réservation confirmée");
   const visibleBookings = bookings.filter(b => filter === "toutes" || (filter === "confirmees" ? b.statut === "Réservation confirmée" : filter === "attente" ? b.statut !== "Réservation confirmée" && b.statut !== "Demande refusée" : b.statut === "Demande refusée"));
   return <div className="account-shell">{receipt && <BookingReceipt booking={receipt} traveler={user} onClose={() => setReceipt(null)} />}
-    <header className="account-header"><a href="/"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC" /></a><nav><a href="/">Rechercher un itinéraire</a><a href="/compte">Mon compte</a></nav></header>
+    <header className="account-header"><a href="/"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC" /></a><nav><a href="/">Rechercher un itinéraire</a><a href="/compte" className="account-header-profile"><span className="account-avatar account-avatar-small" aria-hidden="true">●</span> Mon compte</a></nav></header>
     <main className="account-main">
       <div className="account-heading"><span>VOYAGE RDC · ESPACE VOYAGEUR</span><h1>{user ? "Bonjour, " + user.nom : register ? "Créer mon compte" : "Mon espace voyageur"}</h1>
         <p>Gérez vos réservations, suivez leur validation, préparez vos paiements et retrouvez vos documents.</p></div>
@@ -131,12 +131,28 @@ export default function AccountPage() {
         </form>
         <p className="account-note">Après connexion : Mes réservations, suivi, gestion des demandes, mes paiements, documents et itinéraires. Les paiements en ligne ne sont pas encore activés.</p>
       </section> : <>
-        <div className="account-toolbar"><span>{user.email}</span><button type="button" onClick={logout}>Se déconnecter</button></div>
+        <div className="account-profile-hero">
+          <div className="account-avatar" aria-hidden="true">{(user.prenom || user.nom || "V").trim().charAt(0).toLocaleUpperCase("fr")}</div>
+          <div className="account-profile-hero-info"><span className="account-eyebrow">MON PROFIL VOYAGE RDC</span><h2>{[user.nom,user.postnom,user.prenom].filter(Boolean).join(" ")}</h2><p>{user.email}</p><button type="button" onClick={()=>setSection("parametres")}>⚙ Paramètres de mon compte</button></div>
+          <button type="button" className="account-signout" onClick={logout}>Se déconnecter</button>
+        </div>
         <div className="account-stats"><div><strong>{bookings.length}</strong><span>Mes réservations et demandes</span></div><div><strong>{confirmedBookings.length}</strong><span>Réservations confirmées</span></div><div><strong>{bookings.filter(b => b.paiement_methode).length}</strong><span>Préférences de paiement</span></div></div>
         <nav className="account-dashboard-nav" aria-label="Rubriques de mon compte">
-          {[["reservations","Mes réservations"],["suivi","Suivre mes réservations"],["nouvelle","Nouvelle réservation"],["paiements","Mes paiements"],["itineraires","Mes itinéraires"],["parametres","Paramètres de mon compte"]].map(([key,label]) =>
+          {[["profil","Mon profil"],["reservations","Mes réservations"],["suivi","Suivre mes réservations"],["nouvelle","Nouvelle réservation"],["paiements","Mes paiements"],["itineraires","Mes itinéraires"],["parametres","Paramètres de mon compte"]].map(([key,label]) =>
             <button type="button" key={key} className={section === key ? "selected" : ""} onClick={() => {setSection(key);setError("");}}>{label}</button>)}
         </nav>
+        {section === "profil" && <section className="account-card account-profile-overview">
+          <h2>Mon profil</h2><p>Retrouvez vos informations personnelles et accédez à vos paramètres pour les compléter.</p>
+          <div className="account-profile-details">
+            <div><span>Nom complet</span><strong>{[user.nom,user.postnom,user.prenom].filter(Boolean).join(" ")}</strong></div>
+            <div><span>Adresse e-mail</span><strong>{user.email}</strong></div>
+            <div><span>Téléphone</span><strong>{user.telephone || "À renseigner"}</strong></div>
+            <div><span>Localisation</span><strong>{[user.ville,user.pays].filter(Boolean).join(", ") || "À renseigner"}</strong></div>
+            <div><span>Date et lieu de naissance</span><strong>{[user.date_naissance,user.lieu_naissance].filter(Boolean).join(" · ") || "À renseigner"}</strong></div>
+            <div><span>Pièce d'identité</span><strong>{user.piece_identite ? "Document enregistré" : "Facultative · non ajoutée"}</strong></div>
+          </div>
+          <button type="button" className="account-primary" onClick={()=>setSection("parametres")}>⚙ Modifier mon profil et mes paramètres</button>
+        </section>}
         {section === "parametres" && <section className="account-card"><h2>Paramètres de mon compte · Mes informations</h2>
           <p>Complétez vos informations personnelles. Elles seront reprises automatiquement lors de vos nouvelles demandes de réservation.</p>
           <form key={user.id + JSON.stringify(user)} onSubmit={saveProfile}>
