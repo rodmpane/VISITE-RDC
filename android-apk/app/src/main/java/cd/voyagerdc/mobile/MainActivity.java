@@ -1,6 +1,9 @@
 package cd.voyagerdc.mobile;
 
 import android.app.Activity;
+import android.content.Context;
+import android.print.PrintManager;
+import android.print.PrintAttributes;
 import android.os.Bundle;
 import android.content.Intent;
 import android.net.Uri;
@@ -45,6 +48,16 @@ public class MainActivity extends Activity {
         getWindow().setNavigationBarColor(Color.rgb(12,35,76));
         web.getSettings().setJavaScriptEnabled(true);
         web.addJavascriptInterface(new Object() {
+            @JavascriptInterface public void printPdf() {
+                runOnUiThread(() -> {
+                    try {
+                        PrintManager manager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
+                        manager.print("Voyage RDC - Réservation", web.createPrintDocumentAdapter("Voyage RDC"), new PrintAttributes.Builder().build());
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "Export PDF indisponible", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
             @JavascriptInterface public void announce(String message) {
                 if ("Votre itinéraire est disponible".equals(message)) runOnUiThread(() -> {
                     if (speech != null) speech.speak(message, TextToSpeech.QUEUE_FLUSH, null, "itineraire");
