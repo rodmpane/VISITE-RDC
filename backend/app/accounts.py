@@ -54,7 +54,7 @@ def init_tables(conn):
         execute(conn, "ALTER TABLE demandes_reservation ADD COLUMN IF NOT EXISTS reference VARCHAR(255)")
     execute(conn, "CREATE UNIQUE INDEX IF NOT EXISTS idx_demandes_reference ON demandes_reservation(reference)")
 
-    fields = {"postnom":"VARCHAR(120)","prenom":"VARCHAR(120)","lieu_naissance":"VARCHAR(150)","date_naissance":"VARCHAR(20)","telephone":"VARCHAR(35)","pays":"VARCHAR(100)","ville":"VARCHAR(120)","adresse":"VARCHAR(300)"}
+    fields = {"postnom":"VARCHAR(120)","prenom":"VARCHAR(120)","lieu_naissance":"VARCHAR(150)","date_naissance":"VARCHAR(20)","telephone":"VARCHAR(35)","pays":"VARCHAR(100)","pays_origine":"VARCHAR(100)","ville":"VARCHAR(120)","adresse":"VARCHAR(300)"}
     existing = {r["name"] for r in fetchall(conn, "PRAGMA table_info(voyageurs)")} if is_sqlite() else set()
     for name, kind in fields.items():
         if not is_sqlite() or name not in existing:
@@ -164,7 +164,7 @@ def login(body: Login):
 
 
 
-PROFILE_FIELDS = ("nom","postnom","prenom","lieu_naissance","date_naissance","telephone","pays","ville","adresse")
+PROFILE_FIELDS = ("nom","postnom","prenom","lieu_naissance","date_naissance","telephone","pays_origine","pays","ville","adresse")
 
 class ProfileUpdate(BaseModel):
     nom: str = Field(min_length=2,max_length=120)
@@ -174,6 +174,7 @@ class ProfileUpdate(BaseModel):
     date_naissance: date | None = None
     telephone: str = Field(default="",max_length=35)
     pays: str = Field(default="",max_length=100)
+    pays_origine: str = Field(default="",max_length=100)
     ville: str = Field(default="",max_length=120)
     adresse: str = Field(default="",max_length=300)
 
