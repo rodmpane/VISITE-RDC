@@ -37,6 +37,50 @@ function Icon({ type, size = 20 }) {
   return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 10v6m0-9h.01" /></svg>;
 }
 
+// Match only the declared direction. A reverse flight is not evidence of service.
+const PLACE_ALIASES = { "bandundu-ville": "bandundu", "mahagi (frontière ouganda)": "mahagi", "moanda": "moanda" };
+function placeKey(value) {
+  const key = String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  return PLACE_ALIASES[key] || key;
+}
+function transportOptions(segment) {
+  if (segment.niveau_publication === "hypothese_retour") return [];
+  if (segment.mode === "avion") {
+    const listed = AIR_CARRIERS.filter(carrier => carrier.routes?.some(([from, to]) =>
+      placeKey(from) === placeKey(segment.depart_id) && placeKey(to) === placeKey(segment.arrivee_id)));
+    // Older seed records identify operators without a detailed route declaration.
+    // Do not present these as confirmed or currently available flights.
+    const named = AIR_CARRIERS.filter(carrier => !listed.includes(carrier) &&
+      (segment.operateur || "").toLowerCase().split(/\s*\/\s*/).some(part =>
+        part.trim() === carrier.name.toLowerCase() ||
+        (carrier.name === "CAA" && part.includes("compagnie africaine d'aviation"))));
+    return [...listed.map(carrier => ({ carrier, source: "Liaison déclarée — à confirmer" })),
+      ...named.map(carrier => ({ carrier, source: "Mentionné dans les données initiales — à confirmer" }))];
+  }
+  return [];
+}
+function SegmentOperators({ segment }) {
+  const options = transportOptions(segment);
+  return <div className="points-panel" style={{marginTop:10}}>
+    <strong>{segment.mode === "avion" ? "✈ Compagnies pour cette étape" : "Transporteurs pour cette étape"}</strong>
+    {options.length ? <><p>Compagnies référencées pour ce trajet, sans garantie de vol ni de place. Vérifiez directement les départs et les prix.</p>
+      {options.map(({carrier,source}) => <div key={carrier.name} style={{padding:"9px 0",borderBottom:"1px solid #ddd"}}>
+        <strong>{carrier.name}</strong><p><small>{source}</small></p>
+        {carrier.phones?.map(([label,number],i) => <p key={i}>{label} : <a href={"tel:"+number}>{number}</a></p>)}
+        {carrier.website && <p><a href={carrier.website} target="_blank" rel="noopener noreferrer">Consulter la compagnie ↗</a></p>}
+        {carrier.emails?.map(email => <p key={email}><a href={"mailto:"+email}>{email}</a></p>)}
+        {carrier.schedule?.filter(([,route]) => {
+          const parts = route.split("→").map(placeKey);
+          return parts.length === 2 && parts[0] === placeKey(segment.depart_id) && parts[1] === placeKey(segment.arrivee_id);
+        }).map(([days,,hours],i) => <p key={i}><small>Horaire communiqué : {days}, {hours} — à confirmer</small></p>)}
+      </div>)}</> : <p>{segment.mode === "avion"
+      ? "Aucune compagnie identifiée pour ce sens dans notre répertoire. Le vol reste à confirmer."
+      : segment.operateur && !/^(transporteur|compagnie|à confirmer)/i.test(segment.operateur)
+        ? <>Opérateur indiqué dans les données : <strong>{segment.operateur}</strong>. Service, coordonnées et disponibilité à confirmer.</>
+        : "Aucun transporteur précis enregistré pour cette étape. Nous ajouterons les compagnies de bus, véhicules, trains et bateaux progressivement."}</p>}
+  </div>;
+}
+
 function Header({ admin }) {
   return <header className="header"><div className="container header-inner">
     <a href="/" className="brand" aria-label="Voyage RDC, accueil"><span className="brand-mark"><Icon type="pin" size={24} /></span><span>voyage<span className="brand-rdc">rdc</span><small>Explorez sans limites</small></span></a>
@@ -152,7 +196,7 @@ function SearchPage() {
         </>}
       </div>
       {selectedRoute === i && route.segments.some(s => s.mode === "avion") && <div className="points-panel"><strong>Compagnies aériennes — réservation et paiement sur leur site officiel</strong><p>Choisissez une compagnie qui dessert effectivement votre destination et confirmez les horaires et tarifs. Voyage RDC n'encaisse aucun paiement.</p>{AIRLINES.map(([name,url]) => <p key={name}><a href={url} rel="noopener noreferrer">{name} ↗</a></p>)}</div>}
-      <details className="route-details"><summary>Voir les étapes et informations <span>⌄</span></summary><div className="route-legs">{route.segments.map((s, index) => <div className="leg" key={s.id}><span className="leg-index">{index + 1}</span><div><strong>{s.depart_nom} → {s.arrivee_nom}</strong><p>{MODE_LABEL[s.mode]} · {fmtDuration(s.duree_h)} · {fmtMoney(s.prix_min_usd)}{s.prix_max_usd != null ? ` à ${fmtMoney(s.prix_max_usd)}` : ""}</p><small>{s.niveau_publication === "hypothese_retour" ? "Sens retour théorique non enregistré" : s.niveau_publication === "a_verifier" ? "Liaison non confirmée — vérification nécessaire" : s.niveau_publication === "indicatif" ? "Source initiale non vérifiée" : `Dernière vérification : ${s.verifie_le}`} · {s.source_info || "Transporteur à contacter pour confirmation"}</small><div><button className="text-link" onClick={() => showPoints(s.depart_id, s.depart_nom)} type="button">Points de départ</button> · <button className="text-link" onClick={() => showPoints(s.arrivee_id, s.arrivee_nom)} type="button">Points d’arrivée</button></div></div></div>)}</div>{points && <div className="points-panel"><h4>Points d’embarquement — {points.name}</h4>{points.loading ? <p>Chargement…</p> : points.error ? <p>{points.error}</p> : points.list.length ? points.list.map(p => <p key={p.id}>{p.nom} {p.verifie ? "· Emplacement indiqué comme vérifié" : "· Emplacement à confirmer"} {p.latitude && p.longitude && <a target="_blank" rel="noreferrer" href={`https://www.openstreetmap.org/?mlat=${p.latitude}&mlon=${p.longitude}#map=13/${p.latitude}/${p.longitude}`}>Voir sur la carte ↗</a>}</p>) : <p>Aucun point enregistré pour cette ville.</p>}</div>}</details></article>)}
+      <details className="route-details"><summary>Voir les étapes et informations <span>⌄</span></summary><div className="route-legs">{route.segments.map((s, index) => <div className="leg" key={s.id}><span className="leg-index">{index + 1}</span><div><strong>{s.depart_nom} → {s.arrivee_nom}</strong><p>{MODE_LABEL[s.mode]} · {fmtDuration(s.duree_h)} · {fmtMoney(s.prix_min_usd)}{s.prix_max_usd != null ? ` à ${fmtMoney(s.prix_max_usd)}` : ""}</p><small>{s.niveau_publication === "hypothese_retour" ? "Sens retour théorique non enregistré" : s.niveau_publication === "a_verifier" ? "Liaison non confirmée — vérification nécessaire" : s.niveau_publication === "indicatif" ? "Source initiale non vérifiée" : `Dernière vérification : ${s.verifie_le}`} · {s.source_info || "Transporteur à contacter pour confirmation"}</small><div><button className="text-link" onClick={() => showPoints(s.depart_id, s.depart_nom)} type="button">Points de départ</button> · <button className="text-link" onClick={() => showPoints(s.arrivee_id, s.arrivee_nom)} type="button">Points d’arrivée</button></div><SegmentOperators segment={s} /></div></div>)}</div>{points && <div className="points-panel"><h4>Points d’embarquement — {points.name}</h4>{points.loading ? <p>Chargement…</p> : points.error ? <p>{points.error}</p> : points.list.length ? points.list.map(p => <p key={p.id}>{p.nom} {p.verifie ? "· Emplacement indiqué comme vérifié" : "· Emplacement à confirmer"} {p.latitude && p.longitude && <a target="_blank" rel="noreferrer" href={`https://www.openstreetmap.org/?mlat=${p.latitude}&mlon=${p.longitude}#map=13/${p.latitude}/${p.longitude}`}>Voir sur la carte ↗</a>}</p>) : <p>Aucun point enregistré pour cette ville.</p>}</div>}</details></article>)}
       {!!routes.length && <div className="disclaimer"><Icon type="info" size={20} /><p>{notice} Les horaires et places ne sont pas disponibles en temps réel. Réservations et paiements : mise en relation uniquement. Tarifs déclarés par le gestionnaire ; disponibilité et montant à confirmer auprès du transporteur.</p></div>}
     </section>}
     <section className="container features"><div className="feature"><span>01</span><div><h3>Plusieurs modes, un seul endroit</h3><p>Comparez routes routières, fluviales, ferroviaires et aériennes.</p></div></div><div className="feature"><span>02</span><div><h3>Une information transparente</h3><p>Les itinéraires estimatifs restent signalés comme non vérifiés. Confirmez votre trajet auprès du transporteur.</p></div></div><div className="feature"><span>03</span><div><h3>Pensé pour la RDC</h3><p>Une interface légère, accessible sur téléphone avec Internet.</p></div></div></section>
