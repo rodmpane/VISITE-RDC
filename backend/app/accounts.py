@@ -66,6 +66,8 @@ def init_tables(conn):
     booking_cols = {r["name"] for r in fetchall(conn, "PRAGMA table_info(demandes_reservation)")} if is_sqlite() else set()
     if not is_sqlite() or "voyageur_infos" not in booking_cols:
         execute(conn, "ALTER TABLE demandes_reservation ADD COLUMN " + ("IF NOT EXISTS " if not is_sqlite() else "") + "voyageur_infos TEXT")
+    if not is_sqlite() or "reservation_infos" not in booking_cols:
+        execute(conn, "ALTER TABLE demandes_reservation ADD COLUMN " + ("IF NOT EXISTS " if not is_sqlite() else "") + "reservation_infos TEXT")
 
 
 
@@ -303,6 +305,19 @@ class BookingRequest(BaseModel):
     date_fin: date | None = None
     voyageurs: int = Field(ge=1, le=20)
     details: str = Field(default="", max_length=500)
+    source_apk: bool = False
+    nom: str = Field(default="", max_length=120)
+    postnom: str = Field(default="", max_length=120)
+    prenom: str = Field(default="", max_length=120)
+    lieu_naissance: str = Field(default="", max_length=150)
+    date_naissance: date | None = None
+    telephone: str = Field(default="", max_length=35)
+    email: str = Field(default="", max_length=254)
+    numero_identite: str = Field(default="", max_length=100)
+    itineraire: str = Field(default="", max_length=250)
+    prix_unitaire: float | None = Field(default=None, ge=0, le=1000000000)
+    devise: str = Field(default="USD", pattern="^(USD|CDF)$")
+    modalite: str = Field(default="", max_length=120)
 
 
 class PaymentChoice(BaseModel):
@@ -325,6 +340,10 @@ def request_booking(body: BookingRequest, authorization: str | None = Header(def
         raise HTTPException(status_code=422, detail="Vérifiez les dates de votre demande.")
     if body.type == "hebergement" and not body.date_fin:
         raise HTTPException(status_code=422, detail="Indiquez la date de départ de l'hébergement.")
+    if body.source_apk and body.type == "transport" and not all([body.nom.strip(),body.postnom.strip(),body.prenom.strip(),body.lieu_naissance.strip(),body.date_naissance,body.telephone.strip(),body.itineraire.strip()]):
+        raise HTTPException(status_code=422,detail="Transport : nom, postnom, prénom, lieu et date de naissance, téléphone et itinéraire obligatoires.")
+    if body.type == "hebergement" and body.date_fin and body.date_fin <= body.date_debut:
+        raise HTTPException(status_code=422,detail="La date de départ de l’hôtel doit être après l’arrivée.")
     with connection() as conn:
         init_tables(conn)
         user = current_user(conn, authorization)
@@ -332,10 +351,14 @@ def request_booking(body: BookingRequest, authorization: str | None = Header(def
         created_at = datetime.now(timezone.utc)
         reference = booking_reference(conn, body.prestataire, created_at)
         traveler_snapshot = json.dumps({k:profile(conn,user["id"]).get(k) for k in PROFILE_FIELDS},ensure_ascii=False)
+        info = {key:getattr(body,key) for key in ("nom","postnom","prenom","lieu_naissance","telephone","email","numero_identite","itineraire","prix_unitaire","devise","modalite")}
+        info["date_naissance"] = body.date_naissance.isoformat() if body.date_naissance else None
+        info["nuits"] = (body.date_fin - body.date_debut).days if body.type == "hebergement" and body.date_fin else None
+        info["total_estime"] = round(body.prix_unitaire * (info["nuits"] if body.type == "hebergement" else body.voyageurs),2) if body.prix_unitaire is not None else None
         execute(conn, """INSERT INTO demandes_reservation
             (id,user_id,type,prestataire,ville,date_debut,date_fin,voyageurs,details,
-             statut,paiement_statut,paiement_methode,created_at,reference,voyageur_infos)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+             statut,paiement_statut,paiement_methode,created_at,reference,voyageur_infos,reservation_infos)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (booking_id,user["id"],body.type,body.prestataire.strip(),body.ville.strip(),
              body.date_debut.isoformat(),body.date_fin.isoformat() if body.date_fin else None,
              body.voyageurs,body.details.strip(),"Demande enregistrée — non confirmée",
