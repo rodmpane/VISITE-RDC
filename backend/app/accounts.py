@@ -239,3 +239,45 @@ def cancel_booking(booking_id: str, authorization: str | None = Header(default=N
         execute(conn,"DELETE FROM demandes_reservation WHERE id=? AND user_id=?",
                 (booking_id,user["id"]))
         return {"ok":True}
+
+
+class BookingValidation(BaseModel):
+    statut: str = Field(pattern="^(confirmee|refusee)$")
+    paiement_sur_place: bool = False
+
+
+def require_booking_admin(authorization):
+    configured = os.getenv("ADMIN_API_TOKEN", "")
+    supplied = authorization[7:] if authorization and authorization.startswith("Bearer ") else ""
+    if not configured:
+        raise HTTPException(status_code=503, detail="Administration non configurée.")
+    if not secrets.compare_digest(configured, supplied):
+        raise HTTPException(status_code=401, detail="Accès administrateur refusé.")
+
+
+@router.get("/admin/reservations")
+def admin_bookings(authorization: str | None = Header(default=None)):
+    require_booking_admin(authorization)
+    with connection() as conn:
+        init_tables(conn)
+        return fetchall(conn, """SELECT r.*, v.nom AS voyageur_nom, v.email AS voyageur_email
+            FROM demandes_reservation r JOIN voyageurs v ON v.id=r.user_id
+            ORDER BY r.created_at DESC LIMIT 200""")
+
+
+@router.patch("/admin/reservations/{booking_id}/validation")
+def validate_booking(booking_id: str, body: BookingValidation,
+                     authorization: str | None = Header(default=None)):
+    require_booking_admin(authorization)
+    with connection() as conn:
+        init_tables(conn)
+        existing = fetchone(conn, "SELECT id,paiement_methode FROM demandes_reservation WHERE id=?", (booking_id,))
+        if not existing:
+            raise HTTPException(status_code=404, detail="Demande introuvable.")
+        status = "Réservation confirmée" if body.statut == "confirmee" else "Demande refusée"
+        payment_status = ("À régler sur place — non payé" if body.statut == "confirmee" and body.paiement_sur_place
+                          else "Aucun paiement")
+        method = "sur_place" if body.statut == "confirmee" and body.paiement_sur_place else existing["paiement_methode"]
+        execute(conn, """UPDATE demandes_reservation SET statut=?, paiement_statut=?, paiement_methode=?
+            WHERE id=?""", (status, payment_status, method, booking_id))
+        return {"id": booking_id, "statut": status, "paiement_statut": payment_status}
