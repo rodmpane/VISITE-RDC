@@ -26,6 +26,8 @@ export default function AccountPage() {
   const [bookingType, setBookingType] = useState("hebergement");
   const [receipt, setReceipt] = useState(null);
   const [register, setRegister] = useState(false);
+  const [section, setSection] = useState("reservations");
+  const [filter, setFilter] = useState("toutes");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -81,11 +83,13 @@ export default function AccountPage() {
     try { await request("/reservations/" + id, { method: "DELETE" }, token); await refresh(token); }
     catch(e) { setError(e.message); }
   }
+  const confirmedBookings = bookings.filter(b => b.statut === "Réservation confirmée");
+  const visibleBookings = bookings.filter(b => filter === "toutes" || (filter === "confirmees" ? b.statut === "Réservation confirmée" : filter === "attente" ? b.statut !== "Réservation confirmée" && b.statut !== "Demande refusée" : b.statut === "Demande refusée"));
   return <div className="account-shell">{receipt && <BookingReceipt booking={receipt} traveler={user} onClose={() => setReceipt(null)} />}
     <header className="account-header"><a href="/"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC" /></a><nav><a href="/">Rechercher un itinéraire</a><a href="/compte">Mon compte</a></nav></header>
     <main className="account-main">
       <div className="account-heading"><span>VOYAGE RDC · ESPACE VOYAGEUR</span><h1>{user ? "Bonjour, " + user.nom : register ? "Créer mon compte" : "Mon espace voyageur"}</h1>
-        <p>Conservez vos projets d’itinéraires et retrouvez-les lors de vos prochaines visites.</p></div>
+        <p>Gérez vos réservations, suivez leur validation, préparez vos paiements et retrouvez vos documents.</p></div>
       {error && <p className="account-alert" role="alert">{error}</p>}
       {message && <p className="account-success" role="status">{message}</p>}
       {!user ? <section className="account-card">
@@ -96,18 +100,22 @@ export default function AccountPage() {
           <label>Mot de passe<input name="password" type="password" minLength={register ? 10 : undefined} required autoComplete={register ? "new-password" : "current-password"} placeholder={register ? "10 caractères minimum" : "Votre mot de passe"} /></label>
           <button className="account-primary" disabled={busy} type="submit">{busy ? "Veuillez patienter…" : register ? "Créer mon compte gratuitement" : "Me connecter"}</button>
         </form>
-        <p className="account-note">Votre compte permet de sauvegarder des projets de voyage. Il ne constitue pas une réservation.</p>
+        <p className="account-note">Après connexion : Mes réservations, suivi, gestion des demandes, mes paiements, documents et itinéraires. Les paiements en ligne ne sont pas encore activés.</p>
       </section> : <>
         <div className="account-toolbar"><span>{user.email}</span><button type="button" onClick={logout}>Se déconnecter</button></div>
-        <div className="account-stats"><div><strong>{trips.length}</strong><span>Projets enregistrés</span></div><div><strong>{bookings.length}</strong><span>Demandes non confirmées</span></div><div><strong>0</strong><span>Paiements effectués</span></div></div>
-        <section className="account-card"><h2>Mes itinéraires</h2>
+        <div className="account-stats"><div><strong>{bookings.length}</strong><span>Mes réservations et demandes</span></div><div><strong>{confirmedBookings.length}</strong><span>Réservations confirmées</span></div><div><strong>{bookings.filter(b => b.paiement_methode).length}</strong><span>Préférences de paiement</span></div></div>
+        <nav className="account-dashboard-nav" aria-label="Rubriques de mon compte">
+          {[["reservations","Mes réservations"],["suivi","Suivre mes réservations"],["nouvelle","Nouvelle réservation"],["paiements","Mes paiements"],["itineraires","Mes itinéraires"]].map(([key,label]) =>
+            <button type="button" key={key} className={section === key ? "selected" : ""} onClick={() => {setSection(key);setError("");}}>{label}</button>)}
+        </nav>
+        {section === "itineraires" && <section className="account-card"><h2>Mes itinéraires</h2>
           {trips.length ? trips.map(trip => <article className="account-trip" key={trip.id}>
             <div><h3>{trip.depart} → {trip.arrivee}</h3><p>Transport : {trip.modes.replaceAll(",", ", ")}</p><p><strong>{trip.statut}</strong></p><small>Enregistré le {new Date(trip.created_at).toLocaleDateString("fr-FR")}</small></div>
             <button type="button" onClick={() => remove(trip.id)}>Supprimer</button>
           </article>) : <p>Aucun itinéraire sauvegardé. Recherchez un trajet puis choisissez « Enregistrer dans mon compte ».</p>}
           <a className="account-link" href="/">+ Rechercher un nouvel itinéraire</a>
-        </section>
-        <section className="account-card"><h2>Demander une réservation</h2>
+        </section>}
+        {section === "nouvelle" && <section className="account-card"><h2>Nouvelle demande de réservation</h2>
           <p>Préparez une demande d'hébergement ou de transport. Les partenaires et disponibilités ne sont pas encore connectés : la demande doit être validée par le prestataire avant tout paiement sur place.</p>
           <form onSubmit={createBooking}>
             <label>Type de demande<select value={bookingType} onChange={e => setBookingType(e.target.value)}><option value="hebergement">Hébergement</option><option value="transport">Transport</option></select></label>
@@ -119,23 +127,26 @@ export default function AccountPage() {
             <label>Précisions facultatives<textarea name="details" maxLength={500} placeholder="Chambre souhaitée, trajet, besoins particuliers…" /></label>
             <button className="account-primary" disabled={busy} type="submit">Enregistrer ma demande</button>
           </form>
-        </section>
-        <section className="account-card"><h2>Mes demandes et paiements</h2>
+        </section>}
+        {(section === "reservations" || section === "suivi" || section === "paiements") && <section className="account-card"><h2>{section === "paiements" ? "Mes paiements" : section === "suivi" ? "Suivi de mes réservations" : "Mes réservations · Gérer mes demandes"}</h2>
+          {section === "reservations" && <div className="account-filters"><label>Afficher <select value={filter} onChange={e => setFilter(e.target.value)}><option value="toutes">Toutes</option><option value="attente">En attente</option><option value="confirmees">Confirmées</option><option value="refusees">Refusées</option></select></label><button type="button" onClick={() => setSection("nouvelle")}>+ Nouvelle demande</button></div>}
+          {section === "suivi" && <p>Suivez ici l’état de chaque demande. La validation est effectuée par Voyage RDC après vérification auprès du prestataire. Une demande enregistrée ne garantit pas une place.</p>}
+          {section === "paiements" && <p>Consultez le mode de paiement choisi et son état. « Paiement sur place » signifie un règlement futur auprès du prestataire, uniquement après confirmation. Aucun paiement en ligne n’est actuellement possible et aucun règlement n’est enregistré comme encaissé.</p>}
           {!bookings.length && <p>Aucune demande enregistrée pour le moment.</p>}
-          {bookings.map(b => <article className="account-trip" key={b.id}>
+          {(section === "reservations" ? visibleBookings : bookings).map(b => <article className="account-trip" key={b.id}>
             <div><h3>{b.type === "hebergement" ? "🏨" : "🚌"} {b.prestataire} · {b.ville}</h3>
-              <p>{b.date_debut}{b.date_fin ? " → " + b.date_fin : ""} · {b.voyageurs} voyageur(s)</p>
-              <p><strong>{b.statut}</strong></p>
+              <p>{b.date_debut}{b.date_fin ? " → " + b.date_fin : ""} · {b.voyageurs} voyageur(s)</p><small>Référence : {b.id}</small>
+              <p><strong>{b.statut}</strong></p>{section === "suivi" && <p>{b.statut === "Réservation confirmée" ? "✓ Réservation validée — téléchargez votre confirmation ci-dessous." : b.statut === "Demande refusée" ? "Demande refusée — contactez Voyage RDC pour une autre option." : "⏳ En attente de validation par Voyage RDC et le prestataire."}</p>}
               <p>Paiement : {b.paiement_statut}</p>
               <label>Mode de paiement envisagé<select value={b.paiement_methode || ""} onChange={e => paymentChoice(b.id,e.target.value)}>
                 <option value="" disabled>Choisir pour plus tard</option><option value="sur_place">Paiement sur place (après validation)</option><option value="mpesa">M-Pesa</option><option value="airtel_money">Airtel Money</option><option value="orange_money">Orange Money</option><option value="carte">Carte bancaire</option>
               </select></label>
               <small>Le paiement sur place dépend de l’accord du prestataire et de la confirmation de votre réservation. Les paiements en ligne ne sont pas encore activés.</small>
-            </div><div className="account-booking-actions"><button type="button" onClick={() => setReceipt(b)}>{b.statut === "Réservation confirmée" ? "Voir la confirmation" : "Voir le récépissé"}</button><button type="button" onClick={() => deleteBooking(b.id)}>Supprimer</button></div>
+            </div><div className="account-booking-actions"><button type="button" onClick={() => setReceipt(b)}>{b.statut === "Réservation confirmée" ? "Voir la confirmation" : "Voir le récépissé"}</button>{b.statut !== "Réservation confirmée" && <button type="button" onClick={() => {if(window.confirm("Supprimer cette demande de votre compte ?")) deleteBooking(b.id);}}>Supprimer</button>}</div>
           </article>)}
           <p><strong>Important :</strong> aucun tarif ni disponibilité n'est garanti, aucune carte ni donnée Mobile Money n'est demandée, aucun débit n'est effectué. Les confirmations et paiements réels seront activés après connexion des partenaires et d'un prestataire agréé.</p>
           <p>Contact : <a href="https://wa.me/243830033332" target="_blank" rel="noopener noreferrer">WhatsApp Voyage RDC</a>.</p>
-        </section>
+        </section>}
       </>}
     </main>
     <footer className="account-footer"><a href="/confidentialite">Confidentialité</a> · <a href="/contact">Contact</a> · Voyage RDC</footer>
