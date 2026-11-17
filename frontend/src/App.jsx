@@ -16,7 +16,7 @@ const AIRLINES = [
   ["Congo Airways", "https://www.congoairways.com/"],
   ["Ethiopian Airlines", "https://www.ethiopianairlines.com/cd/fr/book/booking/flight"],
 ];
-const CONTACT = "+243810151533";
+const CONTACT = "+243830033332";
 const EAST_PROVINCES = new Set(["nord-kivu", "sud-kivu", "ituri", "haut-uele", "bas-uele", "maniema", "tanganyika", "tshopo"]);
 const CRITERE_LABEL = { rapide: "Le plus rapide", economique: "Le plus économique", court: "Le plus court", alternative: "Autre itinéraire avec correspondance" };
 
