@@ -189,3 +189,18 @@ body{color:var(--rdc-navy);background:#f5f7fc}
 @media(max-width:560px){.account-dashboard-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.account-dashboard-nav button{font-size:12px;padding:11px 8px}.account-trip{align-items:flex-start;flex-direction:column}}
 
 .account-profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px}.account-profile-grid label{min-width:0}.account-card form:has(.account-profile-grid){max-width:none}.account-profile-summary{border:1px solid #dce5f5;border-radius:12px;background:#f5f8ff;padding:16px;margin:16px 0}.account-profile-summary h3{margin:0 0 8px}.account-profile-summary button{border:1px solid #2052d9;background:white;color:#2052d9;border-radius:8px;padding:9px;cursor:pointer}@media(max-width:560px){.account-profile-grid{grid-template-columns:1fr}}
+
+/* Traveler profile-first account layout */
+.main-account-profile-link,.account-header-profile{display:inline-flex;align-items:center;gap:8px}
+.main-account-avatar,.account-avatar{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;background:linear-gradient(145deg,#2052d9,#0c234c);color:#fff;border:3px solid #f9b82f;font-weight:800}
+.main-account-avatar{width:34px;height:34px;font-size:17px;border-width:2px}
+.account-avatar{width:86px;height:86px;font-size:36px;box-shadow:0 6px 20px #0c234c25}
+.account-avatar-small{width:30px;height:30px;font-size:14px;border-width:2px}
+.account-profile-hero{display:flex;align-items:center;gap:20px;background:white;border:1px solid #dce5f5;border-radius:18px;padding:24px;margin:22px 0;box-shadow:0 8px 26px #0c234c0c}
+.account-profile-hero-info{flex:1;min-width:0}.account-profile-hero-info h2{margin:5px 0;color:#0c234c}.account-profile-hero-info p{margin:0 0 12px;overflow-wrap:anywhere;color:#52617a}
+.account-eyebrow{font-size:11px;letter-spacing:1.3px;font-weight:800;color:#2052d9}
+.account-profile-hero-info button,.account-signout{border:1px solid #2052d9;border-radius:9px;background:white;color:#2052d9;padding:10px 13px;cursor:pointer;font-weight:750}
+.account-profile-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}
+.account-profile-details>div{display:flex;flex-direction:column;gap:6px;border:1px solid #e1e8f5;border-radius:10px;padding:14px;min-width:0}
+.account-profile-details span{font-size:12px;color:#52617a}.account-profile-details strong{overflow-wrap:anywhere;color:#0c234c}
+@media(max-width:650px){.account-profile-hero{flex-wrap:wrap;gap:12px;padding:18px}.account-avatar{width:68px;height:68px;font-size:28px}.account-signout{margin-left:auto}.account-profile-details{grid-template-columns:1fr}}
