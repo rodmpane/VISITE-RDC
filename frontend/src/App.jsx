@@ -89,7 +89,7 @@ function SegmentOperators({ segment }) {
 function Header({ admin }) {
   return <header className="header"><div className="container header-inner">
     <a href="/" className="brand" aria-label="Voyage RDC, accueil"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC — Itinéraires partout en RDC" className="brand-logo" /></a>
-    <nav aria-label="Navigation principale"><a className={!admin ? "nav-active" : ""} href="/">Itinéraires</a><a href="/compte">Mon compte</a><a className={admin ? "nav-active" : ""} href="/admin">Administration</a></nav>
+    <nav aria-label="Navigation principale"><a className={!admin ? "nav-active" : ""} href="/">Itinéraires</a><a href="/compte" className="main-account-profile-link"><span className="main-account-avatar" aria-hidden="true">👤</span> Mon compte</a><a className={admin ? "nav-active" : ""} href="/admin">Administration</a></nav>
     <span className="header-label"><span className="status-dot" /> Service en ligne</span>
   </div></header>;
 }
