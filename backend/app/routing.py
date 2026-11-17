@@ -37,9 +37,14 @@ def shortest_path(edges, start, end, criterion, allowed_modes, max_segments=12, 
     queue = [(0.0, 0, 0, start, (start,), ())]
     counter = 0
     expansions = 0
-    while queue and expansions < 30000:
+    best = {}
+    while queue and expansions < 3000:
         cost, _, _, city, seen, path = heapq.heappop(queue)
         expansions += 1
+        state = (city, len(path))
+        if cost > best.get(state, float("inf")):
+            continue
+        best[state] = cost
         if city == end and path:
             return list(path)
         if len(path) >= max_segments:
@@ -47,6 +52,8 @@ def shortest_path(edges, start, end, criterion, allowed_modes, max_segments=12, 
         for edge in graph.get(city, ()):
             nxt = edge["arrivee_id"]
             if nxt in seen:
+                continue
+            if cost + _weight(edge, field) >= best.get((nxt, len(path) + 1), float("inf")):
                 continue
             counter += 1
             # A small transfer penalty favors understandable itineraries.
