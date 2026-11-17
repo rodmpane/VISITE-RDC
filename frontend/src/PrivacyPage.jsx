@@ -30,7 +30,7 @@ export default function PrivacyPage() {
     <h2>11. Enfants et modifications</h2>
     <p>Le service ne s'adresse pas spécialement aux enfants et nous ne cherchons pas à collecter leurs informations personnelles. Nous pouvons modifier cette politique lorsque les fonctionnalités évoluent ; la date de mise à jour sera indiquée ici.</p>
     <h2>12. Nous contacter</h2>
-    <p><strong>Voyage RDC — Rodrigues MPANE</strong><br/>38, avenue Ndelo, Sans-fil, Masina, Kinshasa, RDC<br/>Téléphone : <a href="tel:+243810151533">+243 810 151 533</a><br/>E-mail : <a href="mailto:contact@voyage-rdc.com">contact@voyage-rdc.com</a></p>
+    <p><strong>Voyage RDC — Rodrigues MPANE</strong><br/>38, avenue Ndelo, Sans-fil, Masina, Kinshasa, RDC<br/>Téléphone : <a href="tel:+243830033332">+243 830 033 332</a><br/>E-mail : <a href="mailto:contact@voyage-rdc.com">contact@voyage-rdc.com</a></p>
     <p><small>Cette version Web conserve les objectifs et les coordonnées de la politique transmise, tout en précisant les traitements liés à l'utilisation d'un site connecté. L'éditeur doit valider les mentions relatives à l'hébergement et à la conservation des données avant publication officielle.</small></p>
   </main></>;
 }
