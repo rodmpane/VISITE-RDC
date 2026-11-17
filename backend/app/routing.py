@@ -89,6 +89,19 @@ def itineraries(edges, start, end, allowed_modes):
     for allowed in selections:
         for criterion in CRITERIA:
             add(shortest_path(edges, start, end, criterion, allowed), criterion)
+            if len(out) >= 8:
+                break
+    # Show alternative transfer hubs even when a different path scores better.
+    for hub in ("kinshasa", "bunia", "kampala", "kisangani", "goma"):
+        if hub in (start, end):
+            continue
+        for allowed in (set(allowed_modes), {"avion", "bus"} & set(allowed_modes)):
+            first = shortest_path(edges, start, hub, "court", allowed)
+            second = shortest_path(edges, hub, end, "court", allowed)
+            if first and second and len(first) + len(second) <= 12:
+                cities = [start] + [e["arrivee_id"] for e in first + second]
+                if len(cities) == len(set(cities)):
+                    add(first + second, "court")
             if len(out) >= 12:
                 return out
     return out
