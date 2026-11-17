@@ -180,11 +180,10 @@ export default function AccountPage() {
         <div className="account-profile-hero">
           <div className="account-avatar" aria-hidden="true">{(user.prenom || user.nom || "V").trim().charAt(0).toLocaleUpperCase("fr")}</div>
           <div className="account-profile-hero-info"><span className="account-eyebrow">MON PROFIL VOYAGE RDC</span><h2>{[user.nom,user.postnom,user.prenom].filter(Boolean).join(" ")}</h2><p>{user.email}</p><button type="button" onClick={()=>setSection("parametres")}>⚙ Paramètres de mon compte</button></div>
-          <button type="button" className="account-signout" onClick={logout}>Se déconnecter</button>
         </div>
         <div className="account-stats"><div><strong>{bookings.length}</strong><span>Mes réservations et demandes</span></div><div><strong>{confirmedBookings.length}</strong><span>Réservations confirmées</span></div><div><strong>{bookings.filter(b => b.paiement_methode).length}</strong><span>Préférences de paiement</span></div></div>
         <nav className="account-dashboard-nav" aria-label="Rubriques de mon compte">
-          {[["profil","Mon profil"],["reservations","Mes réservations"],["suivi","Suivre mes réservations"],["nouvelle","Nouvelle réservation"],["paiements","Mes paiements"],["itineraires","Mes itinéraires"],["parametres","Paramètres de mon compte"]].map(([key,label]) =>
+          {[["reservations","Mes réservations"],["suivi","Suivre mes réservations"],["nouvelle","Nouvelle réservation"],["paiements","Mes paiements"],["itineraires","Mes itinéraires"],["parametres","Paramètres de mon compte"]].map(([key,label]) =>
             <button type="button" key={key} className={section === key ? "selected" : ""} onClick={() => {setSection(key);setError("");}}>{label}</button>)}
         </nav>
         {section === "profil" && <section className="account-card account-profile-overview">
@@ -258,6 +257,10 @@ export default function AccountPage() {
           <p><strong>Important :</strong> aucun tarif ni disponibilité n'est garanti, aucune carte ni donnée Mobile Money n'est demandée, aucun débit n'est effectué. Les confirmations et paiements réels seront activés après connexion des partenaires et d'un prestataire agréé.</p>
           <p>Contact : <a href="https://wa.me/243830033332" target="_blank" rel="noopener noreferrer">WhatsApp Voyage RDC</a>.</p>
         </section>}
+        <nav className="account-bottom-actions" aria-label="Accès rapide au compte">
+          <button type="button" className={section === "profil" ? "account-bottom-profile active" : "account-bottom-profile"} onClick={()=>{setSection("profil");setError("");window.scrollTo({top:0,behavior:"smooth"});}}><span aria-hidden="true">◉</span> Mon profil</button>
+          <button type="button" className="account-bottom-logout" onClick={logout}><span aria-hidden="true">⇥</span> Se déconnecter</button>
+        </nav>
       </>}
     </main>
     <footer className="account-footer"><a href="/confidentialite">Confidentialité</a> · <a href="/contact">Contact</a> · Voyage RDC</footer>
