@@ -89,8 +89,10 @@ def itineraries(edges, start, end, allowed_modes):
     for allowed in selections:
         for criterion in CRITERIA:
             add(shortest_path(edges, start, end, criterion, allowed), criterion)
-            if len(out) >= 8:
+            if len(out) >= 7:
                 break
+        if len(out) >= 7:
+            break
     # Show alternative transfer hubs even when a different path scores better.
     for hub in ("kinshasa", "bunia", "kampala", "kisangani", "goma"):
         if hub in (start, end):
