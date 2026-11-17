@@ -18,15 +18,15 @@ class RealSeedTests(unittest.TestCase):
     def test_included_csv_import_and_counts(self):
         rows = from_directory(SEED_DIR)
         self.assertEqual({name: len(data) for name, data in rows.items()}, {
-            "provinces": 26, "lieux": 51, "points": 100, "operateurs": 8, "liaisons": 155,
+            "provinces": 26, "lieux": 52, "points": 100, "operateurs": 8, "liaisons": 186,
         })
         with tempfile.TemporaryDirectory() as temp, patch.dict(os.environ, {"DATABASE_URL": f"sqlite:///{temp}/seed-test.db"}):
             import_rows(rows)
             import_rows(rows)
             with connection() as conn:
-                self.assertEqual(fetchone(conn, "SELECT COUNT(*) AS n FROM liaisons")["n"], 155)
+                self.assertEqual(fetchone(conn, "SELECT COUNT(*) AS n FROM liaisons")["n"], 186)
                 self.assertEqual(fetchone(conn, "SELECT COUNT(*) AS n FROM liaisons WHERE publie=1")["n"], 0)
-                self.assertEqual(fetchone(conn, "SELECT COUNT(*) AS n FROM liaisons WHERE statut='a_verifier'")["n"], 81)
+                self.assertEqual(fetchone(conn, "SELECT COUNT(*) AS n FROM liaisons WHERE statut='a_verifier'")["n"], 112)
 
     def test_publishing_verified_seed_route_makes_it_searchable(self):
         rows = from_directory(SEED_DIR)
