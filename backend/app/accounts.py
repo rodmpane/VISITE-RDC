@@ -3,13 +3,15 @@ import hashlib
 import hmac
 import os
 import secrets
+import re
+import unicodedata
 from datetime import date, datetime, timedelta, timezone
 from uuid import uuid4
 
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
 
-from .db import connection, execute, fetchall, fetchone
+from .db import connection, execute, fetchall, fetchone, is_sqlite
 
 router = APIRouter(prefix="/api/compte", tags=["Compte voyageur"])
 
@@ -38,6 +40,30 @@ def init_tables(conn):
         paiement_statut VARCHAR(60) NOT NULL,
         paiement_methode VARCHAR(40),
         created_at VARCHAR(40) NOT NULL)""")
+    execute(conn, """CREATE TABLE IF NOT EXISTS compteurs_prestataires (
+        prestataire_cle VARCHAR(180) PRIMARY KEY, nombre INTEGER NOT NULL)""")
+    # Existing installations retain their reservations and UUID primary keys.
+    if is_sqlite():
+        columns = [row["name"] for row in fetchall(conn, "PRAGMA table_info(demandes_reservation)")]
+        if "reference" not in columns:
+            execute(conn, "ALTER TABLE demandes_reservation ADD COLUMN reference VARCHAR(255)")
+    else:
+        execute(conn, "ALTER TABLE demandes_reservation ADD COLUMN IF NOT EXISTS reference VARCHAR(255)")
+    execute(conn, "CREATE UNIQUE INDEX IF NOT EXISTS idx_demandes_reference ON demandes_reservation(reference)")
+
+
+def provider_key(name):
+    normalized = unicodedata.normalize("NFKD", name.strip())
+    ascii_name = "".join(char for char in normalized if not unicodedata.combining(char))
+    return re.sub(r"[^A-Z0-9]+", "-", ascii_name.upper()).strip("-") or "PRESTATAIRE"
+
+
+def booking_reference(conn, provider, created_at):
+    key = provider_key(provider)
+    row = fetchone(conn, """INSERT INTO compteurs_prestataires (prestataire_cle,nombre)
+        VALUES (?,1) ON CONFLICT (prestataire_cle) DO UPDATE SET nombre=compteurs_prestataires.nombre+1
+        RETURNING nombre""", (key,))
+    return f"VRDC-{key}/{row['nombre']:04d}/{created_at.month:02d}/{created_at.year}"
 
 
 def hash_password(password, salt=None):
@@ -190,7 +216,7 @@ def bookings(authorization: str | None = Header(default=None)):
     with connection() as conn:
         init_tables(conn)
         user = current_user(conn, authorization)
-        return fetchall(conn, """SELECT id,type,prestataire,ville,date_debut,date_fin,voyageurs,
+        return fetchall(conn, """SELECT id,reference,type,prestataire,ville,date_debut,date_fin,voyageurs,
             details,statut,paiement_statut,paiement_methode,created_at
             FROM demandes_reservation WHERE user_id=? ORDER BY created_at DESC LIMIT 100""", (user["id"],))
 
@@ -205,15 +231,17 @@ def request_booking(body: BookingRequest, authorization: str | None = Header(def
         init_tables(conn)
         user = current_user(conn, authorization)
         booking_id = str(uuid4())
+        created_at = datetime.now(timezone.utc)
+        reference = booking_reference(conn, body.prestataire, created_at)
         execute(conn, """INSERT INTO demandes_reservation
             (id,user_id,type,prestataire,ville,date_debut,date_fin,voyageurs,details,
-             statut,paiement_statut,paiement_methode,created_at)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+             statut,paiement_statut,paiement_methode,created_at,reference)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (booking_id,user["id"],body.type,body.prestataire.strip(),body.ville.strip(),
              body.date_debut.isoformat(),body.date_fin.isoformat() if body.date_fin else None,
              body.voyageurs,body.details.strip(),"Demande enregistrée — non confirmée",
-             "Aucun paiement",None,datetime.now(timezone.utc).isoformat()))
-        return {"id":booking_id,"message":"Demande enregistrée, sans réservation confirmée ni paiement."}
+             "Aucun paiement",None,created_at.isoformat(),reference))
+        return {"id":booking_id,"reference":reference,"message":"Demande enregistrée, sans réservation confirmée ni paiement."}
 
 
 @router.patch("/reservations/{booking_id}/paiement")
