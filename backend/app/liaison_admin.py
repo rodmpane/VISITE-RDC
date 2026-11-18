@@ -1,10 +1,13 @@
 """Authenticated creation, editing, publication and removal of itinerary links."""
 from datetime import date
 from typing import Literal
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field, model_validator
 from .db import connection, execute, fetchone
-from .main import require_admin
+from .catalogue import admin_auth
+
+def require_admin(authorization: str | None = Header(default=None)):
+    admin_auth(authorization)
 
 router = APIRouter(prefix="/api/admin", dependencies=[Depends(require_admin)])
 
