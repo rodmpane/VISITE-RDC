@@ -160,6 +160,8 @@ class SavedTrip(BaseModel):
 @router.post("/inscription", status_code=201)
 def register(body: Register):
     email = str(body.email).strip().lower()
+    if is_admin_email(email):
+        raise HTTPException(status_code=403, detail="Ce compte est réservé à l’administration. Connectez-vous avec votre compte existant.")
     with connection() as conn:
         init_tables(conn)
         if fetchone(conn, "SELECT id FROM voyageurs WHERE email=?", (email,)):
