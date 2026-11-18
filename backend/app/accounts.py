@@ -24,6 +24,16 @@ def init_tables(conn):
         id VARCHAR(40) PRIMARY KEY, nom VARCHAR(120) NOT NULL,
         email VARCHAR(254) NOT NULL UNIQUE, password_hash TEXT NOT NULL,
         created_at VARCHAR(40) NOT NULL)""")
+    # One-time administrator provisioning from a salted password hash stored only in Render.
+    admin_email = os.getenv("ADMIN_LOGIN_EMAIL", "").strip().lower()
+    admin_hash = os.getenv("ADMIN_INITIAL_PASSWORD_HASH", "").strip()
+    if admin_email and admin_hash and re.fullmatch(r"[0-9a-f]{32}:[0-9a-f]{64}", admin_hash):
+        existing_admin = fetchone(conn, "SELECT id FROM voyageurs WHERE email=?", (admin_email,))
+        if not existing_admin:
+            execute(conn, """INSERT INTO voyageurs (id,nom,email,password_hash,created_at)
+                VALUES (?,?,?,?,?)""",
+                (str(uuid4()), "Administrateur Voyage RDC", admin_email, admin_hash,
+                 datetime.now(timezone.utc).isoformat()))
     execute(conn, """CREATE TABLE IF NOT EXISTS sessions_voyageurs (
         token_hash VARCHAR(64) PRIMARY KEY, user_id VARCHAR(40) NOT NULL,
         expires_at VARCHAR(40) NOT NULL)""")
