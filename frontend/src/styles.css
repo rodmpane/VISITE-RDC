@@ -367,3 +367,14 @@ body{color:var(--rdc-navy);background:#f5f7fc}
 @media(max-width:420px){
  .hero-art{transform:scale(.82);transform-origin:top center;margin-bottom:-16px}
 }
+
+/* Detailed vector vehicle illustrations replace emoji glyphs. */
+.hero-art .art-vehicle-svg{display:block;width:138px;height:80px;color:#f7fbff;filter:drop-shadow(0 5px 7px #0006)}
+.hero-art .art-vehicle{height:106px;top:calc(5% + 103px);gap:3px}
+.hero-art .art-vehicle-label{font-size:9px;letter-spacing:1.4px;background:#123c7d;border-color:#f9b82f}
+.hero-art .art-vehicle-0 .art-vehicle-svg{transform:rotate(-12deg)}
+.hero-art .art-vehicle-1 .art-vehicle-svg{color:#f9b82f}
+.hero-art .art-vehicle-2 .art-vehicle-svg{color:#f9b82f}
+.hero-art .art-vehicle-3 .art-vehicle-svg{color:#f7fbff}
+.hero-art .art-vehicle-4 .art-vehicle-svg{color:#f9b82f}
+.hero-art .art-vehicle-5 .art-vehicle-svg{color:#f7fbff}
