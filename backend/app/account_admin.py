@@ -61,7 +61,7 @@ def set_status(user_id: str,body:AccountStatus):
 def revoke_sessions(user_id: str):
     with connection() as conn:
         init_tables(conn)
-        if not fetchone(conn,"SELECT id FROM voyageurs WHERE id=?",(user_id,)):
+        if not (target := fetchone(conn,"SELECT id,email FROM voyageurs WHERE id=?",(user_id,))) or is_admin_email(target["email"]):
             raise HTTPException(status_code=404,detail="Compte introuvable")
         execute(conn,"DELETE FROM sessions_voyageurs WHERE user_id=?",(user_id,))
         return {"ok":True}
