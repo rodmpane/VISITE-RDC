@@ -474,12 +474,8 @@ class BookingValidation(BaseModel):
 
 
 def require_booking_admin(authorization):
-    configured = os.getenv("ADMIN_API_TOKEN", "")
-    supplied = authorization[7:] if authorization and authorization.startswith("Bearer ") else ""
-    if not configured:
-        raise HTTPException(status_code=503, detail="Administration non configurée.")
-    if not secrets.compare_digest(configured, supplied):
-        raise HTTPException(status_code=401, detail="Accès administrateur refusé.")
+    from .catalogue import admin_auth
+    admin_auth(authorization)
 
 
 @router.get("/admin/reservations")
