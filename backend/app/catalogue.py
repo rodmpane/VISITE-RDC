@@ -7,7 +7,7 @@ import secrets
 
 from fastapi import APIRouter, Header, HTTPException, Query
 from pydantic import BaseModel, Field, HttpUrl, model_validator, field_validator
-from .db import connection, execute, fetchall, fetchone
+from .db import connection, execute, fetchall, fetchone, is_sqlite
 
 router = APIRouter(prefix="/api", tags=["Catalogue"])
 
@@ -32,6 +32,7 @@ def init_catalogue(conn):
         adresse VARCHAR(300),
         telephone VARCHAR(40),
         email VARCHAR(254),
+        notification_active INTEGER NOT NULL DEFAULT 0,
         site_web TEXT,
         description TEXT,
         photo_url TEXT,
@@ -43,6 +44,10 @@ def init_catalogue(conn):
         cree_le VARCHAR(40) NOT NULL,
         modifie_le VARCHAR(40) NOT NULL
     )""")
+    if not is_sqlite():
+        execute(conn,"ALTER TABLE catalogue_partenaires ADD COLUMN IF NOT EXISTS notification_active INTEGER NOT NULL DEFAULT 0")
+    elif "notification_active" not in {r["name"] for r in fetchall(conn,"PRAGMA table_info(catalogue_partenaires)")}:
+        execute(conn,"ALTER TABLE catalogue_partenaires ADD COLUMN notification_active INTEGER NOT NULL DEFAULT 0")
     execute(conn, "CREATE INDEX IF NOT EXISTS idx_catalogue_public ON catalogue_partenaires(publie,categorie,ville_id)")
 
 class Partner(BaseModel):
@@ -52,6 +57,7 @@ class Partner(BaseModel):
     adresse: str = Field(default="", max_length=300)
     telephone: str = Field(default="", max_length=40)
     email: str = Field(default="", max_length=254)
+    notification_active: bool = False
     site_web: HttpUrl | None = None
     description: str = Field(default="", max_length=2000)
     photo_url: HttpUrl | None = None
@@ -72,6 +78,8 @@ class Partner(BaseModel):
     def verify_publication(self):
         if self.date_verification and self.date_verification > date.today():
             raise ValueError("La vérification ne peut pas être datée dans le futur.")
+        if self.notification_active and (not self.publie or not self.email.strip()):
+            raise ValueError("Publiez la fiche et renseignez une adresse e-mail partenaire vérifiée avant d’activer les notifications.")
         if self.publie and (not self.source_verification.strip() or not self.date_verification):
             raise ValueError("Une source et une date de vérification sont obligatoires pour publier.")
         if self.publie and self.categorie == "hotel" and (not self.ville_id.strip() or not self.adresse.strip()):
