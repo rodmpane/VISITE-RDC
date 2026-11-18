@@ -18,7 +18,7 @@ export default function AdminGate({children}){
   if(token)fetch("/api/compte/deconnexion",{method:"POST",headers:{Authorization:"Bearer "+token}}).catch(()=>{});
   window.location.replace("/compte");
  }
- return <><nav className="container admin-links" aria-label="Navigation de l’administration" style={{display:"flex",flexWrap:"wrap",gap:"12px",paddingTop:"12px",paddingBottom:"12px"}}>
+ return <><nav className="admin-links admin-global-nav" aria-label="Navigation de l’administration">
    <a href="/admin">Itinéraires</a><a href="/admin/catalogue">Transporteurs et hôtels</a><a href="/admin/reservations">Réservations et paiements</a><a href="/admin/comptes">Comptes clients</a><a href="/">Site public</a><button type="button" onClick={logout}>Se déconnecter</button>
  </nav>{children}</>;
 }
