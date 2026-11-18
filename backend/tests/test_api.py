@@ -1,3 +1,4 @@
+from tests.admin_helper import admin_headers
 import os
 import tempfile
 import unittest
@@ -34,14 +35,14 @@ class ApiTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.env = patch.dict(os.environ, {
             "DATABASE_URL": f"sqlite:///{self.temp.name}/test.db",
-            "ADMIN_API_TOKEN": "this-is-a-test-only-token-do-not-reuse",
+            
         })
         self.env.start()
         init_schema()
         self.data = fixture()
         import_rows(self.data)
         self.client = TestClient(app)
-        self.headers = {"Authorization": "Bearer this-is-a-test-only-token-do-not-reuse"}
+        self.headers = admin_headers()
 
     def tearDown(self):
         self.client.close()
