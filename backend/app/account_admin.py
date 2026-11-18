@@ -71,7 +71,7 @@ def reset_password(user_id: str):
     """Generate a strong temporary password, returned exactly once to the administrator."""
     with connection() as conn:
         init_tables(conn)
-        if not fetchone(conn,"SELECT id FROM voyageurs WHERE id=?",(user_id,)):
+        if not (target := fetchone(conn,"SELECT id,email FROM voyageurs WHERE id=?",(user_id,))) or is_admin_email(target["email"]):
             raise HTTPException(status_code=404,detail="Compte introuvable")
         temporary=secrets.token_urlsafe(20)
         execute(conn,"UPDATE voyageurs SET password_hash=? WHERE id=?",(hash_password(temporary),user_id))
@@ -83,7 +83,7 @@ def delete_account(user_id: str):
     """Delete account and associated private records; reservation history is permanently removed."""
     with connection() as conn:
         init_tables(conn)
-        if not fetchone(conn,"SELECT id FROM voyageurs WHERE id=?",(user_id,)):
+        if not (target := fetchone(conn,"SELECT id,email FROM voyageurs WHERE id=?",(user_id,))) or is_admin_email(target["email"]):
             raise HTTPException(status_code=404,detail="Compte introuvable")
         for table in ("sessions_voyageurs","pieces_identite_voyageurs","voyages_enregistres","demandes_reservation"):
             execute(conn,f"DELETE FROM {table} WHERE user_id=?",(user_id,))
