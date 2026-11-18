@@ -2,6 +2,8 @@
 
 Never return password hashes, authentication tokens or identity document bytes.
 """
+import secrets
+from .accounts import hash_password
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from pydantic import BaseModel
 from .accounts import init_tables
@@ -60,3 +62,27 @@ def revoke_sessions(user_id: str):
             raise HTTPException(status_code=404,detail="Compte introuvable")
         execute(conn,"DELETE FROM sessions_voyageurs WHERE user_id=?",(user_id,))
         return {"ok":True}
+
+@router.post("/{user_id}/reinitialiser-mot-de-passe")
+def reset_password(user_id: str):
+    """Generate a strong temporary password, returned exactly once to the administrator."""
+    with connection() as conn:
+        init_tables(conn)
+        if not fetchone(conn,"SELECT id FROM voyageurs WHERE id=?",(user_id,)):
+            raise HTTPException(status_code=404,detail="Compte introuvable")
+        temporary=secrets.token_urlsafe(20)
+        execute(conn,"UPDATE voyageurs SET password_hash=? WHERE id=?",(hash_password(temporary),user_id))
+        execute(conn,"DELETE FROM sessions_voyageurs WHERE user_id=?",(user_id,))
+        return {"mot_de_passe_temporaire":temporary,"message":"Mot de passe réinitialisé. Transmettez-le au voyageur par un canal sécurisé. Les anciennes sessions sont déconnectées."}
+
+@router.delete("/{user_id}")
+def delete_account(user_id: str):
+    """Delete account and associated private records; reservation history is permanently removed."""
+    with connection() as conn:
+        init_tables(conn)
+        if not fetchone(conn,"SELECT id FROM voyageurs WHERE id=?",(user_id,)):
+            raise HTTPException(status_code=404,detail="Compte introuvable")
+        for table in ("sessions_voyageurs","pieces_identite_voyageurs","voyages_enregistres","demandes_reservation"):
+            execute(conn,f"DELETE FROM {table} WHERE user_id=?",(user_id,))
+        execute(conn,"DELETE FROM voyageurs WHERE id=?",(user_id,))
+        return {"deleted":True}
