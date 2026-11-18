@@ -324,3 +324,14 @@ body{color:var(--rdc-navy);background:#f5f7fc}
 .journey-booking-form input:not([type="checkbox"]),.journey-booking-form select,.journey-booking-form textarea{box-sizing:border-box;width:100%;padding:11px;border:1px solid #a6b7d2;border-radius:7px;background:white;color:#0c234c;font:inherit}
 .journey-booking-form .booking-actions button{font-weight:800}
 @media(max-width:620px){.journey-form-grid{grid-template-columns:1fr}.journey-booking-form{padding:12px}}
+
+/* Website only: compact identity and account settings in the static header */
+.account-shell:not(.account-apk) .account-header{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:12px max(16px,calc((100% - 1160px)/2));position:sticky;top:0;z-index:105;background:#fff}
+.account-web-top-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;margin-left:auto}
+.account-web-identity{display:flex;align-items:center;gap:8px;min-width:0}
+.account-web-identity>span:last-child{display:flex;flex-direction:column;min-width:0}
+.account-web-identity strong{font-size:12px;color:#0c234c}
+.account-web-identity small{font-size:11px;color:#566781;overflow-wrap:anywhere}
+.account-web-settings{background:#2052d9;color:#fff;border:2px solid #f9b82f;border-radius:8px;padding:10px 13px;font-size:12px;font-weight:850;cursor:pointer}
+.account-web-top-actions .account-signout{position:static;margin:0;font-size:12px}
+@media(max-width:780px){.account-shell:not(.account-apk) .account-header{padding:10px 12px}.account-web-top-actions{width:100%;justify-content:space-between;margin-left:0}.account-web-identity{flex:1}.account-web-settings{padding:8px}.account-web-top-actions .account-signout{padding:8px}}
