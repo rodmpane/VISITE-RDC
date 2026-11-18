@@ -1,3 +1,4 @@
+from tests.admin_helper import admin_headers
 """Catalogue: authentication, draft isolation and verified publication."""
 import os
 import tempfile
@@ -9,10 +10,10 @@ from app.main import app
 class CatalogueTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory()
-        self.env=patch.dict(os.environ,{"DATABASE_URL":f"sqlite:///{self.temp.name}/test.db","ADMIN_API_TOKEN":"test-secret-only"})
+        self.env=patch.dict(os.environ,{"DATABASE_URL":f"sqlite:///{self.temp.name}/test.db",})
         self.env.start()
         self.client=TestClient(app)
-        self.headers={"Authorization":"Bearer test-secret-only"}
+        self.headers=admin_headers()
         self.partner={"categorie":"hotel","nom":"Hôtel de test","ville_id":"kinshasa","adresse":"Adresse de test","tarif":50,"devise":"USD"}
 
     def tearDown(self):
