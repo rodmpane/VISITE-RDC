@@ -12,12 +12,16 @@ from .db import connection, execute, fetchall, fetchone
 router = APIRouter(prefix="/api", tags=["Catalogue"])
 
 def admin_auth(authorization: str | None):
-    configured = os.getenv("ADMIN_API_TOKEN", "")
-    if not configured:
-        raise HTTPException(status_code=503, detail="Configurez ADMIN_API_TOKEN sur Render.")
-    supplied = authorization[7:] if authorization and authorization.startswith("Bearer ") else ""
-    if not secrets.compare_digest(configured, supplied):
-        raise HTTPException(status_code=401, detail="Accès administrateur refusé.")
+    """Authorize the logged-in administrator using the shared account session."""
+    from .accounts import current_user, is_admin_email, init_tables
+    if not os.getenv("ADMIN_LOGIN_EMAIL", "").strip():
+        raise HTTPException(status_code=503, detail="Compte administrateur non configuré.")
+    with connection() as conn:
+        init_tables(conn)
+        user = current_user(conn, authorization)
+        if not is_admin_email(user["email"]):
+            raise HTTPException(status_code=403, detail="Accès réservé à l’administrateur.")
+
 
 def init_catalogue(conn):
     execute(conn, """CREATE TABLE IF NOT EXISTS catalogue_partenaires (
