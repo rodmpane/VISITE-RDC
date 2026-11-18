@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 
 from .db import connection, execute, fetchall, fetchone
 from .accounts import router as accounts_router
-from .catalogue import router as catalogue_router
+from .catalogue import router as catalogue_router, init_catalogue
 from .routing import MODES, itineraries
 
 app = FastAPI(title="Voyage RDC", version="1.1.0", description="Recherche d'itinéraires informatifs, sans vente de billets")
@@ -61,7 +61,10 @@ def points(lieu_id: str = Query(min_length=1, max_length=100)):
 @app.get("/api/operateurs")
 def operateurs():
     with connection() as conn:
-        return fetchall(conn, "SELECT id,nom,type,note FROM operateurs ORDER BY nom")
+        base = fetchall(conn, "SELECT id,nom,type,note FROM operateurs ORDER BY nom")
+        init_catalogue(conn)
+        verified = fetchall(conn, "SELECT id,nom,description AS note FROM catalogue_partenaires WHERE categorie=? AND publie=1 ORDER BY nom", ("transporteur",))
+        return base + [{**item, "type": "Partenaire vérifié"} for item in verified]
 
 
 EDGES_SQL = """
