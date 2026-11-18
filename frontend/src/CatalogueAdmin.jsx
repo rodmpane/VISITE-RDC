@@ -1,7 +1,7 @@
 import {getTravelerToken} from "./AccountPage";
 import React, {useState,useEffect} from "react";
 
-const blank={categorie:"transporteur",nom:"",ville_id:"",adresse:"",telephone:"",email:"",site_web:"",description:"",photo_url:"",tarif:"",devise:"USD",source_verification:"",date_verification:"",publie:false};
+const blank={categorie:"transporteur",nom:"",ville_id:"",adresse:"",telephone:"",email:"",notification_active:false,site_web:"",description:"",photo_url:"",tarif:"",devise:"USD",source_verification:"",date_verification:"",publie:false};
 const FIELDS=[["nom","Nom officiel","text"],["ville_id","Identifiant de la ville (ex. kinshasa)","text"],["adresse","Adresse","text"],["telephone","Téléphone","tel"],["email","E-mail","email"],["site_web","Site officiel HTTPS","url"],["photo_url","URL de photo autorisée (HTTPS)","url"],["tarif","Tarif indicatif (laisser vide si inconnu)","number"],["source_verification","Source de vérification","text"],["date_verification","Date de vérification","date"]];
 function readable(error){return typeof error==="string"?error:Array.isArray(error)?error.map(x=>x.msg).join("; "):"Erreur serveur";}
 export default function CatalogueAdmin(){
@@ -12,7 +12,7 @@ export default function CatalogueAdmin(){
  }
  async function refresh(){setBusy(true);setError("");try{setItems(await request(""));setLoaded(true);}catch(e){setError(e.message);}finally{setBusy(false);}}
  function addHotel(){setSelected(null);setForm({...blank,categorie:"hotel"});setError("");setNotice("");}
- function edit(item){setSelected(item?.id||null);setForm(item?{...item,site_web:item.site_web||"",photo_url:item.photo_url||"",tarif:item.tarif??"",date_verification:item.date_verification||"",publie:!!item.publie}:blank);setError("");setNotice("");}
+ function edit(item){setSelected(item?.id||null);setForm(item?{...item,site_web:item.site_web||"",photo_url:item.photo_url||"",tarif:item.tarif??"",date_verification:item.date_verification||"",publie:!!item.publie,notification_active:!!item.notification_active}:blank);setError("");setNotice("");}
  async function save(e){e.preventDefault();setBusy(true);setError("");setNotice("");try{
   const payload={...form,nom:form.nom.trim(),site_web:form.site_web||null,photo_url:form.photo_url||null,tarif:form.tarif===""?null:Number(form.tarif),date_verification:form.date_verification||null};
   const saved=await request(selected?"/"+selected:"",selected?"PUT":"POST",payload);
@@ -26,6 +26,7 @@ export default function CatalogueAdmin(){
  {loaded&&<div className="catalogue-layout"><aside className="account-card"><h2>Fiches ({items.length})</h2><button type="button" onClick={addHotel}>+ Ajouter un hôtel</button><button type="button" onClick={()=>edit(null)}>+ Ajouter un transporteur</button>{items.map(item=><button type="button" className={"catalogue-entry "+(selected===item.id?"selected":"")} key={item.id} onClick={()=>edit(item)}><strong>{item.nom}</strong><small>{item.categorie==="hotel"?"Hôtel":"Transporteur"} · {item.publie?"Publié":"Brouillon"}</small></button>)}</aside>
  <form className="account-card catalogue-form" onSubmit={save}><h2>{selected?"Modifier la fiche":"Nouvelle fiche"}</h2><label>Catégorie<select value={form.categorie} onChange={e=>setForm({...form,categorie:e.target.value})}><option value="transporteur">Transporteur</option><option value="hotel">Hôtel</option></select></label>
  {FIELDS.map(([key,label,type])=><label key={key}>{label}<input type={type} value={form[key]??""} min={type==="number"?"0":undefined} step={type==="number"?"0.01":undefined} onChange={e=>setForm({...form,[key]:e.target.value})} required={key==="nom"} /></label>)}
+ <label className="checkbox-line"><input type="checkbox" checked={!!form.notification_active} onChange={e=>setForm({...form,notification_active:e.target.checked})}/> Activer les notifications automatiques à l’adresse e-mail vérifiée de ce partenaire</label><p className="small-note">À activer uniquement après accord du partenaire. Nécessite la configuration SMTP sur Render. Les demandes restent non confirmées tant que le partenaire ne les a pas acceptées.</p>
  <label>Devise<select value={form.devise} onChange={e=>setForm({...form,devise:e.target.value})}><option value="USD">USD</option><option value="CDF">CDF</option></select></label>
  <label>Description<textarea value={form.description||""} maxLength={2000} onChange={e=>setForm({...form,description:e.target.value})}/></label>
  {form.photo_url&&<img className="catalogue-preview" src={form.photo_url} alt="Aperçu de la photo proposée" referrerPolicy="no-referrer"/>}
