@@ -335,3 +335,25 @@ body{color:var(--rdc-navy);background:#f5f7fc}
 .account-web-settings{background:#2052d9;color:#fff;border:2px solid #f9b82f;border-radius:8px;padding:10px 13px;font-size:12px;font-weight:850;cursor:pointer}
 .account-web-top-actions .account-signout{position:static;margin:0;font-size:12px}
 @media(max-width:780px){.account-shell:not(.account-apk) .account-header{padding:10px 12px}.account-web-top-actions{width:100%;justify-content:space-between;margin-left:0}.account-web-identity{flex:1}.account-web-settings{padding:8px}.account-web-top-actions .account-signout{padding:8px}}
+
+/* Animated transport story: the two existing circles, pins and labels stay fixed. */
+.hero-art .art-traffic{position:absolute;inset:0;pointer-events:none;z-index:1}
+.hero-art .art-vehicle{position:absolute;left:calc(20% + 78px);top:calc(5% + 119px);width:154px;height:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;opacity:0;animation:rdcVehicleJourney 18s ease-in-out infinite;filter:drop-shadow(0 8px 12px #020f2d55)}
+.hero-art .art-vehicle-symbol{display:block;font-size:47px;line-height:1.1;transform-origin:center;animation:rdcVehicleBob 1.5s ease-in-out infinite alternate}
+.hero-art .art-vehicle-label{font-size:10px;font-weight:900;letter-spacing:1.7px;text-transform:uppercase;color:#fff;background:#2052d9d9;border:1px solid #f9b82f;border-radius:15px;padding:4px 11px}
+.hero-art .art-vehicle-0{animation-delay:0s}
+.hero-art .art-vehicle-1{animation-delay:-15s}
+.hero-art .art-vehicle-2{animation-delay:-12s}
+.hero-art .art-vehicle-3{animation-delay:-9s}
+.hero-art .art-vehicle-4{animation-delay:-6s}
+.hero-art .art-vehicle-5{animation-delay:-3s}
+@keyframes rdcVehicleJourney{
+  0%{opacity:0;transform:translate(-70px,50px) scale(.6) rotate(-8deg)}
+  2%{opacity:1}
+  8%{opacity:1;transform:translate(-14px,12px) scale(.95) rotate(-3deg)}
+  13%{opacity:1;transform:translate(22px,-12px) scale(1.05) rotate(1deg)}
+  16%{opacity:0;transform:translate(75px,-50px) scale(.7) rotate(5deg)}
+  16.7%,100%{opacity:0;transform:translate(75px,-50px) scale(.7)}
+}
+@keyframes rdcVehicleBob{from{transform:translateY(-3px)}to{transform:translateY(3px)}}
+@media(prefers-reduced-motion:reduce){.hero-art .art-vehicle{animation:none;opacity:0}.hero-art .art-vehicle-0{opacity:1;transform:none}.hero-art .art-vehicle-symbol{animation:none}}
