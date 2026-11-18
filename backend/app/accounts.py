@@ -11,7 +11,7 @@ import unicodedata
 from datetime import date, datetime, timedelta, timezone
 from uuid import uuid4
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field
 
 from .db import connection, execute, fetchall, fetchone, is_sqlite
@@ -63,6 +63,10 @@ def init_tables(conn):
     else:
         execute(conn, "ALTER TABLE demandes_reservation ADD COLUMN IF NOT EXISTS reference VARCHAR(255)")
     execute(conn, "CREATE UNIQUE INDEX IF NOT EXISTS idx_demandes_reference ON demandes_reservation(reference)")
+    if not is_sqlite():
+        execute(conn,"ALTER TABLE demandes_reservation ADD COLUMN IF NOT EXISTS notification_partenaire VARCHAR(30)")
+    elif "notification_partenaire" not in {r["name"] for r in fetchall(conn,"PRAGMA table_info(demandes_reservation)")}:
+        execute(conn,"ALTER TABLE demandes_reservation ADD COLUMN notification_partenaire VARCHAR(30)")
 
     fields = {"postnom":"VARCHAR(120)","prenom":"VARCHAR(120)","lieu_naissance":"VARCHAR(150)","date_naissance":"VARCHAR(20)","telephone":"VARCHAR(35)","pays":"VARCHAR(100)","pays_origine":"VARCHAR(100)","ville":"VARCHAR(120)","adresse":"VARCHAR(300)"}
     existing = {r["name"] for r in fetchall(conn, "PRAGMA table_info(voyageurs)")} if is_sqlite() else set()
@@ -359,7 +363,7 @@ class PublicBookingRequest(BookingRequest):
 
 
 @router.post("/reservations/invite", status_code=201)
-def public_booking(body: PublicBookingRequest, authorization: str | None = Header(default=None)):
+def public_booking(body: PublicBookingRequest, background_tasks: BackgroundTasks, authorization: str | None = Header(default=None)):
     """Guest and signed-in booking requests; no payment collection or automatic confirmation."""
     if not all((body.nom.strip(), body.postnom.strip(), body.prenom.strip(),
                 body.lieu_naissance.strip(), body.date_naissance, body.telephone.strip(),
@@ -395,6 +399,8 @@ def public_booking(body: PublicBookingRequest, authorization: str | None = Heade
              body.voyageurs,body.details.strip(),"Demande enregistrée — non confirmée",
              status,body.paiement_methode,now.isoformat(),reference,
              json.dumps(info,ensure_ascii=False),json.dumps(info,ensure_ascii=False)))
+        from .partner_notifications import notify_partner
+        background_tasks.add_task(notify_partner,booking_id)
         return {"id":booking_id,"reference":reference,"type":body.type,
                 "prestataire":body.prestataire,"ville":body.ville,
                 "date_debut":body.date_debut.isoformat(),
@@ -422,7 +428,7 @@ def bookings(authorization: str | None = Header(default=None)):
 
 
 @router.post("/reservations", status_code=201)
-def request_booking(body: BookingRequest, authorization: str | None = Header(default=None)):
+def request_booking(body: BookingRequest, background_tasks: BackgroundTasks, authorization: str | None = Header(default=None)):
     if body.date_debut < date.today() or (body.date_fin and body.date_fin < body.date_debut):
         raise HTTPException(status_code=422, detail="Vérifiez les dates de votre demande.")
     if body.type == "hebergement" and not body.date_fin:
@@ -450,6 +456,8 @@ def request_booking(body: BookingRequest, authorization: str | None = Header(def
              body.date_debut.isoformat(),body.date_fin.isoformat() if body.date_fin else None,
              body.voyageurs,body.details.strip(),"Demande enregistrée — non confirmée",
              "Aucun paiement",None,created_at.isoformat(),reference,traveler_snapshot))
+        from .partner_notifications import notify_partner
+        background_tasks.add_task(notify_partner,booking_id)
         return {"id":booking_id,"reference":reference,"message":"Demande enregistrée, sans réservation confirmée ni paiement."}
 
 
