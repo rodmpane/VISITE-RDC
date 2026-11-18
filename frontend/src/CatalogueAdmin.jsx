@@ -1,10 +1,11 @@
+import {getTravelerToken} from "./AccountPage";
 import React, {useState} from "react";
 
 const blank={categorie:"transporteur",nom:"",ville_id:"",adresse:"",telephone:"",email:"",site_web:"",description:"",photo_url:"",tarif:"",devise:"USD",source_verification:"",date_verification:"",publie:false};
 const FIELDS=[["nom","Nom officiel","text"],["ville_id","Identifiant de la ville (ex. kinshasa)","text"],["adresse","Adresse","text"],["telephone","Téléphone","tel"],["email","E-mail","email"],["site_web","Site officiel HTTPS","url"],["photo_url","URL de photo autorisée (HTTPS)","url"],["tarif","Tarif indicatif (laisser vide si inconnu)","number"],["source_verification","Source de vérification","text"],["date_verification","Date de vérification","date"]];
 function readable(error){return typeof error==="string"?error:Array.isArray(error)?error.map(x=>x.msg).join("; "):"Erreur serveur";}
 export default function CatalogueAdmin(){
- const [token,setToken]=useState("");const [items,setItems]=useState([]);const [selected,setSelected]=useState(null);const [form,setForm]=useState(blank);const [error,setError]=useState("");const [notice,setNotice]=useState("");const [busy,setBusy]=useState(false);const [loaded,setLoaded]=useState(false);
+ const [token,setToken]=useState(getTravelerToken);const [items,setItems]=useState([]);const [selected,setSelected]=useState(null);const [form,setForm]=useState(blank);const [error,setError]=useState("");const [notice,setNotice]=useState("");const [busy,setBusy]=useState(false);const [loaded,setLoaded]=useState(false);
  async function request(path,method="GET",data){
   const res=await fetch("/api/admin/catalogue"+path,{method,headers:{"Authorization":"Bearer "+token,...(data?{"Content-Type":"application/json"}:{})},body:data?JSON.stringify(data):undefined,cache:"no-store"});
   const json=await res.json().catch(()=>({}));if(!res.ok)throw Error(readable(json.detail));return json;
@@ -17,8 +18,9 @@ export default function CatalogueAdmin(){
   setItems(await request(""));edit(saved);setNotice("Enregistrement effectué. "+(saved.publie?"Fiche publiée.":"Fiche conservée en brouillon."));
  }catch(err){setError(err.message);}finally{setBusy(false);}}
  async function remove(){if(!selected||!window.confirm("Supprimer définitivement cette fiche ?"))return;setBusy(true);setError("");try{await request("/"+selected,"DELETE");setItems(await request(""));edit(null);setNotice("Fiche supprimée.");}catch(e){setError(e.message);}finally{setBusy(false);}}
+ useEffect(()=>{if(token)refresh();},[]);
  return <main className="container catalogue-admin"><a href="/admin">← Administration des itinéraires</a><h1>Catalogue des partenaires</h1><p>Gérez les transporteurs, hôtels, photos autorisées et tarifs. Une fiche reste invisible pour les voyageurs tant qu'elle n'est pas vérifiée et publiée.</p>
- <section className="account-card catalogue-auth"><label>Jeton administrateur<input type="password" autoComplete="off" value={token} onChange={e=>{setToken(e.target.value);setLoaded(false);setItems([]);}}/></label><button type="button" disabled={!token||busy} onClick={refresh}>Accéder au catalogue</button><a href="/admin/reservations">Gérer les réservations →</a></section>
+<p><a href="/admin/reservations">Gérer les réservations →</a></p>
  {error&&<p role="alert" className="account-alert">{error}</p>}{notice&&<p role="status">{notice}</p>}
  {loaded&&<div className="catalogue-layout"><aside className="account-card"><h2>Fiches ({items.length})</h2><button type="button" onClick={()=>edit(null)}>+ Nouvelle fiche</button>{items.map(item=><button type="button" className={"catalogue-entry "+(selected===item.id?"selected":"")} key={item.id} onClick={()=>edit(item)}><strong>{item.nom}</strong><small>{item.categorie==="hotel"?"Hôtel":"Transporteur"} · {item.publie?"Publié":"Brouillon"}</small></button>)}</aside>
  <form className="account-card catalogue-form" onSubmit={save}><h2>{selected?"Modifier la fiche":"Nouvelle fiche"}</h2><label>Catégorie<select value={form.categorie} onChange={e=>setForm({...form,categorie:e.target.value})}><option value="transporteur">Transporteur</option><option value="hotel">Hôtel</option></select></label>
