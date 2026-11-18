@@ -38,6 +38,14 @@ class CatalogueTests(unittest.TestCase):
         self.assertEqual(self.client.delete(f"/api/admin/catalogue/{partner_id}",headers=self.headers).status_code,200)
         self.assertEqual(self.client.get("/api/catalogue").json(),[])
 
+    def test_notifications_require_verified_published_partner(self):
+        draft={**self.partner,"email":"partenaire@example.invalid","notification_active":True}
+        self.assertEqual(self.client.post("/api/admin/catalogue",json=draft,headers=self.headers).status_code,422)
+        enabled={**draft,"publie":True,"source_verification":"Accord partenaire de test","date_verification":"2026-11-01"}
+        created=self.client.post("/api/admin/catalogue",json=enabled,headers=self.headers)
+        self.assertEqual(created.status_code,201,created.text)
+        self.assertTrue(created.json()["notification_active"])
+
     def test_photo_url_requires_https_and_no_fake_records(self):
         self.assertEqual(self.client.get("/api/catalogue").json(),[])
         bad={**self.partner,"photo_url":"javascript:alert(1)"}
