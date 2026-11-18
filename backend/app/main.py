@@ -29,12 +29,8 @@ app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", 
 
 
 def require_admin(authorization: str | None = Header(default=None)):
-    configured = os.getenv("ADMIN_API_TOKEN", "")
-    if not configured:
-        raise HTTPException(status_code=503, detail="Administration non configurée")
-    supplied = authorization.removeprefix("Bearer ") if authorization and authorization.startswith("Bearer ") else ""
-    if not secrets.compare_digest(configured, supplied):
-        raise HTTPException(status_code=401, detail="Accès refusé")
+    from .catalogue import admin_auth
+    admin_auth(authorization)
 
 
 @app.get("/api/health")
