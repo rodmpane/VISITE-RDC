@@ -91,6 +91,7 @@ export default function AccountPage() {
   async function refresh(current) {
     const [profile, saved, requests] = await Promise.all([request("/moi", {}, current), request("/voyages", {}, current), request("/reservations", {}, current)]);
     setUser(profile); setTrips(saved); setBookings(requests);
+    if (profile.role === "admin" && window.location.pathname === "/compte") window.location.replace("/admin");
   }
   useEffect(() => { if (token) refresh(token).catch(() => { sessionStorage.removeItem(KEY); setToken(""); setUser(null); }); }, [token]);
   async function submit(event) {
