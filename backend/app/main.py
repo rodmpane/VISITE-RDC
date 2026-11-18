@@ -15,12 +15,14 @@ from .db import connection, execute, fetchall, fetchone
 from .accounts import router as accounts_router
 from .catalogue import router as catalogue_router, init_catalogue
 from .liaison_admin import router as liaison_admin_router
+from .account_admin import router as account_admin_router
 from .routing import MODES, itineraries
 
 app = FastAPI(title="Voyage RDC", version="1.1.0", description="Recherche d'itinéraires informatifs, sans vente de billets")
 app.include_router(accounts_router)
 app.include_router(catalogue_router)
 app.include_router(liaison_admin_router)
+app.include_router(account_admin_router)
 
 origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",") if o.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "PATCH", "DELETE"], allow_headers=["Authorization", "Content-Type"])
@@ -212,6 +214,7 @@ if STATIC_DIR.is_dir():
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
     @app.get("/", include_in_schema=False)
+    @app.get("/admin/comptes", include_in_schema=False)
     @app.get("/admin/catalogue", include_in_schema=False)
     @app.get("/admin/reservations", include_in_schema=False)
     @app.get("/admin", include_in_schema=False)
