@@ -105,6 +105,7 @@ export default function AccountPage() {
       });
       sessionStorage.setItem(KEY, data.token);
       setToken(data.token); setUser(data.user); setSection("reservations");
+      if (data.user.role === "admin") { window.location.href = "/admin"; return; }
       setMessage("Bienvenue dans votre espace Voyage RDC.");
     } catch (e) { setError(e.message); }
     finally { setBusy(false); }
@@ -189,6 +190,7 @@ export default function AccountPage() {
     <main className="account-main">
       <div className="account-heading"><span>VOYAGE RDC · ESPACE VOYAGEUR</span><h1>{user ? "Bonjour, " + user.nom : register ? "Créer mon compte" : "Mon espace voyageur"}</h1>
         <p>Gérez vos réservations, suivez leur validation, préparez vos paiements et retrouvez vos documents.</p></div>
+      {user?.role === "admin" && <section className="account-card"><h2>Administration Voyage RDC</h2><p>Vous êtes connecté comme administrateur.</p><a href="/admin">Accéder aux fonctions administrateur</a></section>}
       {error && <p className="account-alert" role="alert">{error}</p>}
       {message && <p className="account-success" role="status">{message}</p>}
       {!user ? <section className="account-card">
