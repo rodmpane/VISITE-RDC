@@ -212,6 +212,7 @@ if STATIC_DIR.is_dir():
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
     @app.get("/", include_in_schema=False)
+    @app.get("/admin/catalogue", include_in_schema=False)
     @app.get("/admin/reservations", include_in_schema=False)
     @app.get("/admin", include_in_schema=False)
     def serve_frontend():
