@@ -70,6 +70,12 @@ def init_tables(conn):
             execute(conn, "ALTER TABLE voyageurs ADD COLUMN bloque INTEGER NOT NULL DEFAULT 0")
     else:
         execute(conn, "ALTER TABLE voyageurs ADD COLUMN IF NOT EXISTS bloque INTEGER NOT NULL DEFAULT 0")
+    if is_sqlite():
+        payment_columns = {r["name"] for r in fetchall(conn, "PRAGMA table_info(demandes_reservation)")}
+        if "paiement_reference" not in payment_columns:
+            execute(conn, "ALTER TABLE demandes_reservation ADD COLUMN paiement_reference VARCHAR(200)")
+    else:
+        execute(conn, "ALTER TABLE demandes_reservation ADD COLUMN IF NOT EXISTS paiement_reference VARCHAR(200)")
     booking_cols = {r["name"] for r in fetchall(conn, "PRAGMA table_info(demandes_reservation)")} if is_sqlite() else set()
     if not is_sqlite() or "voyageur_infos" not in booking_cols:
         execute(conn, "ALTER TABLE demandes_reservation ADD COLUMN " + ("IF NOT EXISTS " if not is_sqlite() else "") + "voyageur_infos TEXT")
@@ -493,3 +499,21 @@ def validate_booking(booking_id: str, body: BookingValidation,
         execute(conn, """UPDATE demandes_reservation SET statut=?, paiement_statut=?, paiement_methode=?
             WHERE id=?""", (status, payment_status, method, booking_id))
         return {"id": booking_id, "statut": status, "paiement_statut": payment_status}
+
+class PaymentValidation(BaseModel):
+    reference: str = Field(min_length=4,max_length=200)
+    encaisse: bool
+
+@router.patch("/admin/reservations/{booking_id}/paiement-valide")
+def validate_payment(booking_id: str, body: PaymentValidation, authorization: str | None = Header(default=None)):
+    require_booking_admin(authorization)
+    with connection() as conn:
+        init_tables(conn)
+        booking=fetchone(conn,"SELECT id,statut FROM demandes_reservation WHERE id=?",(booking_id,))
+        if not booking:
+            raise HTTPException(status_code=404,detail="Réservation introuvable")
+        if booking["statut"] != "Réservation confirmée":
+            raise HTTPException(status_code=422,detail="Confirmez d'abord la réservation auprès du prestataire")
+        status="Paiement encaissé — confirmé par l'administration" if body.encaisse else "Paiement non encaissé — vérification requise"
+        execute(conn,"UPDATE demandes_reservation SET paiement_statut=?,paiement_reference=? WHERE id=?",(status,body.reference.strip(),booking_id))
+        return {"id":booking_id,"paiement_statut":status,"paiement_reference":body.reference.strip()}
