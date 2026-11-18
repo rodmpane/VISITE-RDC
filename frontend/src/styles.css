@@ -439,3 +439,20 @@ body{color:var(--rdc-navy);background:#f5f7fc}
 .header{position:sticky;top:0;z-index:200;background:#fff;box-shadow:0 3px 16px rgba(12,35,76,.09)}
 .header nav a:focus-visible,.header .brand:focus-visible{outline:3px solid #f9b82f;outline-offset:3px}
 @media(max-width:620px){.header{top:0}}
+
+/* Logo Voyage RDC: preserve the complete SVG including the dotted trail on every viewport. */
+.header{height:auto;min-height:100px}
+.header-inner{height:auto;min-height:100px;padding-top:12px;padding-bottom:12px}
+.header .brand{align-self:center;overflow:visible;min-width:0}
+.header .brand-logo{display:block;width:clamp(185px,23vw,270px);max-width:100%;height:auto;max-height:none;object-fit:contain;object-position:center}
+@media(max-width:700px){
+  .header{height:auto;min-height:90px}
+  .header-inner{height:auto;min-height:90px;padding-top:10px;padding-bottom:10px}
+  .header .brand{flex:0 1 48%;width:48%;min-width:0}
+  .header .brand-logo{display:block;width:100%!important;max-width:100%!important;max-height:none!important;height:auto!important;object-fit:contain}
+  .header nav{flex:1 1 auto;min-width:0;gap:8px}
+}
+@media(max-width:390px){
+  .header .brand{flex-basis:46%;width:46%}
+  .header nav{gap:5px}
+}
