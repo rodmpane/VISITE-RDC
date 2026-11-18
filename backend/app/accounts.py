@@ -63,6 +63,13 @@ def init_tables(conn):
         user_id VARCHAR(40) PRIMARY KEY, filename VARCHAR(160) NOT NULL,
         content_type VARCHAR(60) NOT NULL, encrypted_data TEXT NOT NULL,
         updated_at VARCHAR(40) NOT NULL)""")
+    # Account suspension is additive and preserves existing profiles.
+    if is_sqlite():
+        user_columns = {r["name"] for r in fetchall(conn, "PRAGMA table_info(voyageurs)")}
+        if "bloque" not in user_columns:
+            execute(conn, "ALTER TABLE voyageurs ADD COLUMN bloque INTEGER NOT NULL DEFAULT 0")
+    else:
+        execute(conn, "ALTER TABLE voyageurs ADD COLUMN IF NOT EXISTS bloque INTEGER NOT NULL DEFAULT 0")
     booking_cols = {r["name"] for r in fetchall(conn, "PRAGMA table_info(demandes_reservation)")} if is_sqlite() else set()
     if not is_sqlite() or "voyageur_infos" not in booking_cols:
         execute(conn, "ALTER TABLE demandes_reservation ADD COLUMN " + ("IF NOT EXISTS " if not is_sqlite() else "") + "voyageur_infos TEXT")
@@ -115,7 +122,7 @@ def current_user(conn, authorization):
         raise HTTPException(status_code=401, detail="Session invalide.")
     session = fetchone(conn, """SELECT v.id,v.nom,v.email FROM sessions_voyageurs s
         JOIN voyageurs v ON v.id=s.user_id
-        WHERE s.token_hash=? AND s.expires_at>?""",
+        WHERE s.token_hash=? AND s.expires_at>? AND v.bloque=0""",
         (hashlib.sha256(token.encode()).hexdigest(), datetime.now(timezone.utc).isoformat()))
     if not session:
         raise HTTPException(status_code=401, detail="Session expirée. Reconnectez-vous.")
@@ -162,6 +169,8 @@ def login(body: Login):
         user = fetchone(conn, "SELECT * FROM voyageurs WHERE email=?", (str(body.email).lower(),))
         if not user or not verify_password(body.password, user["password_hash"]):
             raise HTTPException(status_code=401, detail="Adresse e-mail ou mot de passe incorrect.")
+        if user["bloque"]:
+            raise HTTPException(status_code=403, detail="Ce compte est suspendu. Contactez l'administration.")
         return {"token": new_session(conn, user["id"]), "user": {"id": user["id"], "nom": user["nom"], "email": user["email"]}}
 
 
