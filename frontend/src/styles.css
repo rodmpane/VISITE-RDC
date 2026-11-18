@@ -420,3 +420,17 @@ body{color:var(--rdc-navy);background:#f5f7fc}
 .catalogue-preview{max-width:340px;max-height:180px;object-fit:contain;border:1px solid #dce4f0;border-radius:8px}
 .catalogue-actions{display:flex;gap:12px}
 @media(max-width:760px){.catalogue-layout{grid-template-columns:1fr}.catalogue-form{grid-template-columns:1fr}.catalogue-admin .account-card{padding:15px}}
+
+/* Full itinerary CRUD administration */
+.admin-links{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}
+.admin-links a{display:inline-block;background:#eef3fc;color:#1744a0;padding:11px 14px;border:1px solid #d3e0f2;border-radius:10px;font-weight:750;text-decoration:none}
+.admin-new{display:block;width:100%;background:#2052d9;color:#fff;border:0;border-radius:9px;padding:12px;margin:10px 0 18px;font-weight:800;cursor:pointer}
+.admin-edit{display:flex;flex-direction:column;gap:15px}
+.admin-edit label{display:flex;flex-direction:column;gap:6px}
+.admin-edit input:not([type=checkbox]),.admin-edit select,.admin-edit textarea{width:100%;padding:11px;border:1px solid #cbd7e8;border-radius:8px;background:#fff;color:#0c234c;font:inherit}
+.admin-edit .checkbox-line{flex-direction:row;align-items:center}
+.admin-edit .checkbox-line input{width:auto}
+.admin-form-actions{display:flex;gap:10px;flex-wrap:wrap}
+.admin-form-actions button{background:#2052d9;color:white;padding:12px 16px;border:0;border-radius:9px;font-weight:800;cursor:pointer}
+.admin-form-actions .admin-delete{background:#8c2430}
+@media(max-width:760px){.admin-columns{display:grid;grid-template-columns:1fr}.admin-links a{width:100%}}
