@@ -1,3 +1,4 @@
+from tests.admin_helper import admin_headers
 """Administrative itinerary lifecycle and carrier validation."""
 import os
 import tempfile
@@ -12,12 +13,12 @@ from tests.test_api import fixture
 class RouteAdminTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory()
-        self.env=patch.dict(os.environ,{"DATABASE_URL":f"sqlite:///{self.temp.name}/test.db","ADMIN_API_TOKEN":"test-token"})
+        self.env=patch.dict(os.environ,{"DATABASE_URL":f"sqlite:///{self.temp.name}/test.db",})
         self.env.start()
         init_schema()
         import_rows(fixture())
         self.client=TestClient(app)
-        self.auth={"Authorization":"Bearer test-token"}
+        self.auth=admin_headers()
         self.route={"mode":"bus","depart_id":"a","arrivee_id":"b","statut":"a_verifier","publie":False}
 
     def tearDown(self):
