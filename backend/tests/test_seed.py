@@ -1,3 +1,4 @@
+from tests.admin_helper import admin_headers
 import os
 from pathlib import Path
 import tempfile
@@ -30,7 +31,7 @@ class RealSeedTests(unittest.TestCase):
 
     def test_publishing_verified_seed_route_makes_it_searchable(self):
         rows = from_directory(SEED_DIR)
-        env = {"ADMIN_API_TOKEN": "test-token-with-sufficient-length", "DATABASE_URL": ""}
+        env = { "DATABASE_URL": ""}
         with tempfile.TemporaryDirectory() as temp:
             env["DATABASE_URL"] = f"sqlite:///{temp}/seed-test.db"
             with patch.dict(os.environ, env):
@@ -39,7 +40,7 @@ class RealSeedTests(unittest.TestCase):
                     one = fetchone(conn, "SELECT id,depart_id,arrivee_id,mode FROM liaisons WHERE statut='ok' LIMIT 1")
                 self.assertIsNotNone(one)
                 with TestClient(app) as client:
-                    response = client.patch(f"/api/admin/liaisons/{one['id']}", headers={"Authorization": "Bearer test-token-with-sufficient-length"}, json={
+                    response = client.patch(f"/api/admin/liaisons/{one['id']}", headers=admin_headers(), json={
                         "publie": True, "verifie_le": "2026-11-01", "source_info": "Vérification fictive de test seulement"
                     })
                     self.assertEqual(response.status_code, 200)
