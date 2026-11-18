@@ -6,7 +6,7 @@ import os
 import secrets
 
 from fastapi import APIRouter, Header, HTTPException, Query
-from pydantic import BaseModel, Field, HttpUrl, model_validator
+from pydantic import BaseModel, Field, HttpUrl, model_validator, field_validator
 from .db import connection, execute, fetchall, fetchone
 
 router = APIRouter(prefix="/api", tags=["Catalogue"])
@@ -56,6 +56,13 @@ class Partner(BaseModel):
     source_verification: str = Field(default="", max_length=500)
     date_verification: date | None = None
     publie: bool = False
+
+    @field_validator("photo_url", "site_web")
+    @classmethod
+    def require_https(cls, value):
+        if value is not None and value.scheme != "https":
+            raise ValueError("Utilisez une URL HTTPS sécurisée.")
+        return value
 
     @model_validator(mode="after")
     def verify_publication(self):
