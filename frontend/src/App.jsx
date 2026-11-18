@@ -169,6 +169,19 @@ function JourneyBooking({ route, destination, hotel, onBack }) {
   </div>;
 }
 
+
+const VEHICLE_ART = [
+  {name:"Avion", body:<><path d="M9 37 61 23 89 7 99 10 85 28 113 26 127 33 129 39 81 44 63 69 54 71 57 45 25 49 13 59 6 58 10 43 3 42Z" fill="currentColor"/><path d="M62 23 85 28 99 10" fill="none" stroke="#d9e9ff" strokeWidth="2"/><path d="M57 45 81 44" stroke="#d9e9ff" strokeWidth="2"/></>},
+  {name:"Bateau",body:<><path d="M13 45H127L109 63H35Z" fill="currentColor"/><path d="M32 31H100V45H32Z" fill="#d9e9ff"/><path d="M44 18H86V31H44Z" fill="currentColor"/><path d="M66 8V18M25 69q11-6 22 0t22 0t22 0t22 0" stroke="#73c9f6" strokeWidth="3" fill="none"/><path d="M49 34h10m9 0h10m9 0h8" stroke="#174581" strokeWidth="4"/></>},
+  {name:"Bus",body:<><rect x="14" y="17" width="112" height="45" rx="9" fill="currentColor"/><path d="M22 25h71v22H22Z" fill="#d9e9ff"/><path d="M98 25h18v22H98Z" fill="#8fc6f0"/><path d="M45 25v22m24-22v22" stroke="#174581" strokeWidth="3"/><circle cx="38" cy="62" r="9" fill="#102c55"/><circle cx="105" cy="62" r="9" fill="#102c55"/><circle cx="38" cy="62" r="4" fill="#d9e9ff"/><circle cx="105" cy="62" r="4" fill="#d9e9ff"/></>},
+  {name:"Voiture",body:<><path d="M16 40 29 37 43 21H95L111 38 123 42V60H13V47Z" fill="currentColor"/><path d="M48 26H69V39H36Zm27 0h17l12 13H75Z" fill="#d9e9ff"/><circle cx="39" cy="61" r="10" fill="#102c55"/><circle cx="103" cy="61" r="10" fill="#102c55"/><circle cx="39" cy="61" r="4" fill="#d9e9ff"/><circle cx="103" cy="61" r="4" fill="#d9e9ff"/><path d="M14 47h10m89 0h10" stroke="#f9b82f" strokeWidth="4"/></>},
+  {name:"Moto",body:<><circle cx="30" cy="59" r="16" stroke="currentColor" strokeWidth="5" fill="none"/><circle cx="108" cy="59" r="16" stroke="currentColor" strokeWidth="5" fill="none"/><path d="M30 59 55 31 75 59H30L51 43M75 59 97 35 108 59M92 32h14M52 31h17M67 26l-10-7" stroke="#d9e9ff" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" fill="none"/><path d="M60 19h20l10 15H69Z" fill="currentColor"/></>},
+  {name:"Train",body:<><rect x="26" y="7" width="88" height="58" rx="14" fill="currentColor"/><rect x="35" y="18" width="31" height="23" rx="4" fill="#d9e9ff"/><rect x="74" y="18" width="31" height="23" rx="4" fill="#d9e9ff"/><circle cx="44" cy="52" r="5" fill="#f9b82f"/><circle cx="96" cy="52" r="5" fill="#f9b82f"/><path d="m42 65-10 9m66-9 10 9M42 70h56" stroke="#d9e9ff" strokeWidth="4" strokeLinecap="round"/></>}
+];
+function TransportIllustration({index}) {
+  return <svg className="art-vehicle-svg" viewBox="0 0 140 80" role="img" aria-label={VEHICLE_ART[index].name} xmlns="http://www.w3.org/2000/svg">{VEHICLE_ART[index].body}</svg>;
+}
+
 function SearchPage() {
   const [lieux, setLieux] = useState([]);
   const [from, setFrom] = useState("");
@@ -260,7 +273,7 @@ function SearchPage() {
       <h1>Le meilleur chemin<br />vers <em>votre destination.</em></h1>
       <p>Comparez les trajets en avion, bus, bateau et plus encore. Un seul endroit pour préparer vos déplacements à travers la RDC.</p>
       <div className="hero-benefits"><span><Icon type="shield" size={18} /> Estimations à confirmer</span><span><Icon type="clock" size={18} /> Recherche rapide</span></div>
-    </div><div className="hero-art" aria-hidden="true"><span className="art-ring ring-one" /><span className="art-ring ring-two" /><span className="art-line" /><span className="art-pin pin-a"><Icon type="pin" size={22} /></span><span className="art-pin pin-b"><Icon type="pin" size={22} /></span><span className="art-label label-a">DÉPART</span><span className="art-label label-b">ARRIVÉE</span><span className="art-center">RDC<span>↗</span></span><span className="art-traffic" aria-hidden="true">{[["✈️","Avion"],["🚢","Bateau"],["🚌","Bus"],["🚙","Voiture"],["🏍️","Moto"],["🚆","Train"]].map(([symbol,label],i)=><span className={"art-vehicle art-vehicle-"+i} key={label}><span className="art-vehicle-symbol">{symbol}</span><span className="art-vehicle-label">{label}</span></span>)}</span></div></div></section>
+    </div><div className="hero-art" aria-hidden="true"><span className="art-ring ring-one" /><span className="art-ring ring-two" /><span className="art-line" /><span className="art-pin pin-a"><Icon type="pin" size={22} /></span><span className="art-pin pin-b"><Icon type="pin" size={22} /></span><span className="art-label label-a">DÉPART</span><span className="art-label label-b">ARRIVÉE</span><span className="art-center">RDC<span>↗</span></span><span className="art-traffic" aria-hidden="true">{VEHICLE_ART.map((vehicle,i)=><span className={"art-vehicle art-vehicle-"+i} key={vehicle.name}><TransportIllustration index={i}/><span className="art-vehicle-label">{vehicle.name}</span></span>)}</span></div></div></section>
 
     <section className="container search-wrap"><div className="search-card">
       <div className="tabs" role="tablist" aria-label="Explorer Voyage RDC"><button type="button" className={section === "recherche" ? "tab active" : "tab"} onClick={() => showSection("recherche")}>↗ Rechercher un trajet</button><button type="button" className={section === "operateurs" ? "tab active" : "tab"} onClick={() => showSection("operateurs")}>▦ Transporteurs</button></div>
