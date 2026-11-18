@@ -378,3 +378,22 @@ body{color:var(--rdc-navy);background:#f5f7fc}
 .hero-art .art-vehicle-3 .art-vehicle-svg{color:#f7fbff}
 .hero-art .art-vehicle-4 .art-vehicle-svg{color:#f9b82f}
 .hero-art .art-vehicle-5 .art-vehicle-svg{color:#f7fbff}
+
+/* Every vehicle follows the existing dashed departure-to-arrival diagonal.
+   Pins, circles and labels remain motionless. */
+.hero-art .art-vehicle{left:0;top:0;width:145px;height:105px;z-index:2;animation-duration:24s}
+.hero-art .art-vehicle-0{animation-delay:0s}
+.hero-art .art-vehicle-1{animation-delay:-20s}
+.hero-art .art-vehicle-2{animation-delay:-16s}
+.hero-art .art-vehicle-3{animation-delay:-12s}
+.hero-art .art-vehicle-4{animation-delay:-8s}
+.hero-art .art-vehicle-5{animation-delay:-4s}
+@keyframes rdcVehicleJourney{
+  0%{opacity:0;transform:translate(20px,224px) scale(.52)}
+  1%{opacity:1;transform:translate(20px,224px) scale(.52)}
+  7%{opacity:1;transform:translate(126px,150px) scale(.8)}
+  14%{opacity:1;transform:translate(228px,72px) scale(.68)}
+  16%{opacity:0;transform:translate(255px,51px) scale(.5)}
+  16.67%,100%{opacity:0;transform:translate(255px,51px) scale(.5)}
+}
+@media(prefers-reduced-motion:reduce){.hero-art .art-vehicle-0{transform:translate(126px,150px) scale(.8)}}
