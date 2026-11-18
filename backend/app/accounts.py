@@ -120,6 +120,11 @@ def new_session(conn, user_id):
     return token
 
 
+def is_admin_email(email):
+    configured = os.getenv("ADMIN_LOGIN_EMAIL", "").strip().lower()
+    return bool(configured) and email.strip().lower() == configured
+
+
 def current_user(conn, authorization):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Connectez-vous pour accéder à votre espace.")
@@ -165,7 +170,7 @@ def register(body: Register):
                     (uid, body.nom.strip(), email, hash_password(body.password), datetime.now(timezone.utc).isoformat()))
         except Exception:
             raise HTTPException(status_code=409, detail="Impossible de créer ce compte. Vérifiez votre adresse.")
-        return {"token": new_session(conn, uid), "user": {"id": uid, "nom": body.nom.strip(), "email": email}}
+        return {"token": new_session(conn, uid), "user": {"id": uid, "nom": body.nom.strip(), "email": email, "role": "client"}}
 
 
 @router.post("/connexion")
@@ -177,7 +182,7 @@ def login(body: Login):
             raise HTTPException(status_code=401, detail="Adresse e-mail ou mot de passe incorrect.")
         if user["bloque"]:
             raise HTTPException(status_code=403, detail="Ce compte est suspendu. Contactez l'administration.")
-        return {"token": new_session(conn, user["id"]), "user": {"id": user["id"], "nom": user["nom"], "email": user["email"]}}
+        return {"token": new_session(conn, user["id"]), "user": {"id": user["id"], "nom": user["nom"], "email": user["email"], "role": "admin" if is_admin_email(user["email"]) else "client"}}
 
 
 
@@ -265,7 +270,9 @@ def me(authorization: str | None = Header(default=None)):
     with connection() as conn:
         init_tables(conn)
         user = current_user(conn, authorization)
-        return profile(conn,user["id"])
+        data = profile(conn,user["id"])
+    data["role"] = "admin" if is_admin_email(user["email"]) else "client"
+    return data
 
 
 @router.post("/deconnexion")
