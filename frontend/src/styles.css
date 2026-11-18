@@ -397,3 +397,26 @@ body{color:var(--rdc-navy);background:#f5f7fc}
   16.67%,100%{opacity:0;transform:translate(255px,51px) scale(.5)}
 }
 @media(prefers-reduced-motion:reduce){.hero-art .art-vehicle-0{transform:translate(126px,150px) scale(.8)}}
+
+/* Verified partner catalogue administration, web and Android WebView */
+.catalogue-admin{padding-top:34px;padding-bottom:70px;max-width:1160px}
+.catalogue-admin h1{color:#0c234c;font-size:clamp(25px,3vw,38px)}
+.catalogue-admin .account-card{background:#fff;border:1px solid #dce4f0;border-radius:14px;padding:22px;box-shadow:0 8px 24px #0c234c0c}
+.catalogue-auth{display:flex;gap:18px;align-items:end;flex-wrap:wrap;margin:22px 0}
+.catalogue-auth label{flex:1;min-width:220px}
+.catalogue-admin label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#0c234c}
+.catalogue-admin input:not([type=checkbox]),.catalogue-admin select,.catalogue-admin textarea{width:100%;border:1px solid #c6d1e2;border-radius:9px;padding:11px;font:inherit;background:#fff;color:#0c234c}
+.catalogue-admin textarea{min-height:92px}
+.catalogue-admin button{border:0;border-radius:9px;padding:11px 16px;background:#2052d9;color:white;font-weight:800;cursor:pointer}
+.catalogue-admin button:disabled{opacity:.5;cursor:wait}
+.catalogue-layout{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:22px;align-items:start}
+.catalogue-layout aside{display:flex;flex-direction:column;gap:10px}
+.catalogue-entry{display:flex;flex-direction:column;text-align:left;gap:4px;background:#eef3fb!important;color:#0c234c!important;border:1px solid #d7e1f0!important}
+.catalogue-entry.selected{border:2px solid #2052d9!important}
+.catalogue-entry small{font-weight:500;color:#55657c}
+.catalogue-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.catalogue-form h2,.catalogue-form>label:has(textarea),.catalogue-form .checkbox-line,.catalogue-form .small-note,.catalogue-form .catalogue-actions,.catalogue-form .catalogue-preview{grid-column:1/-1}
+.catalogue-form .checkbox-line{flex-direction:row;align-items:center}
+.catalogue-preview{max-width:340px;max-height:180px;object-fit:contain;border:1px solid #dce4f0;border-radius:8px}
+.catalogue-actions{display:flex;gap:12px}
+@media(max-width:760px){.catalogue-layout{grid-template-columns:1fr}.catalogue-form{grid-template-columns:1fr}.catalogue-admin .account-card{padding:15px}}
