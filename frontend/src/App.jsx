@@ -1,3 +1,4 @@
+import AdminGate from "./AdminGate";
 import AccountAdmin from "./AccountAdmin";
 import BookingAdmin from "./BookingAdmin";
 import CatalogueAdmin from "./CatalogueAdmin";
@@ -381,4 +382,4 @@ function AdminPage() {
 }
 
 function Footer() { return <footer className="footer"><div className="container footer-inner"><div><strong>voyage<span>rdc</span></strong><p>Le Congo est vaste. Vos possibilités aussi.</p></div><p>© {new Date().getFullYear()} Voyage RDC · Service d’information gratuit, uniquement en ligne. · <a href="/a-propos">À propos</a> · <a href="/contact">Contact</a> · <a href="/confidentialite">Politique de confidentialité</a></p></div></footer>; }
-export default function App() { return window.location.pathname.startsWith("/a-propos") ? <AboutPage /> : window.location.pathname.startsWith("/contact") ? <ContactPage /> : window.location.pathname.startsWith("/confidentialite") ? <PrivacyPage /> : window.location.pathname.startsWith("/compte") || window.location.pathname.startsWith("/mes-voyages") ? <AccountPage /> : window.location.pathname.startsWith("/admin/comptes") ? <AccountAdmin /> : window.location.pathname.startsWith("/admin/reservations") ? <BookingAdmin /> : window.location.pathname.startsWith("/admin/catalogue") ? <CatalogueAdmin /> : window.location.pathname.startsWith("/admin") ? <RouteAdmin /> : <SearchPage />; }
+export default function App() { return window.location.pathname.startsWith("/a-propos") ? <AboutPage /> : window.location.pathname.startsWith("/contact") ? <ContactPage /> : window.location.pathname.startsWith("/confidentialite") ? <PrivacyPage /> : window.location.pathname.startsWith("/compte") || window.location.pathname.startsWith("/mes-voyages") ? <AccountPage /> : window.location.pathname.startsWith("/admin/comptes") ? <AdminGate><AccountAdmin /></AdminGate> : window.location.pathname.startsWith("/admin/reservations") ? <AdminGate><BookingAdmin /></AdminGate> : window.location.pathname.startsWith("/admin/catalogue") ? <AdminGate><CatalogueAdmin /></AdminGate> : window.location.pathname.startsWith("/admin") ? <AdminGate><RouteAdmin /></AdminGate> : <SearchPage />; }
