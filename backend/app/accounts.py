@@ -8,6 +8,7 @@ import os
 import secrets
 import re
 import unicodedata
+import threading
 from datetime import date, datetime, timedelta, timezone
 from uuid import uuid4
 
@@ -19,7 +20,26 @@ from .db import connection, execute, fetchall, fetchone, is_sqlite
 router = APIRouter(prefix="/api/compte", tags=["Compte voyageur"])
 
 
+_tables_ready = False
+_tables_lock = threading.Lock()
+
+
 def init_tables(conn):
+    """Run migrations once per worker; serialize PostgreSQL schema changes across workers."""
+    global _tables_ready
+    if _tables_ready:
+        return
+    with _tables_lock:
+        if _tables_ready:
+            return
+        if not is_sqlite():
+            # Transaction-scoped lock prevents concurrent ALTER TABLE deadlocks.
+            execute(conn, "SELECT pg_advisory_xact_lock(726315901)")
+        _init_tables(conn)
+        # Do not cache completion until the surrounding transaction commits.
+
+
+def _init_tables(conn):
     execute(conn, """CREATE TABLE IF NOT EXISTS voyageurs (
         id VARCHAR(40) PRIMARY KEY, nom VARCHAR(120) NOT NULL,
         email VARCHAR(254) NOT NULL UNIQUE, password_hash TEXT NOT NULL,
