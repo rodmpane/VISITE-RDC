@@ -3,7 +3,7 @@ from datetime import date
 from typing import Literal
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field, model_validator
-from .db import connection, execute, fetchone
+from .db import connection, execute, fetchone, fetchall
 from .catalogue import admin_auth
 
 def require_admin(authorization: str | None = Header(default=None)):
@@ -84,3 +84,32 @@ def delete_liaison(liaison_id:int):
             raise HTTPException(status_code=404,detail="Liaison introuvable")
         execute(conn,"DELETE FROM liaisons WHERE id=?",(liaison_id,))
         return {"deleted":True}
+
+class LiaisonCompany(BaseModel):
+    operateur: str = Field(min_length=2,max_length=180)
+    prix_min_usd: float | None = Field(default=None,ge=0)
+    prix_max_usd: float | None = Field(default=None,ge=0)
+
+class LiaisonMultiple(BaseModel):
+    liaison: LiaisonRecord
+    compagnies: list[LiaisonCompany] = Field(min_length=1,max_length=30)
+
+@router.post("/liaisons/multiples",status_code=201)
+def create_multiple_liaisons(body:LiaisonMultiple):
+    """Create one route per operator atomically; each retains its own price range."""
+    names=[c.operateur.strip().casefold() for c in body.compagnies]
+    if len(set(names))!=len(names):
+        raise HTTPException(status_code=422,detail="Une compagnie ne peut figurer qu'une fois par itinéraire.")
+    with connection() as conn:
+        created=[]
+        for company in body.compagnies:
+            row=body.liaison.model_copy(update={"operateur":company.operateur.strip(),
+                "prix_min_usd":company.prix_min_usd,"prix_max_usd":company.prix_max_usd})
+            # model_copy does not revalidate updated values; validate explicitly.
+            row=LiaisonRecord.model_validate(row.model_dump())
+            validate_places(conn,row)
+            data=as_data(row)
+            keys=list(data)
+            cursor=execute(conn,f"INSERT INTO liaisons ({','.join(keys)}) VALUES ({','.join('?' for _ in keys)}) RETURNING id",[data[k] for k in keys])
+            created.append(fetchone(conn,"SELECT * FROM liaisons WHERE id=?",(cursor.fetchone()[0],)))
+        return {"created":created,"count":len(created)}
