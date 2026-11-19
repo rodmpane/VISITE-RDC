@@ -150,7 +150,7 @@ def admin_liaisons(limit: int = Query(default=200, ge=1, le=500), offset: int = 
         return fetchall(conn, """
             SELECT l.*, d.nom AS depart_nom, a.nom AS arrivee_nom
             FROM liaisons l JOIN lieux d ON d.id=l.depart_id JOIN lieux a ON a.id=l.arrivee_id
-            ORDER BY l.id LIMIT ? OFFSET ?
+            ORDER BY l.id DESC LIMIT ? OFFSET ?
         """, (limit, offset))
 
 
