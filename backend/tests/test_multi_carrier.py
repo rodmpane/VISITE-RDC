@@ -19,8 +19,10 @@ class MultiCarrierTests(unittest.TestCase):
                 headers=admin_headers()
                 places=client.get("/api/lieux").json()
                 self.assertGreaterEqual(len(places),2)
-                names=[r["nom"] for r in client.get("/api/operateurs").json()]
-                self.assertGreaterEqual(len(names),2)
+                names=["Compagnie test A","Compagnie test B"]
+                for name in names:
+                    response=client.post("/api/admin/catalogue",json={"categorie":"transporteur","nom":name},headers=headers)
+                    self.assertEqual(response.status_code,201,response.text)
                 body={"liaison":{"mode":"avion","depart_id":places[0]["id"],"arrivee_id":places[1]["id"],
                     "statut":"a_verifier","publie":False},"compagnies":[
                     {"operateur":names[0],"prix_min_usd":100,"prix_max_usd":180},
