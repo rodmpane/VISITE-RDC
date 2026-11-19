@@ -43,11 +43,11 @@ def validate_places(conn, body):
         if not fetchone(conn,"SELECT id FROM lieux WHERE id=?",(place,)):
             raise HTTPException(status_code=422,detail=f"Ville inconnue : {place}")
     if body.operateur:
-        from .catalogue import init_catalogue
+        from .catalogue import init_catalogue, TRANSPORTEURS_PROPOSES
         init_catalogue(conn)
         partner=fetchone(conn,"SELECT id FROM catalogue_partenaires WHERE categorie='transporteur' AND nom=?",(body.operateur,))
         legacy=fetchone(conn,"SELECT id FROM operateurs WHERE nom=?",(body.operateur,))
-        if not partner and not legacy:
+        if not partner and not legacy and body.operateur.casefold() not in {name.casefold() for name in TRANSPORTEURS_PROPOSES}:
             raise HTTPException(status_code=422,detail="Choisissez une compagnie enregistrée dans le catalogue.")
 
 def as_data(body):
