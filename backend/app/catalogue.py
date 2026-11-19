@@ -30,7 +30,7 @@ _catalogue_lock = threading.Lock()
 
 def init_catalogue(conn):
     global _catalogue_ready
-    if _catalogue_ready:
+    if _catalogue_ready and not is_sqlite():
         return
     with _catalogue_lock:
         if _catalogue_ready:
