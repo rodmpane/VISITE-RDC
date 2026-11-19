@@ -128,6 +128,16 @@ def admin_catalogue(authorization: str | None = Header(default=None)):
         init_catalogue(conn)
         return fetchall(conn, "SELECT * FROM catalogue_partenaires ORDER BY modifie_le DESC LIMIT 500")
 
+
+@router.get("/admin/transporteurs")
+def admin_transporteurs(authorization: str | None = Header(default=None)):
+    """All registered carriers, including unpublished catalogue partners and legacy operators."""
+    admin_auth(authorization)
+    with connection() as conn:
+        init_catalogue(conn)
+        rows = fetchall(conn, "SELECT nom FROM catalogue_partenaires WHERE categorie=? UNION SELECT nom FROM operateurs ORDER BY nom", ("transporteur",))
+        return [row["nom"] for row in rows if row["nom"]]
+
 @router.post("/admin/catalogue", status_code=201)
 def create_partner(body: Partner, authorization: str | None = Header(default=None)):
     admin_auth(authorization)
