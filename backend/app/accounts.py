@@ -27,7 +27,7 @@ _tables_lock = threading.Lock()
 def init_tables(conn):
     """Run migrations once per worker; serialize PostgreSQL schema changes across workers."""
     global _tables_ready
-    if _tables_ready:
+    if _tables_ready and not is_sqlite():
         return
     with _tables_lock:
         if _tables_ready:
