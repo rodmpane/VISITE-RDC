@@ -4,6 +4,7 @@ from typing import Literal
 from uuid import uuid4
 import os
 import secrets
+import threading
 
 from fastapi import APIRouter, Header, HTTPException, Query
 from pydantic import BaseModel, Field, HttpUrl, model_validator, field_validator
@@ -23,7 +24,24 @@ def admin_auth(authorization: str | None):
             raise HTTPException(status_code=403, detail="Accès réservé à l’administrateur.")
 
 
+_catalogue_ready = False
+_catalogue_lock = threading.Lock()
+
+
 def init_catalogue(conn):
+    global _catalogue_ready
+    if _catalogue_ready:
+        return
+    with _catalogue_lock:
+        if _catalogue_ready:
+            return
+        if not is_sqlite():
+            execute(conn, "SELECT pg_advisory_xact_lock(726315902)")
+        _init_catalogue(conn)
+        _catalogue_ready = True
+
+
+def _init_catalogue(conn):
     execute(conn, """CREATE TABLE IF NOT EXISTS catalogue_partenaires (
         id VARCHAR(40) PRIMARY KEY,
         categorie VARCHAR(20) NOT NULL,
