@@ -6,12 +6,15 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 from app.main import app
 from app.schema import init_schema
+from scripts.import_csv import import_rows
+from tests.test_api import fixture
 from tests.admin_helper import admin_headers
 
 class MultiCarrierTests(unittest.TestCase):
     def test_multiple_companies_and_prices(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ,{"DATABASE_URL":f"sqlite:///{folder}/test.db"}):
             init_schema()
+            import_rows(fixture())
             with TestClient(app) as client:
                 headers=admin_headers()
                 places=client.get("/api/lieux").json()
