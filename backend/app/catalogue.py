@@ -33,7 +33,7 @@ def init_catalogue(conn):
     if _catalogue_ready and not is_sqlite():
         return
     with _catalogue_lock:
-        if _catalogue_ready:
+        if _catalogue_ready and not is_sqlite():
             return
         if not is_sqlite():
             execute(conn, "SELECT pg_advisory_xact_lock(726315902)")
