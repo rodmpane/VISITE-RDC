@@ -30,7 +30,7 @@ def init_tables(conn):
     if _tables_ready and not is_sqlite():
         return
     with _tables_lock:
-        if _tables_ready:
+        if _tables_ready and not is_sqlite():
             return
         if not is_sqlite():
             # Transaction-scoped lock prevents concurrent ALTER TABLE deadlocks.
