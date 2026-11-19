@@ -70,7 +70,12 @@ def replace_liaison(liaison_id:int,body:LiaisonRecord):
     with connection() as conn:
         if not fetchone(conn,"SELECT id FROM liaisons WHERE id=?",(liaison_id,)):
             raise HTTPException(status_code=404,detail="Liaison introuvable")
-        validate_places(conn,body)
+        existing=fetchone(conn,"SELECT operateur FROM liaisons WHERE id=?",(liaison_id,))
+        # Existing legacy operator names remain editable without forcing a catalogue migration.
+        if existing and existing["operateur"] == body.operateur:
+            validate_places(conn,body.model_copy(update={"operateur":""}))
+        else:
+            validate_places(conn,body)
         data=as_data(body)
         keys=list(data)
         execute(conn,f"UPDATE liaisons SET {','.join(k+'=?' for k in keys)} WHERE id=?",[data[k] for k in keys]+[liaison_id])
