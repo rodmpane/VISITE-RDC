@@ -96,15 +96,6 @@ def _init_catalogue(conn):
     elif "notification_active" not in {r["name"] for r in fetchall(conn,"PRAGMA table_info(catalogue_partenaires)")}:
         execute(conn,"ALTER TABLE catalogue_partenaires ADD COLUMN notification_active INTEGER NOT NULL DEFAULT 0")
     execute(conn, "CREATE INDEX IF NOT EXISTS idx_catalogue_public ON catalogue_partenaires(publie,categorie,ville_id)")
-    # Transporteurs fournis par l'administrateur : brouillons non verifies.
-    requested_carriers = ("CAA", "Tracep Congo", "Kin Avion", "Congo Airways", "Ai Congo", "MAF", "Mont Gabaon")
-    now = datetime.now(timezone.utc).isoformat()
-    for name in requested_carriers:
-        existing = fetchone(conn, "SELECT id FROM catalogue_partenaires WHERE categorie=? AND LOWER(nom)=LOWER(?)", ("transporteur", name))
-        legacy = fetchone(conn, "SELECT id FROM operateurs WHERE LOWER(nom)=LOWER(?)", (name,))
-        if not existing and not legacy:
-            execute(conn, "INSERT INTO catalogue_partenaires (id,categorie,nom,cree_le,modifie_le,publie) VALUES (?,?,?,?,?,0)",
-                    (str(uuid4()), "transporteur", name, now, now))
 
 
 class Partner(BaseModel):
