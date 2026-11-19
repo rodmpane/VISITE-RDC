@@ -91,9 +91,9 @@ export default function AccountPage() {
   async function refresh(current) {
     const [profile, saved, requests] = await Promise.all([request("/moi", {}, current), request("/voyages", {}, current), request("/reservations", {}, current)]);
     setUser(profile); setTrips(saved); setBookings(requests);
-    if (profile.role === "admin" && window.location.pathname === "/compte") window.location.replace("/admin");
+
   }
-  useEffect(() => { if (token) refresh(token).catch(() => { sessionStorage.removeItem(KEY); setToken(""); setUser(null); }); }, [token]);
+  useEffect(() => { if (!token) return; let active=true; request("/moi",{},token).then(profile=>{if(!active)return;setUser(profile);if(profile.role==="admin"){window.location.replace("/admin");return;}return refresh(token);}).catch(err=>{if(!active)return;if(/Session expirée|Connectez-vous|invalide/i.test(err.message)){sessionStorage.removeItem(KEY);setToken("");setUser(null);}else{setError("Connexion au serveur momentanément indisponible. Réessayez sans vous déconnecter.");}});return ()=>{active=false;}; }, [token]);
   async function submit(event) {
     event.preventDefault(); setError(""); setBusy(true);
     const form = new FormData(event.currentTarget);
@@ -105,8 +105,8 @@ export default function AccountPage() {
         })
       });
       sessionStorage.setItem(KEY, data.token);
+      if (data.user.role === "admin") { window.location.replace("/admin"); return; }
       setToken(data.token); setUser(data.user); setSection("reservations");
-      if (data.user.role === "admin") { window.location.href = "/admin"; return; }
       setMessage("Bienvenue dans votre espace Voyage RDC.");
     } catch (e) { setError(e.message); }
     finally { setBusy(false); }
