@@ -12,6 +12,35 @@ from .db import connection, execute, fetchall, fetchone, is_sqlite
 
 router = APIRouter(prefix="/api", tags=["Catalogue"])
 
+# Transporteurs fournis par l’administrateur : choix disponibles, sans validation ni publication automatique.
+TRANSPORTEURS_PROPOSES = [
+        "Air Congo",
+        "Air Kasaï",
+        "Air Katanga",
+        "Airfast Congo",
+        "Aviatrade Congo",
+        "Busy bee Congo",
+        "Bluesky Airlines",
+        "CAA",
+        "Congo Airways",
+        "Dakota Aviation",
+        "Gomair",
+        "Goma Express",
+        "Itab - Interntional Trans",
+        "Katanga Wings",
+        "KinAvia",
+        "Malu Aviation",
+        "Mont Gabaon Airlines",
+        "Mwant Jet",
+        "Naweza Airways",
+        "Serve Air Congo",
+        "Swala Aviation",
+        "Tracep Aviation",
+        "Trans Air Congo Service",
+        "XL Trading",
+        "Maf"
+]
+
 def admin_auth(authorization: str | None):
     """Authorize the logged-in administrator using the shared account session."""
     from .accounts import current_user, is_admin_email, init_tables
@@ -146,7 +175,7 @@ def admin_transporteurs(authorization: str | None = Header(default=None)):
     with connection() as conn:
         init_catalogue(conn)
         rows = fetchall(conn, "SELECT nom FROM catalogue_partenaires WHERE categorie=? UNION SELECT nom FROM operateurs ORDER BY nom", ("transporteur",))
-        return [row["nom"] for row in rows if row["nom"]]
+        return sorted(set(TRANSPORTEURS_PROPOSES + [row["nom"] for row in rows if row["nom"]]), key=str.casefold)
 
 @router.post("/admin/catalogue", status_code=201)
 def create_partner(body: Partner, authorization: str | None = Header(default=None)):
