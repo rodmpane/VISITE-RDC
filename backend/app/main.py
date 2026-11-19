@@ -215,7 +215,7 @@ if STATIC_DIR.is_dir():
     @app.get("/admin/reservations", include_in_schema=False)
     @app.get("/admin", include_in_schema=False)
     def serve_frontend():
-        return FileResponse(STATIC_DIR / "index.html")
+        return FileResponse(STATIC_DIR / "index.html", headers={"Cache-Control": "no-store, no-cache, must-revalidate", "Pragma": "no-cache"})
 
     @app.get("/a-propos", include_in_schema=False)
     @app.get("/contact", include_in_schema=False)
