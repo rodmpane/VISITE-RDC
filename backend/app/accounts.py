@@ -36,7 +36,7 @@ def init_tables(conn):
             # Transaction-scoped lock prevents concurrent ALTER TABLE deadlocks.
             execute(conn, "SELECT pg_advisory_xact_lock(726315901)")
         _init_tables(conn)
-        # Do not cache completion until the surrounding transaction commits.
+        _tables_ready = True
 
 
 def _init_tables(conn):
