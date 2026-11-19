@@ -3,7 +3,7 @@ from datetime import date
 from typing import Literal
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field, model_validator
-from .db import connection, execute, fetchone, fetchall
+from .db import connection, execute, fetchone, fetchall, is_sqlite
 from .catalogue import admin_auth
 
 def require_admin(authorization: str | None = Header(default=None)):
@@ -62,7 +62,8 @@ def create_liaison(body:LiaisonRecord):
         data=as_data(body)
         keys=list(data)
         cursor=execute(conn,f"INSERT INTO liaisons ({','.join(keys)}) VALUES ({','.join('?' for _ in keys)}) RETURNING id",[data[k] for k in keys])
-        new_id=cursor.fetchone()[0]
+        inserted=cursor.fetchone()
+        new_id=inserted[0] if is_sqlite() else inserted["id"]
         return fetchone(conn,"SELECT * FROM liaisons WHERE id=?",(new_id,))
 
 @router.put("/liaisons/{liaison_id}")
@@ -116,5 +117,7 @@ def create_multiple_liaisons(body:LiaisonMultiple):
             data=as_data(row)
             keys=list(data)
             cursor=execute(conn,f"INSERT INTO liaisons ({','.join(keys)}) VALUES ({','.join('?' for _ in keys)}) RETURNING id",[data[k] for k in keys])
-            created.append(fetchone(conn,"SELECT * FROM liaisons WHERE id=?",(cursor.fetchone()[0],)))
+            inserted=cursor.fetchone()
+            new_id=inserted[0] if is_sqlite() else inserted["id"]
+            created.append(fetchone(conn,"SELECT * FROM liaisons WHERE id=?",(new_id,)))
         return {"created":created,"count":len(created)}
