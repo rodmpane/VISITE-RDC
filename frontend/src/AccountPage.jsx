@@ -64,7 +64,7 @@ function ProfileLocationFields({ traveler }) {
   </>;
 }
 
-export default function AccountPage() {
+export default function AccountPage({ renderSearch }) {
   const [token, setToken] = useState(getTravelerToken);
   const [user, setUser] = useState(null);
   const [trips, setTrips] = useState([]);
@@ -174,7 +174,7 @@ export default function AccountPage() {
   const confirmedBookings = bookings.filter(b => b.statut === "Réservation confirmée");
   const visibleBookings = bookings.filter(b => filter === "toutes" || (filter === "confirmees" ? b.statut === "Réservation confirmée" : filter === "attente" ? b.statut !== "Réservation confirmée" && b.statut !== "Demande refusée" : b.statut === "Demande refusée"));
   return <div className={isAndroidApp ? "account-shell account-apk account-apk-" + apkTheme : "account-shell"}>{receipt && <BookingReceipt booking={receipt} traveler={user} onClose={() => setReceipt(null)} />}
-    <header className="account-header"><a href="/"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC" /></a><nav><a href="/">Rechercher un itinéraire</a><a href="/compte" className="account-header-profile"><span className="account-avatar account-avatar-small" aria-hidden="true">●</span> Mon compte</a></nav>      {user && !isAndroidApp && <div className="account-web-top-actions"><span className="account-web-identity"><span className="account-avatar account-avatar-small" aria-hidden="true">{(user.prenom || user.nom || "V").trim().charAt(0).toLocaleUpperCase("fr")}</span><span><strong>{[user.nom,user.postnom,user.prenom].filter(Boolean).join(" ")}</strong><small>{user.email}</small></span></span><button type="button" className="account-web-settings" onClick={()=>{setSection("parametres");setError("");}}>⚙ Paramètres de mon compte</button><button type="button" className="account-signout" onClick={logout}>Se déconnecter</button></div>}
+    <header className="account-header"><a href="/"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC" /></a><nav>{user ? <button type="button" onClick={()=>setSection("recherche")}>Rechercher un itinéraire</button> : <a href="/">Rechercher un itinéraire</a>}<a href="/compte" className="account-header-profile"><span className="account-avatar account-avatar-small" aria-hidden="true">●</span> Mon compte</a></nav>      {user && !isAndroidApp && <div className="account-web-top-actions"><span className="account-web-identity"><span className="account-avatar account-avatar-small" aria-hidden="true">{(user.prenom || user.nom || "V").trim().charAt(0).toLocaleUpperCase("fr")}</span><span><strong>{[user.nom,user.postnom,user.prenom].filter(Boolean).join(" ")}</strong><small>{user.email}</small></span></span><button type="button" className="account-web-settings" onClick={()=>{setSection("parametres");setError("");}}>⚙ Paramètres de mon compte</button><button type="button" className="account-signout" onClick={logout}>Se déconnecter</button></div>}
       {user && isAndroidApp && <div className="account-top-actions">
         <div className="account-profile-menu-wrap">
           <button type="button" className="account-top-profile" aria-expanded={profileMenuOpen} onClick={()=>setProfileMenuOpen(!profileMenuOpen)}>
@@ -233,8 +233,9 @@ export default function AccountPage() {
             <div><h3>{trip.depart} → {trip.arrivee}</h3><p>Transport : {trip.modes.replaceAll(",", ", ")}</p><p><strong>{trip.statut}</strong></p><small>Enregistré le {new Date(trip.created_at).toLocaleDateString("fr-FR")}</small></div>
             <button type="button" onClick={() => remove(trip.id)}>Supprimer</button>
           </article>) : <p>Aucun itinéraire sauvegardé. Recherchez un trajet puis choisissez « Enregistrer dans mon compte ».</p>}
-          <a className="account-link" href="/">+ Rechercher un nouvel itinéraire</a>
+          <button className="account-primary" type="button" onClick={()=>setSection("recherche")}>+ Rechercher un nouvel itinéraire</button>
         </section>}
+        {section === "recherche" && <><button className="account-primary" type="button" onClick={()=>setSection("itineraires")}>← Mes itinéraires</button>{renderSearch?.({traveler:user,onSaved:()=>refresh(token).catch(e=>setError(e.message)),onBooked:()=>refresh(token).catch(e=>setError(e.message)),onTrips:()=>setSection("itineraires")})}</>}
         {section === "nouvelle" && <section className="account-card"><h2>Nouvelle demande de réservation</h2>
           <p>Préparez une demande d'hébergement ou de transport. Les partenaires et disponibilités ne sont pas encore connectés : la demande doit être validée par le prestataire avant tout paiement sur place.</p>
           <div className="account-profile-summary"><h3>Informations du voyageur reprises depuis mon compte</h3><p><strong>{[user.nom,user.postnom,user.prenom].filter(Boolean).join(" ")}</strong> · {user.telephone || "Téléphone non renseigné"} · {[user.ville,user.pays].filter(Boolean).join(", ") || "Adresse non renseignée"}</p><p>{user.date_naissance ? "Né(e) le "+user.date_naissance+" à "+(user.lieu_naissance||"—") : "Date de naissance non renseignée"} · {user.piece_identite ? "Pièce d’identité enregistrée (non transmise)" : "Aucune pièce d’identité jointe"}</p><button type="button" onClick={()=>setSection("parametres")}>Modifier mes informations</button></div>
