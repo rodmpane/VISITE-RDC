@@ -90,10 +90,11 @@ export default function AccountPage({ renderSearch }) {
   const [message, setMessage] = useState("");
   async function refresh(current) {
     const [profile, saved, requests] = await Promise.all([request("/moi", {}, current), request("/voyages", {}, current), request("/reservations", {}, current)]);
+    if (getTravelerToken() !== current) return;
     setUser(profile); setTrips(saved); setBookings(requests);
 
   }
-  useEffect(() => { if (!token) return; let active=true; request("/moi",{},token).then(profile=>{if(!active)return;setUser(profile);if(profile.role==="admin"){window.location.replace("/admin");return;}return refresh(token);}).catch(err=>{if(!active)return;if(/Session expirée|Connectez-vous|invalide/i.test(err.message)){sessionStorage.removeItem(KEY);setToken("");setUser(null);}else{setError("Connexion au serveur momentanément indisponible. Réessayez sans vous déconnecter.");}});return ()=>{active=false;}; }, [token]);
+  useEffect(() => { if (!token) return; let active=true; request("/moi",{},token).then(profile=>{if(!active || getTravelerToken() !== token)return;setUser(profile);if(profile.role==="admin"){window.location.replace("/admin");return;}return refresh(token);}).catch(err=>{if(!active)return;if(/Session expirée|Connectez-vous|invalide/i.test(err.message)){sessionStorage.removeItem(KEY);setToken("");setUser(null);}else{setError("Connexion au serveur momentanément indisponible. Réessayez sans vous déconnecter.");}});return ()=>{active=false;}; }, [token]);
   async function submit(event) {
     event.preventDefault(); setError(""); setBusy(true);
     const form = new FormData(event.currentTarget);
@@ -139,9 +140,13 @@ export default function AccountPage({ renderSearch }) {
     try {await request("/moi/piece-identite",{method:"DELETE"},token);await refresh(token);setMessage("Pièce d'identité supprimée.");}
     catch(e){setError(e.message);}
   }
-  async function logout() {
-    try { await request("/deconnexion", { method: "POST" }, token); } catch {}
-    sessionStorage.removeItem(KEY); setToken(""); setUser(null); setTrips([]); setBookings([]); setMessage("");
+  function logout() {
+    const previousToken = token;
+    try { sessionStorage.removeItem(KEY); } catch {}
+    setToken(""); setUser(null); setTrips([]); setBookings([]); setMessage(""); setError("");
+    setProfileMenuOpen(false); setSection("reservations"); setRegister(false);
+    if(previousToken) request("/deconnexion", {method:"POST", keepalive:true}, previousToken).catch(()=>{});
+    window.scrollTo(0,0);
   }
   async function remove(id) {
     try { await request("/voyages/" + encodeURIComponent(id), { method: "DELETE" }, token); await refresh(token); }
