@@ -228,7 +228,7 @@ if STATIC_DIR.is_dir():
     @app.get("/compte", include_in_schema=False)
     @app.get("/mes-voyages", include_in_schema=False)
     def serve_accounts():
-        return FileResponse(STATIC_DIR / "index.html")
+        return FileResponse(STATIC_DIR / "index.html", headers={"Cache-Control": "no-store, no-cache, must-revalidate", "Pragma": "no-cache", "Expires": "0"})
 
     @app.get("/confidentialite", include_in_schema=False)
     def serve_privacy():
