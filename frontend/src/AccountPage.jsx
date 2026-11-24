@@ -174,18 +174,19 @@ export default function AccountPage({ renderSearch }) {
   const confirmedBookings = bookings.filter(b => b.statut === "Réservation confirmée");
   const visibleBookings = bookings.filter(b => filter === "toutes" || (filter === "confirmees" ? b.statut === "Réservation confirmée" : filter === "attente" ? b.statut !== "Réservation confirmée" && b.statut !== "Demande refusée" : b.statut === "Demande refusée"));
   return <div className={isAndroidApp ? "account-shell account-apk account-apk-" + apkTheme : "account-shell"}>{receipt && <BookingReceipt booking={receipt} traveler={user} onClose={() => setReceipt(null)} />}
-    <header className="account-header"><a href="/"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC" /></a><nav>{user ? <button type="button" onClick={()=>setSection("recherche")}>Rechercher un itinéraire</button> : <a href="/">Rechercher un itinéraire</a>}<a href="/compte" className="account-header-profile"><span className="account-avatar account-avatar-small" aria-hidden="true">●</span> Mon compte</a></nav>      {user && !isAndroidApp && <div className="account-web-top-actions"><span className="account-web-identity"><span className="account-avatar account-avatar-small" aria-hidden="true">{(user.prenom || user.nom || "V").trim().charAt(0).toLocaleUpperCase("fr")}</span><span><strong>{[user.nom,user.postnom,user.prenom].filter(Boolean).join(" ")}</strong><small>{user.email}</small></span></span><button type="button" className="account-web-settings" onClick={()=>{setSection("parametres");setError("");}}>⚙ Paramètres de mon compte</button><button type="button" className="account-signout" onClick={logout}>Se déconnecter</button></div>}
-      {user && isAndroidApp && <div className="account-top-actions">
+    <header className="account-header"><a href="/"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC" /></a><nav>{user ? <button type="button" onClick={()=>setSection("recherche")}>Rechercher un itinéraire</button> : <a href="/">Rechercher un itinéraire</a>}{!user && <a href="/compte" className="account-header-profile">Mon compte</a>}</nav>
+      {user && <div className="account-top-actions account-unified-actions">
         <div className="account-profile-menu-wrap">
-          <button type="button" className="account-top-profile" aria-expanded={profileMenuOpen} onClick={()=>setProfileMenuOpen(!profileMenuOpen)}>
-            <span className="account-profile-circle" aria-hidden="true">{(user.prenom || user.nom || "V").trim().charAt(0).toLocaleUpperCase("fr")}</span> <span className="account-profile-label">Mon profil</span> <span aria-hidden="true">⌄</span>
+          <button type="button" className="account-top-profile" aria-expanded={profileMenuOpen} onClick={()=>setProfileMenuOpen(v=>!v)}>
+            <span className="account-profile-circle" aria-hidden="true">{(user.prenom || user.nom || "V").trim().charAt(0).toLocaleUpperCase("fr")}</span> <span>Mon compte</span> <span aria-hidden="true">⌄</span>
           </button>
-          {profileMenuOpen && <div className="account-profile-submenu">
-            <button type="button" onClick={()=>{setSection("parametres");setProfileMenuOpen(false);}}>⚙ Paramètres de mon compte</button>
+          {profileMenuOpen && <div className="account-profile-submenu account-unified-menu">
+            <div className="account-unified-identity"><strong>{[user.nom,user.postnom,user.prenom].filter(Boolean).join(" ")}</strong><small>{user.email}</small></div>
+            <button type="button" onClick={()=>{setSection("parametres");setError("");setProfileMenuOpen(false);}}>⚙ Paramètres de mon compte</button>
+            {isAndroidApp && <button type="button" onClick={toggleApkTheme}>{apkTheme === "dark" ? "☀ Thème clair" : "☾ Thème sombre"}</button>}
+            <button type="button" onClick={()=>{setProfileMenuOpen(false);logout();}}>Se déconnecter</button>
           </div>}
         </div>
-        <button type="button" className="account-theme-toggle" aria-label={apkTheme === "dark" ? "Activer le thème clair" : "Activer le thème sombre"} title={apkTheme === "dark" ? "Thème clair" : "Thème sombre"} onClick={toggleApkTheme}>{apkTheme === "dark" ? "☀" : "☾"}</button>
-        <button type="button" className="account-top-logout" onClick={logout}>Se déconnecter</button>
       </div>}
 </header>
     <main className="account-main">
