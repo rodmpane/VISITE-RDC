@@ -1,4 +1,4 @@
-/* Informations communiquées pour Voyage RDC : non vérifiées en temps réel. */
+/* Horaires communiqués, à confirmer. */
 export const AIR_CARRIERS = [
   {
     "name": "Air Congo",
@@ -12,19 +12,19 @@ export const AIR_CARRIERS = [
       ],
       [
         "Kinshasa",
-        "kisangani"
+        "Kisangani"
       ],
       [
         "Kinshasa",
-        "kindu"
+        "Kindu"
       ],
       [
         "Kinshasa",
-        "kananga"
+        "Kananga"
       ],
       [
         "Kinshasa",
-        "gemena"
+        "Gemena"
       ],
       [
         "Kinshasa",
@@ -36,10 +36,197 @@ export const AIR_CARRIERS = [
       ],
       [
         "Kinshasa",
-        "lubumbashi"
+        "Lubumbashi"
+      ],
+      [
+        "Lubumbashi",
+        "Kinshasa"
+      ],
+      [
+        "Kinshasa",
+        "Mbuji Mayi"
+      ],
+      [
+        "Mbuji Mayi",
+        "Lubumbashi"
+      ],
+      [
+        "Lubumbashi",
+        "Mbuji Mayi"
+      ],
+      [
+        "Mbuji Mayi",
+        "Kinshasa"
+      ],
+      [
+        "Kisangani",
+        "Kindu"
+      ],
+      [
+        "Kindu",
+        "Kinshasa"
+      ],
+      [
+        "Kindu",
+        "Kisangani"
+      ],
+      [
+        "Kisangani",
+        "Kinshasa"
+      ],
+      [
+        "Gemena",
+        "Kinshasa"
+      ],
+      [
+        "Kananga",
+        "Kalemie"
+      ],
+      [
+        "Kalemie",
+        "Kananga"
+      ],
+      [
+        "Kananga",
+        "Kinshasa"
+      ],
+      [
+        "Kinshasa",
+        "Mbandaka"
+      ],
+      [
+        "Mbandaka",
+        "Kinshasa"
       ]
     ],
-    "note": "« Mandataire » non identifié ; « Gémeaux » interprété comme Gemena, « Kaliémie » comme Kalemie et « Kolwezie » comme Kolwezi : à confirmer. Les dessertes ne sont pas des vols garantis."
+    "note": "Horaires du document Air Congo fourni, sans date de validité. Les deux horaires inversés sont reproduits tels quels et à vérifier. Disponibilité à confirmer.",
+    "schedule": [
+      [
+        "Tous les jours",
+        "Kinshasa → Lubumbashi",
+        "08:00 - 11:30"
+      ],
+      [
+        "Tous les jours",
+        "Lubumbashi → Kinshasa",
+        "12:10 - 11:30 (à vérifier)"
+      ],
+      [
+        "Tous les jours",
+        "Kinshasa → Lubumbashi",
+        "15:00 - 11:30 (à vérifier)"
+      ],
+      [
+        "Tous les jours",
+        "Lubumbashi → Kinshasa",
+        "19:10 - 20:40"
+      ],
+      [
+        "Lundi & Mercredi",
+        "Kinshasa → Mbuji Mayi",
+        "08:00 - 10:40"
+      ],
+      [
+        "Lundi & Mercredi",
+        "Mbuji Mayi → Lubumbashi",
+        "11:20 - 12:50"
+      ],
+      [
+        "Lundi & Mercredi",
+        "Lubumbashi → Mbuji Mayi",
+        "13:30 - 15:00"
+      ],
+      [
+        "Lundi & Mercredi",
+        "Mbuji Mayi → Kinshasa",
+        "15:40 - 16:20"
+      ],
+      [
+        "Dimanche",
+        "Kinshasa → Kisangani",
+        "08:00 - 11:00"
+      ],
+      [
+        "Dimanche",
+        "Kisangani → Kindu",
+        "11:45 - 12:45"
+      ],
+      [
+        "Dimanche",
+        "Kindu → Kinshasa",
+        "13:20 - 14:20"
+      ],
+      [
+        "Vendredi",
+        "Kinshasa → Kindu",
+        "08:00 - 11:00"
+      ],
+      [
+        "Vendredi",
+        "Kindu → Kisangani",
+        "11:40 - 12:45"
+      ],
+      [
+        "Vendredi",
+        "Kisangani → Kinshasa",
+        "13:20 - 14:20"
+      ],
+      [
+        "Mardi & Samedi",
+        "Kinshasa → Gemena",
+        "08:00 - 09:50"
+      ],
+      [
+        "Mardi & Samedi",
+        "Gemena → Kinshasa",
+        "10:30 - 12:20"
+      ],
+      [
+        "Jeudi",
+        "Kinshasa → Kananga",
+        "08:00 - 10:30"
+      ],
+      [
+        "Jeudi",
+        "Kananga → Kalemie",
+        "11:00 - 12:30"
+      ],
+      [
+        "Jeudi",
+        "Kalemie → Kananga",
+        "13:20 - 14:50"
+      ],
+      [
+        "Jeudi",
+        "Kananga → Kinshasa",
+        "15:30 - 16:00"
+      ],
+      [
+        "Mardi & Samedi",
+        "Kinshasa → Mbandaka",
+        "13:30 - 14:50"
+      ],
+      [
+        "Mardi & Samedi",
+        "Mbandaka → Kinshasa",
+        "15:30 - 16:50"
+      ]
+    ],
+    "address": "Boulevard du 30 Juin 144/A, Immeuble Dikin Center",
+    "phones": [
+      [
+        "Informations",
+        "+243999916107"
+      ],
+      [
+        "Informations",
+        "+243999918176"
+      ],
+      [
+        "Informations",
+        "+243999884088"
+      ]
+    ]
   },
   {
     "name": "Air Kasaï",
