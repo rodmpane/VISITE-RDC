@@ -174,11 +174,18 @@ export default function AccountPage({ renderSearch }) {
   const confirmedBookings = bookings.filter(b => b.statut === "Réservation confirmée");
   const visibleBookings = bookings.filter(b => filter === "toutes" || (filter === "confirmees" ? b.statut === "Réservation confirmée" : filter === "attente" ? b.statut !== "Réservation confirmée" && b.statut !== "Demande refusée" : b.statut === "Demande refusée"));
   return <div className={isAndroidApp ? "account-shell account-apk account-apk-" + apkTheme : "account-shell"}>{receipt && <BookingReceipt booking={receipt} traveler={user} onClose={() => setReceipt(null)} />}
-    <header className="account-header"><a href="/"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC" /></a><nav>{user ? <button type="button" onClick={()=>setSection("recherche")}>Rechercher un itinéraire</button> : <a href="/">Rechercher un itinéraire</a>}{!user && <a href="/compte" className="account-header-profile">Mon compte</a>}</nav>
+    <header className="account-header"><a href="/"><img src="/voyage-rdc-logo.svg" alt="Voyage RDC" /></a>{user ? <div className="account-fixed-dashboard"><div className="account-heading"><span>VOYAGE RDC · ESPACE VOYAGEUR</span><h1>{user ? "Bonjour, " + user.nom : register ? "Créer mon compte" : "Mon espace voyageur"}</h1>
+        <p>Gérez vos réservations, suivez leur validation, préparez vos paiements et retrouvez vos documents.</p></div>
+      <div className="account-stats"><div><strong>{bookings.length}</strong><span>Mes réservations et demandes</span></div><div><strong>{confirmedBookings.length}</strong><span>Réservations confirmées</span></div><div><strong>{bookings.filter(b => b.paiement_methode).length}</strong><span>Préférences de paiement</span></div></div>
+        {!isAndroidApp && <nav className="account-dashboard-nav" aria-label="Rubriques de mon compte">
+          {[["reservations","Mes réservations"],["suivi","Suivre mes réservations"],["nouvelle","Nouvelle réservation"],["paiements","Mes paiements"],["itineraires","Mes itinéraires"]].map(([key,label]) =>
+            <button type="button" key={key} className={section === key ? "selected" : ""} onClick={() => {setSection(key);setError("");}}>{label}</button>)}
+        </nav>}
+        </div> : <nav><a href="/compte" className="account-header-profile">Mon compte</a></nav>}
       {user && <div className="account-top-actions account-unified-actions">
         <div className="account-profile-menu-wrap">
           <button type="button" className="account-top-profile" aria-expanded={profileMenuOpen} onClick={()=>setProfileMenuOpen(v=>!v)}>
-            <span className="account-profile-circle" aria-hidden="true">{(user.prenom || user.nom || "V").trim().charAt(0).toLocaleUpperCase("fr")}</span> <span>Mon compte</span> <span aria-hidden="true">⌄</span>
+            <span>Mon compte</span> <span aria-hidden="true">⌄</span>
           </button>
           {profileMenuOpen && <div className="account-profile-submenu account-unified-menu">
             <div className="account-unified-identity"><strong>{[user.nom,user.postnom,user.prenom].filter(Boolean).join(" ")}</strong><small>{user.email}</small></div>
@@ -190,9 +197,9 @@ export default function AccountPage({ renderSearch }) {
       </div>}
 </header>
     <main className="account-main">
-      <div className="account-heading"><span>VOYAGE RDC · ESPACE VOYAGEUR</span><h1>{user ? "Bonjour, " + user.nom : register ? "Créer mon compte" : "Mon espace voyageur"}</h1>
+      {!user && <><div className="account-heading"><span>VOYAGE RDC · ESPACE VOYAGEUR</span><h1>{user ? "Bonjour, " + user.nom : register ? "Créer mon compte" : "Mon espace voyageur"}</h1>
         <p>Gérez vos réservations, suivez leur validation, préparez vos paiements et retrouvez vos documents.</p></div>
-      {user?.role === "admin" && <section className="account-card"><h2>Administration Voyage RDC</h2><p>Vous êtes connecté comme administrateur.</p><a href="/admin">Accéder aux fonctions administrateur</a></section>}
+      </>}{user?.role === "admin" && <section className="account-card"><h2>Administration Voyage RDC</h2><p>Vous êtes connecté comme administrateur.</p><a href="/admin">Accéder aux fonctions administrateur</a></section>}
       {error && <p className="account-alert" role="alert">{error}</p>}
       {message && <p className="account-success" role="status">{message}</p>}
       {!user ? <section className="account-card">
@@ -205,11 +212,6 @@ export default function AccountPage({ renderSearch }) {
         </form>
         <p className="account-note">Après connexion : Mes réservations, suivi, gestion des demandes, mes paiements, documents et itinéraires. Les paiements en ligne ne sont pas encore activés.</p>
       </section> : <>
-        <div className="account-stats"><div><strong>{bookings.length}</strong><span>Mes réservations et demandes</span></div><div><strong>{confirmedBookings.length}</strong><span>Réservations confirmées</span></div><div><strong>{bookings.filter(b => b.paiement_methode).length}</strong><span>Préférences de paiement</span></div></div>
-        {!isAndroidApp && <nav className="account-dashboard-nav" aria-label="Rubriques de mon compte">
-          {[["reservations","Mes réservations"],["suivi","Suivre mes réservations"],["nouvelle","Nouvelle réservation"],["paiements","Mes paiements"],["itineraires","Mes itinéraires"]].map(([key,label]) =>
-            <button type="button" key={key} className={section === key ? "selected" : ""} onClick={() => {setSection(key);setError("");}}>{label}</button>)}
-        </nav>}
         {section === "parametres" && <section className="account-card"><h2>Paramètres de mon compte · Mes informations</h2>
           <p>Complétez vos informations personnelles. Elles seront reprises automatiquement lors de vos nouvelles demandes de réservation.</p>
           <form key={user.id + JSON.stringify(user)} onSubmit={saveProfile}>
