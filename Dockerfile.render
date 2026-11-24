@@ -17,4 +17,4 @@ COPY backend/seed ./seed
 COPY --from=frontend_builder /build/frontend/dist ./static
 USER voyage
 EXPOSE 10000
-CMD ["sh", "-c", "python -m scripts.init_db && python -m scripts.import_csv --directory /srv/seed && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000} --proxy-headers"]
+CMD ["sh", "-c", "python -m scripts.init_db && python -m scripts.import_csv --directory /srv/seed && python -m scripts.air_congo_schedule && python -m scripts.caa_schedule && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000} --proxy-headers"]
