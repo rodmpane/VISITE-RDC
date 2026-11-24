@@ -476,3 +476,31 @@ body{color:var(--rdc-navy);background:#f5f7fc}
 .admin-global-nav button{background:#0c234c;color:#fff}
 .admin-global-nav a:focus-visible,.admin-global-nav button:focus-visible{outline:3px solid #f9b82f;outline-offset:2px}
 @media(max-width:760px){.admin-global-nav{gap:7px;padding:10px 12px}.admin-global-nav a,.admin-global-nav button{font-size:12px;padding:10px}}
+
+/* Compact phone layout; desktop and accessibility zoom remain unchanged. */
+@media (max-width: 700px) {
+  .header,.header-inner{min-height:72px}
+  .header-inner{padding-top:7px;padding-bottom:7px}
+  .header .brand{flex-basis:42%;width:42%}
+  .header nav a{font-size:12px}
+  .container{width:calc(100% - 24px);max-width:100%;box-sizing:border-box}
+  .hero-copy{padding-bottom:38px}
+  .hero-copy h1{font-size:clamp(27px,7vw,36px);line-height:1.15}
+  .hero-copy p{font-size:14px;line-height:1.5}
+  .hero-art{margin-top:-32px;margin-bottom:12px}
+  .admin-main,.catalogue-admin{padding-top:18px;padding-bottom:30px}
+  .admin-main h1,.catalogue-admin h1,.account-heading h1{font-size:24px;line-height:1.2}
+  .admin-main h2,.account-card h2{font-size:19px}
+  .admin-columns,.catalogue-layout,.catalogue-form,.journey-form-grid{grid-template-columns:minmax(0,1fr);gap:10px}
+  .admin-columns>*{min-width:0;overflow-wrap:anywhere}
+  .admin-global-nav{gap:6px;padding:6px 10px}
+  .admin-global-nav a,.admin-global-nav button{padding:8px 10px;min-height:44px;box-sizing:border-box;font-size:12px;display:flex;align-items:center}
+  .admin-edit,.account-card,.catalogue-admin .account-card,.journey-booking-form{padding:12px;gap:10px}
+  .admin-edit label,.catalogue-admin label{gap:4px;font-size:13px}
+  .admin-edit input:not([type=checkbox]),.admin-edit select,.admin-edit textarea,.journey-booking-form input:not([type=checkbox]),.journey-booking-form select{box-sizing:border-box;max-width:100%;min-width:0;padding:8px;min-height:44px;font-size:16px}
+  .search-submit,.booking-actions button,.account-primary{min-height:44px;padding:9px 12px}
+  .account-apk .account-apk-booking-fields{padding:10px;margin:10px 0}
+  .journey-booking-form form{gap:10px}
+  .route-details,.points-panel{overflow-wrap:anywhere}
+  img{max-width:100%}
+}
