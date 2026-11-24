@@ -218,10 +218,31 @@ function SearchPage({ embedded = false, traveler = null, onSaved, onBooked, onTr
     api("/catalogue?categorie=hotel").then(rows=>setCatalogueHotels(rows.map(h=>({id:h.id,cityId:h.ville_id,name:h.nom,address:h.adresse,priceFrom:h.tarif,currency:h.devise,phone:h.telephone,email:h.email,website:h.site_web,cityPhotos:h.photo_url?[h.photo_url]:[],roomPhotos:[],verifiedAt:h.date_verification})))).catch(()=>{});
   }, []);
   const places = useMemo(() => [...lieux].sort((a, b) => a.nom.localeCompare(b.nom, "fr")), [lieux]);
+  function announceResults(text = "Votre itinéraire est disponible") {
+    try {
+      if (window.VoyageRDCAndroid?.announce) {
+        const result = window.VoyageRDCAndroid.announce(text);
+        if (result !== false) return;
+      }
+    } catch (_) {}
+    try {
+      if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+      const synth = window.speechSynthesis;
+      synth.cancel();
+      synth.resume();
+      const message = new window.SpeechSynthesisUtterance(text);
+      message.lang = "fr-FR";
+      message.rate = 0.95;
+      const french = synth.getVoices().find(v => /^fr[-_]/i.test(v.lang));
+      if (french) message.voice = french;
+      synth.speak(message);
+    } catch (_) {}
+  }
   async function search(event) {
     event.preventDefault();
     if (!from || !to || from === to) { setError("Choisissez deux villes différentes."); return; }
     if (!modes.length) { setError("Sélectionnez au moins un transport."); return; }
+    if (voiceEnabled) announceResults("Recherche de votre itinéraire en cours");
     const loadingStartedAt = Date.now();
     setLoading(true); setError(""); setSearched(true); setRoutes([]); setPoints(null); setSelectedRoute(null); setChosenJourney(null); setShowHotels(false);setBookingStep(false);setSelectedHotel(null);
     try {
@@ -229,17 +250,7 @@ function SearchPage({ embedded = false, traveler = null, onSaved, onBooked, onTr
       const data = await api(`/itineraire?${params}`);
       const found = data["itinéraires"] || [];
       setRoutes(found);
-      if (found.length && voiceEnabled && typeof window !== "undefined") {
-        try {
-          if (window.VoyageRDCAndroid?.announce) window.VoyageRDCAndroid.announce("Votre itinéraire est disponible");
-          else if ("speechSynthesis" in window) {
-            window.speechSynthesis.cancel();
-            const message = new SpeechSynthesisUtterance("Votre itinéraire est disponible");
-            message.lang = "fr-FR"; message.rate = 0.95;
-            window.speechSynthesis.speak(message);
-          }
-        } catch (_) { /* Le message visuel reste disponible si la voix est bloquée. */ }
-      }
+      if (found.length && voiceEnabled) announceResults();
       setNotice(data.avertissement || "");
     } catch (e) { setError(e.message); }
     finally {
@@ -298,7 +309,7 @@ function SearchPage({ embedded = false, traveler = null, onSaved, onBooked, onTr
       <div className="booking-teaser"><strong>Réservation et paiement : assistance disponible</strong><p>Après la recherche, choisissez un trajet pour contacter le service de réservation. Les vols sont réservés et payés exclusivement sur les sites officiels des compagnies. Pour les autres transports, contactez le {CONTACT} ; aucun paiement n'est encaissé dans Voyage RDC.</p></div>
     </div></section>
 
-    {section === "recherche" && <section className="container results-section" aria-live="polite"><div className="section-top"><div><span className="kicker">VOS OPTIONS</span><h2>Itinéraires disponibles</h2></div><span className="result-count">{searched ? `${routes.length} itinéraire${routes.length > 1 ? "s" : ""}` : "Prêt à explorer"}</span></div>
+    {section === "recherche" && <section className="container results-section" aria-live="polite"><div className="section-top"><div><span className="kicker">VOS OPTIONS</span><h2>Itinéraires disponibles</h2>{routes.length > 0 && <button type="button" onClick={()=>announceResults()} aria-label="Réécouter l’annonce vocale">🔊 Écouter l’annonce</button>}</div><span className="result-count">{searched ? `${routes.length} itinéraire${routes.length > 1 ? "s" : ""}` : "Prêt à explorer"}</span></div>
       {error && <div className="message error" role="alert">{error}</div>}
       {!searched && !error && <div className="empty-state"><span className="empty-symbol">⌁</span><h3>Votre prochain voyage commence ici.</h3><p>Choisissez deux villes et les moyens de transport souhaités pour découvrir les itinéraires estimatifs. Leur disponibilité réelle reste à confirmer.</p></div>}
       {loading && <div className="search-loading-overlay" role="status" aria-live="polite" aria-label="Recherche d’itinéraire en cours"><div className="search-progress"><span className="rdc-spinner" aria-hidden="true" /><strong>Recherche de votre itinéraire…</strong><span>Analyse des correspondances, des transports et des tarifs renseignés.</span><small>Veuillez patienter pendant la consultation du réseau Voyage RDC.</small></div></div>}
