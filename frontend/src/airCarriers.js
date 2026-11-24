@@ -859,26 +859,39 @@ export const AIR_CARRIERS = [
       [
         "Bandundu-ville",
         "Nioki"
+      ],
+      [
+        "Nioki",
+        "Kinshasa"
+      ],
+      [
+        "Bandundu-ville",
+        "Kinshasa"
       ]
     ],
     "schedule": [
       [
-        "Lundi, mercredi, vendredi",
+        "Lundi à samedi",
         "Kinshasa → Bandundu-ville",
-        "07h30–08h30"
+        "07h30–08h30 (1h00)"
       ],
       [
         "Lundi, mercredi, vendredi",
         "Bandundu-ville → Nioki",
-        "09h00–09h30"
+        "09h00–09h15 (15 min)"
+      ],
+      [
+        "Lundi, mercredi, vendredi",
+        "Nioki → Kinshasa",
+        "09h30–10h30 (1h00)"
       ],
       [
         "Mardi, jeudi, samedi",
-        "Kinshasa → Bandundu-ville",
-        "07h30–08h30"
+        "Bandundu-ville → Kinshasa",
+        "08h45–09h45 (1h00)"
       ]
     ],
-    "note": "Horaires transmis par le propriétaire de Voyage RDC ; à reconfirmer avant départ. Le site communiqué « Kinshasa.com/ » semble erroné."
+    "note": "Horaires selon la capture fournie, date de vérification non précisée; à confirmer auprès de la compagnie."
   },
   {
     "name": "Malu Aviation",
