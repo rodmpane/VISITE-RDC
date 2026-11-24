@@ -516,3 +516,22 @@ body{color:var(--rdc-navy);background:#f5f7fc}
  .account-shell .account-header img{max-height:48px;object-fit:contain}
  .admin-global-nav{padding-top:3px;padding-bottom:3px}
 }
+
+/* Android traveler login: compact layout, including the unauthenticated screen. */
+@media(max-width:700px){
+ .account-apk .account-main{width:calc(100% - 24px);max-width:480px;margin:0 auto;padding-top:8px;box-sizing:border-box}
+ .account-apk .account-main:has(.account-tabs){padding-bottom:16px}
+ .account-apk .account-heading{margin-bottom:9px}
+ .account-apk .account-heading span{font-size:10px;letter-spacing:.8px}
+ .account-apk .account-heading h1{font-size:21px;margin:4px 0}
+ .account-apk .account-heading p{font-size:12px;line-height:1.4;margin:5px 0 10px}
+ .account-apk .account-card{padding:11px;margin-bottom:10px}
+ .account-apk .account-card form{gap:9px}
+ .account-apk .account-card form label{font-size:12px;gap:4px}
+ .account-apk .account-card form input:not([type=checkbox]){box-sizing:border-box;min-height:44px;padding:8px 10px;font-size:14px;max-width:100%}
+ .account-apk .account-tabs{gap:5px;margin-bottom:10px}
+ .account-apk .account-tabs button,.account-apk .account-primary{font-size:13px;min-height:44px;padding:8px 10px}
+ .account-apk .account-note{font-size:11px;line-height:1.4;margin:10px 0 0}
+ .account-apk .account-bottom-actions .account-bottom-tab{min-height:52px;gap:3px}
+ .account-apk .account-bottom-tab span:first-child{font-size:17px}
+}
