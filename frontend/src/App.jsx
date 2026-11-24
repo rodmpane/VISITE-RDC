@@ -120,10 +120,12 @@ function JourneyBooking({ route, destination, hotel, onBack, traveler, onBooked 
     if(direct && !/^(transporteur|compagnie|à confirmer|non renseigné|inconnu)/i.test(direct)) return direct;
     return listed.length===1 ? listed[0].carrier.name : "";
   }).filter(Boolean);
-  const provider=isHotel ? hotel.name : ([...new Set(operators)].join(" / ").slice(0,180) || "Transporteur à confirmer");
+  const candidates=[...new Set(route.segments.flatMap(s=>transportOptions(s).map(o=>o.carrier.name)).concat(operators))].filter(n=>n && n!=="Congo Airways");
+  const [chosenProvider,setChosenProvider]=useState("");
+  const provider=isHotel ? hotel.name : chosenProvider;
   const nights=arrival && departure && departure>arrival ? Math.round((new Date(departure+"T00:00:00")-new Date(arrival+"T00:00:00"))/86400000) : 0;
   async function submit(e) {
-    e.preventDefault();setBusy(true);setFormError("");
+    e.preventDefault();if(!provider){setFormError("Choisissez une compagnie.");return;}setBusy(true);setFormError("");
     const f=new FormData(e.currentTarget);
     const body={type:isHotel?"hebergement":"transport",prestataire:f.get("prestataire"),ville:destination,
       date_debut:f.get("date_debut"),date_fin:isHotel?f.get("date_fin"):null,voyageurs:Number(f.get("voyageurs")),
@@ -144,7 +146,7 @@ function JourneyBooking({ route, destination, hotel, onBack, traveler, onBooked 
   return <div className="journey-booking-form"><h3>3. Informations de réservation {isHotel?"— hôtel":"— transport"}</h3>
     <p>{traveler ? "Demande depuis votre compte : vérifiez vos informations avant de continuer." : "Réservation libre, avec ou sans compte. Les informations ci-dessous servent uniquement à transmettre une demande au prestataire."}</p>
     <p><strong>Itinéraire :</strong> {itinerary}</p>
-    {isHotel && <p><strong>Hôtel :</strong> {hotel.name} · {hotel.address || destination}</p>}{!isHotel && <p><strong>Transporteur sélectionné automatiquement :</strong> {provider}{provider === "Transporteur à confirmer" && <small> — le nom du transporteur n’est pas encore enregistré pour cet itinéraire.</small>}</p>}
+    {isHotel && <p><strong>Hôtel :</strong> {hotel.name} · {hotel.address || destination}</p>}{!isHotel && <p><strong>Compagnie :</strong> {provider || "À sélectionner"}</p>}
     <form onSubmit={submit}>
       <div className="journey-form-grid">
         <label>Nom *<input defaultValue={traveler?.nom || ""} name="nom" required maxLength={120}/></label>
@@ -155,7 +157,7 @@ function JourneyBooking({ route, destination, hotel, onBack, traveler, onBooked 
         <label>Téléphone *<input defaultValue={traveler?.telephone || ""} name="telephone" type="tel" required maxLength={35}/></label>
         <label>E-mail (facultatif)<input defaultValue={traveler?.email || ""} name="email" type="email" maxLength={254}/></label>
         <label>Numéro de pièce d'identité (facultatif)<input name="numero_identite" maxLength={100}/></label>
-        <label>{isHotel?"Établissement":"Compagnie / transporteur (issu de l'itinéraire)"} *<input name="prestataire" value={provider} readOnly required minLength={2} maxLength={180}/></label>
+        <label>{isHotel?"Établissement":"Compagnie / transporteur (issu de l'itinéraire)"} *{isHotel ? <input name="prestataire" value={provider} readOnly required/> : <select name="prestataire" required value={provider} onChange={e=>setChosenProvider(e.target.value)}><option value="">Choisir une compagnie</option>{candidates.map(n=><option key={n} value={n}>{n}</option>)}</select>}</label>
         <label>{isHotel?"Date d'arrivée":"Date de départ"} *<input name="date_debut" type="date" required min={new Date().toISOString().slice(0,10)} value={arrival} onChange={e=>setArrival(e.target.value)}/></label>
         {isHotel && <label>Date de départ de l'hôtel *<input name="date_fin" type="date" required min={arrival||new Date().toISOString().slice(0,10)} value={departure} onChange={e=>setDeparture(e.target.value)}/></label>}
         <label>Nombre de voyageurs *<input name="voyageurs" type="number" min="1" max="20" defaultValue="1" required/></label>
@@ -166,8 +168,7 @@ function JourneyBooking({ route, destination, hotel, onBack, traveler, onBooked 
       {isHotel && <p><strong>Durée du séjour : {nights||"—"} nuit(s)</strong>{price && nights ? " · Total estimé : "+(nights*Number(price)).toLocaleString("fr-FR")+" (devise sélectionnée)" : ""}</p>}
       <label>Informations complémentaires<textarea name="details" maxLength={500}/></label>
       <h4>4. Mode de paiement souhaité</h4>
-      <label>Choisir une modalité<select value={payment} onChange={e=>setPayment(e.target.value)}><option value="sur_place">Payer sur place après confirmation</option><option value="mpesa">M-Pesa — non activé</option><option value="airtel_money">Airtel Money — non activé</option><option value="orange_money">Orange Money — non activé</option><option value="carte">Carte bancaire — non activée</option></select></label>
-      <p><small>Le paiement en ligne n'est pas activé. Le choix d'un moyen de paiement n'entraîne aucun débit. La demande doit être validée par le prestataire.</small></p>
+      <p><strong>Paiement directement auprès du prestataire</strong></p><p>Voyage RDC ne perçoit aucun paiement. Le lien de paiement propre à votre réservation sera disponible après confirmation par la compagnie. Aucun paiement ni billet ne peut être confirmé automatiquement tant que son intégration API n’est pas active.</p>
       <label><input type="checkbox" checked={emailWanted} onChange={e=>setEmailWanted(e.target.checked)}/> Je souhaite recevoir mon document par e-mail lorsqu'un service d'envoi sera disponible.</label>
       <p><small>Le PDF est disponible immédiatement après l'enregistrement. L'envoi automatique par e-mail n'est pas encore opérationnel.</small></p>
       {formError && <p role="alert" className="message error">{formError}</p>}
