@@ -65,3 +65,20 @@ def create_provider(data: Provider):
             VALUES (?,?,?,?,?,?,?,?,?,?)""",
             (provider_id,data.nom.strip(),data.mode,str(data.api_url) if data.api_url else None,credentials,data.email,data.telephone,int(data.transmission),int(data.confirmation_paiement),int(data.confirmation_reservation)))
         return fetchone(conn, f"SELECT {PUBLIC} FROM provider_integrations WHERE id=?", (provider_id,))
+
+@router.patch("/{provider_id}")
+def update_provider(provider_id: str, data: Provider):
+    import json
+    if data.api_url and (data.api_url.scheme != "https" or data.api_url.username or data.api_url.password or data.api_url.query):
+        raise HTTPException(422, "URL HTTPS sans identifiants ni paramètres requise")
+    with connection() as conn:
+        init(conn)
+        existing = fetchone(conn, "SELECT credentials FROM provider_integrations WHERE id=?", (provider_id,))
+        if not existing:
+            raise HTTPException(404, "Prestataire inconnu")
+        credentials = existing["credentials"]
+        if data.identifiant or data.cle_api:
+            credentials = encrypt(json.dumps({"identifiant":data.identifiant,"cle_api":data.cle_api}))
+        execute(conn, """UPDATE provider_integrations SET nom=?,mode=?,api_url=?,credentials=?,email=?,telephone=?,transmission=?,confirmation_paiement=?,confirmation_reservation=?,actif=0 WHERE id=?""",
+            (data.nom.strip(),data.mode,str(data.api_url) if data.api_url else None,credentials,data.email,data.telephone,int(data.transmission),int(data.confirmation_paiement),int(data.confirmation_reservation),provider_id))
+        return fetchone(conn, f"SELECT {PUBLIC} FROM provider_integrations WHERE id=?", (provider_id,))
