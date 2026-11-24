@@ -19,6 +19,6 @@ export default function AdminGate({children}){
   window.location.replace("/compte");
  }
  return <><nav className="admin-links admin-global-nav" aria-label="Navigation de l’administration">
-   <a href="/admin">Itinéraires</a><a href="/admin/catalogue">Transporteurs et hôtels</a><a href="/admin/reservations">Réservations et paiements</a><a href="/admin/comptes">Comptes clients</a><a href="/">Site public</a><button type="button" onClick={logout}>Se déconnecter</button>
+   <a href="/admin">Itinéraires</a><a href="/admin/catalogue">Transporteurs et hôtels</a><a href="/admin/reservations">Réservations et paiements</a><a href="/admin/prestataires">Prestataires et intégrations API</a><a href="/admin/comptes">Comptes clients</a><a href="/">Site public</a><button type="button" onClick={logout}>Se déconnecter</button>
  </nav>{children}</>;
 }

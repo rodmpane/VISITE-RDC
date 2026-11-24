@@ -19,6 +19,8 @@ from .account_admin import router as account_admin_router
 from .routing import MODES, itineraries
 
 app = FastAPI(title="Voyage RDC", version="1.1.0", description="Recherche d'itinéraires informatifs, sans vente de billets")
+from .provider_integrations import router as provider_router
+app.include_router(provider_router)
 app.include_router(accounts_router)
 app.include_router(catalogue_router)
 app.include_router(liaison_admin_router)
@@ -210,6 +212,7 @@ if STATIC_DIR.is_dir():
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
     @app.get("/", include_in_schema=False)
+    @app.get("/admin/prestataires", include_in_schema=False)
     @app.get("/admin/comptes", include_in_schema=False)
     @app.get("/admin/catalogue", include_in_schema=False)
     @app.get("/admin/reservations", include_in_schema=False)
