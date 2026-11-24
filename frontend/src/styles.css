@@ -504,3 +504,15 @@ body{color:var(--rdc-navy);background:#f5f7fc}
   .route-details,.points-panel{overflow-wrap:anywhere}
   img{max-width:100%}
 }
+
+/* More usable vertical space on phones, without shrinking touch targets. */
+@media (max-width:700px){
+ .header,.header-inner{min-height:58px}
+ .header-inner{padding-top:3px;padding-bottom:3px;gap:6px}
+ .header .brand-logo{max-height:52px!important;width:100%!important;object-fit:contain}
+ .header nav{gap:4px}
+ .header nav a{font-size:11px;padding:5px 4px;min-height:44px;box-sizing:border-box;align-content:center}
+ .account-shell .account-header{padding-top:4px;padding-bottom:4px;gap:6px}
+ .account-shell .account-header img{max-height:48px;object-fit:contain}
+ .admin-global-nav{padding-top:3px;padding-bottom:3px}
+}
